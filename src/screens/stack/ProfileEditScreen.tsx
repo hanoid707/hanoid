@@ -1,8 +1,9 @@
 /** 내 프로필 수정(X 스타일) — 배너·프로필 사진(선택→크롭) · 이름 · 아이디 · 자기소개 · 위치 · 역할 · AI가 읽는 내 설정 · 인증 배지 */
 import { useNavigation } from '@react-navigation/native';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Avatar } from '../../components/Avatar';
+import { FacePicker } from '../../components/FacePicker';
 import { IconCamera } from '../../components/icons';
 import { Photo } from '../../components/Photo';
 import { usePhotoPicker } from '../../components/PhotoCropper';
@@ -31,6 +32,12 @@ export function ProfileEditScreen() {
   const [role, setRole] = useState(p?.role ?? '');
   const [desc, setDesc] = useState(p?.description ?? '');
   const [badge, setBadge] = useState<BadgeKind | null>(p?.badge ?? null);
+  // 이 세계에서 다른 인물이 쓰는 기본 사진은 프리셋에서 뺀다
+  const usedFaces = useMemo(() => {
+    const out = new Set<string>();
+    for (const ch of Object.values(sc?.characters ?? {})) if (ch.avatar.photo) out.add(ch.avatar.photo);
+    return out;
+  }, [sc?.characters]);
   if (!sc || !p || !avatar) return null;
 
   const save = () => {
@@ -57,6 +64,11 @@ export function ProfileEditScreen() {
             </View>
           </Pressable>
           <View style={{ padding: space.lg, gap: space.lg }}>
+            <FacePicker
+              value={avatar.mediaId ? undefined : avatar.photo}
+              exclude={usedFaces}
+              onPick={(key) => setAvatar({ ...avatar, photo: key, mediaId: undefined, image: undefined, url: undefined })}
+            />
             <Field label="이름" value={name} onChangeText={setName} maxLength={30} counter />
             <Field label="아이디(@)" value={handle} onChangeText={(t) => setHandle(sanitizeHandle(t))} autoCapitalize="none" maxLength={15} />
             <Field label="자기소개" value={bio} onChangeText={setBio} multiline maxLength={160} counter />

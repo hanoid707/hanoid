@@ -205,6 +205,9 @@ export interface CastDraft {
   archetype: Archetype;
   bio: string;
   description: string;
+  /** 성별·나이(기본 사진 고르기용, 뉴스 계정은 없음) */
+  gender?: Gender;
+  age?: number;
   followers: number;
   isNews?: boolean;
   verified?: boolean;

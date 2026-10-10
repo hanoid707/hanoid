@@ -247,7 +247,7 @@ export function AISettingsScreen() {
   if (total.errors > 0) tableRows.push({ label: '실패', val: (b) => `${b.errors}회` });
 
   const last = usage.last;
-  const background: BackgroundAI = ai.background ?? 'off';
+  const background: BackgroundAI = ai.background ?? 'full';
   const head = (t: string, sub?: string) => (
     <View style={{ gap: 2 }}>
       <Text style={{ color: c.text, fontSize: font.h2, fontWeight: '800' }} accessibilityRole="header">
@@ -316,12 +316,12 @@ export function AISettingsScreen() {
 
         {/* AI를 쓰는 범위(토큰 절약) */}
         <View style={{ gap: space.sm }}>
-          {head('AI를 쓰는 범위', '내가 시키지 않아도 뒤에서 도는 AI를 얼마나 쓸지 골라요.')}
+          {head('AI를 쓰는 범위', '기본은 전부예요. 토큰을 아끼고 싶을 때만 줄이세요(먼저 오는 쪽지·새 글이 줄어들어요).')}
           <Segmented<BackgroundAI>
             options={[
-              { key: 'off', label: '내 행동만' },
-              { key: 'lite', label: '+ 새 글' },
               { key: 'full', label: '전부' },
+              { key: 'lite', label: '새 글만' },
+              { key: 'off', label: '내 행동만' },
             ]}
             value={background}
             onChange={(next) => setAI({ background: next })}

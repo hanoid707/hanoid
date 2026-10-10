@@ -75,10 +75,23 @@ export function castPreview(templateId: string | null, customCast: CastDraft[] |
       isNews: !!c.isNews, badge: badgeOf(c), photo: `${t.id}__${c.key}`, tier: c.tier, followers: c.followers,
     }));
   }
+  const faces = customFaces(customCast ?? []);
   return (customCast ?? []).map((c, i) => ({
     key: `custom${i}`, name: c.name, handle: c.handle, emoji: c.emoji, color: AVATAR_COLORS[i % AVATAR_COLORS.length], archetype: c.archetype, bio: c.bio,
-    isNews: !!c.isNews, badge: c.isNews ? 'gold' : c.verified ? 'blue' : null, tier: 'core', followers: c.followers,
+    isNews: !!c.isNews, badge: c.isNews ? 'gold' : c.verified ? 'blue' : null, ...(faces[i] ? { photo: faces[i] } : {}), tier: 'core', followers: c.followers,
   }));
+}
+
+/** 직접 만든 세계관 인물의 기본 사진: 성별·나이대에 맞게, 서로 겹치지 않게(같은 인물 목록이면 늘 같은 결과). 뉴스 계정·성별 없는 인물은 사진 없이 이모지 */
+function customFaces(cast: CastDraft[]): (string | undefined)[] {
+  const used = new Set<string>();
+  return cast.map((c) => {
+    if (c.isNews || !c.gender) return undefined;
+    const ageGroup = (Math.min(60, Math.max(20, Math.floor((c.age ?? 25) / 10) * 10)) as AgeGroup);
+    const key = pickFace(c.gender, ageGroup, used, `${c.handle}:${c.name}`);
+    if (key) used.add(key);
+    return key;
+  });
 }
 
 function buildWorld(input: NewScenarioInput): World {
@@ -136,11 +149,14 @@ export function characterFromSeed(t: WorldTemplate, s: CharacterSeed): Character
 function buildCharacters(input: NewScenarioInput): Character[] {
   const t = getWorldTemplate(input.templateId);
   if (t) return t.cast.map((s) => characterFromSeed(t, s));
+  const faces = customFaces(input.customCast ?? []);
   return (input.customCast ?? []).map((c, i) => ({
     id: `ch_custom${i}`,
     name: c.name,
     handle: c.handle,
-    avatar: { emoji: c.emoji, color: AVATAR_COLORS[i % AVATAR_COLORS.length] },
+    avatar: { emoji: c.emoji, color: AVATAR_COLORS[i % AVATAR_COLORS.length], ...(faces[i] ? { photo: faces[i] } : {}) },
+    ...(c.gender ? { gender: c.gender } : {}),
+    ...(c.age ? { ageGroup: (Math.min(60, Math.max(20, Math.floor(c.age / 10) * 10)) as AgeGroup) } : {}),
     bio: c.bio,
     description: c.description,
     archetype: c.archetype,

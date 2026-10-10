@@ -73,9 +73,9 @@ export function engine(): GameAI {
   };
 }
 
-/** 뒤에서 도는 AI를 얼마나 쓸지(설정 없으면 'off' = 내 행동에만 AI) */
+/** 뒤에서 도는 AI를 얼마나 쓸지(설정 없으면 'full' = 전부. 절약은 AI 연결 화면에서 직접 고를 때만) */
 export function backgroundAI(): BackgroundAI {
-  return G().settings.ai.background ?? 'off';
+  return G().settings.ai.background ?? 'full';
 }
 
 export function ctxOf(sid: ID) {

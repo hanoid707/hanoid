@@ -477,8 +477,10 @@ ${clip(world.setting, 1200)}
 
 [할 일] 이 세계의 SNS 등장인물 8명 JSON(cast). 전원 성인, 실존 인물 아님, 유명인·연예인 계정 없음
 - archetype을 골고루: bestie, rival, mentor, fan, crush, chaos, troll, news 각 1명
+- 누구나 떠올릴 전형적인 주변 인물로(오랜 절친, 견제하는 동기, 챙겨 주는 선배처럼). 특이한 과거·복잡한 사연·세세한 버릇 없이 현실에 흔한 사람
 - name: 실제 한국 트위터 유저가 쓸 법한 표시 이름(실명형·닉네임+이모지 등), handle: 영문 소문자·숫자·밑줄 4~15자
-- emoji 1개, bio(실제 트위터 자기소개처럼 짧게), description(2문장: 정체 1문장 + "플레이어가 ○○하면 △△한다" 1문장. 성격 형용사 나열·말버릇·이모지 규칙·고정 동작은 적지 않는다. 말투는 관계에 따라 게임이 정한다)
+- emoji 1개, bio 20자 이내, description 한 문장 40자 이내(이 세계에서의 정체와 플레이어와의 사이만. 말투는 관계에 따라 게임이 정한다)
+- g: 성별 m 또는 f, age: 나이 20~59(뉴스 계정은 생략)
 - followers: 300 ~ 2000000, isNews(뉴스 계정만 true), verified`;
 }
 
@@ -498,5 +500,5 @@ export const SHAPES = {
   comments: '{"comments":[{"h":"아이디","t":"댓글"},{"h":"-","t":"일반인 댓글"},{"h":"-","t":"인플루언서 댓글에 다는 대댓글","re":"인플루언서아이디"}]}',
   firstDM: '{"messages":["쪽지1","쪽지2"]}',
   draft: '{"name":"이름","handle":"handle_01","bio":"자기소개","emoji":"🙂","post":"첫 글"}',
-  cast: '{"cast":[{"name":"이름","handle":"handle","emoji":"🙂","archetype":"bestie","bio":"소개","description":"정체 1문장 + 플레이어가 ○○하면 △△한다 1문장","followers":<300~2000000>,"isNews":false,"verified":false}]}',
+  cast: '{"cast":[{"name":"이름","handle":"handle","emoji":"🙂","archetype":"bestie","bio":"소개","description":"정체와 플레이어와의 사이 한 문장","g":"m|f","age":<20~59>,"followers":<300~2000000>,"isNews":false,"verified":false}]}',
 } as const;

@@ -6,9 +6,10 @@
  * 위치 칸은 없앴다. 관계·말투는 호감도·설렘으로 자동으로 바뀌고, 원하면 고정할 수 있다.
  */
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { Avatar } from '../../components/Avatar';
+import { FacePicker } from '../../components/FacePicker';
 import { VerifiedBadge } from '../../components/Badge';
 import { Dropdown } from '../../components/Dropdown';
 import { IconCamera, IconChevronRight, IconTrash, IconWand } from '../../components/icons';
@@ -104,6 +105,13 @@ export function CharacterEditorScreen() {
   const [saving, setSaving] = useState(false);
   const [rewriting, setRewriting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+
+  // 이 세계에서 다른 인물이 이미 쓰는 기본 사진(프리셋에서 뺀다)
+  const usedFaces = useMemo(() => {
+    const out = new Set<string>();
+    for (const ch of Object.values(sc?.characters ?? {})) if (ch.id !== editing?.id && ch.avatar.photo) out.add(ch.avatar.photo);
+    return out;
+  }, [sc?.characters, editing?.id]);
 
   if (!sc) return null;
 
@@ -508,6 +516,7 @@ export function CharacterEditorScreen() {
             {typeChips}
             {followerBox}
             {genderAge}
+            <FacePicker value={photo.photo} gender={gender} exclude={usedFaces} onPick={(key) => setPhoto({ photo: key })} hint={isEdit ? undefined : '안 고르면 성별·나이대에 맞게 자동'} />
             {traitBox}
             {isEdit && editing ? (
               <View style={[styles.statsBox, { borderColor: c.border }]}>

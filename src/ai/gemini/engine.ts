@@ -28,7 +28,7 @@ const MAX_OUT = {
   comments: (n: number) => 120 + (n + 3) * 75,
   firstDM: 200,
   draft: 300,
-  cast: 3500,
+  cast: 1800,
 } as const;
 
 export function createGeminiEngine(settings: AISettings, opts: { via?: GeminiVia } = {}): AIEngine {

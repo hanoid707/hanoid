@@ -119,6 +119,8 @@ export const CAST_SCHEMA = obj({
       archetype: { type: 'STRING', format: 'enum', enum: ['bestie', 'rival', 'fan', 'mentor', 'troll', 'news', 'crush', 'chaos', 'celeb'] },
       bio: STR,
       description: STR,
+      g: { type: 'STRING', format: 'enum', enum: ['m', 'f'] },
+      age: INT,
       followers: INT,
       isNews: BOOL,
       verified: BOOL,

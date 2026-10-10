@@ -3,6 +3,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useMemo, useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Avatar } from '../../components/Avatar';
+import { FacePicker } from '../../components/FacePicker';
 import { IconCamera } from '../../components/icons';
 import { usePhotoPicker } from '../../components/PhotoCropper';
 import { Screen, TopBar } from '../../components/Screen';
@@ -31,6 +32,9 @@ export function PersonaCreateScreen() {
   const [emoji, setEmoji] = useState(draft.persona?.avatar.emoji ?? '😎');
   const [color, setColor] = useState(draft.persona?.avatar.color ?? AVATAR_COLORS[0]);
   const [mediaId, setMediaId] = useState<string | undefined>(draft.persona?.avatar.mediaId);
+  const [photo, setPhoto] = useState<string | undefined>(draft.persona?.avatar.photo);
+  // 이 세계 인물이 쓰는 기본 사진은 프리셋에서 뺀다
+  const usedFaces = useMemo(() => new Set(tpl ? tpl.cast.map((x) => `${tpl.id}__${x.key}`) : []), [tpl]);
   const [role, setRole] = useState(draft.persona?.role ?? roles[0]);
   const [bio, setBio] = useState(draft.persona?.bio ?? tpl?.personaHint.bio ?? '');
   const [desc, setDesc] = useState(draft.persona?.description ?? tpl?.personaHint.description ?? '');
@@ -38,7 +42,7 @@ export function PersonaCreateScreen() {
   const cleanHandle = sanitizeHandle(handle);
   const handleTaken = takenHandles.has(cleanHandle);
   const valid = name.trim().length >= 1 && cleanHandle.length >= 3 && !handleTaken;
-  const avatar = { emoji, color, mediaId };
+  const avatar = { emoji, color, mediaId, ...(mediaId ? {} : { photo }) };
 
   const next = () => {
     draft.set({
@@ -65,7 +69,10 @@ export function PersonaCreateScreen() {
             <Pressable
               onPress={async () => {
                 const id = await picker.pick('avatar');
-                if (id) setMediaId(id);
+                if (id) {
+                  setMediaId(id);
+                  setPhoto(undefined);
+                }
               }}
               accessibilityLabel="사진 선택"
             >
@@ -74,13 +81,19 @@ export function PersonaCreateScreen() {
                 <IconCamera size={26} color="#fff" />
               </View>
             </Pressable>
-            {mediaId ? (
-              <Pressable onPress={() => setMediaId(undefined)}>
+            {mediaId || photo ? (
+              <Pressable
+                onPress={() => {
+                  setMediaId(undefined);
+                  setPhoto(undefined);
+                }}
+              >
                 <Text style={{ color: c.danger, fontSize: font.small }}>사진 지우기</Text>
               </Pressable>
             ) : null}
           </View>
-          {!mediaId && (
+          {!mediaId && <FacePicker value={photo} exclude={usedFaces} onPick={setPhoto} />}
+          {!mediaId && !photo && (
             <View style={{ gap: 8 }}>
               <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
                 {AVATAR_EMOJIS.map((e) => (

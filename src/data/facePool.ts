@@ -1,12 +1,12 @@
 /**
- * 기본 얼굴 사진 풀 — 직접 만든 캐릭터(첫 팔로워 등)에 성별·나이대에 맞는 기본 사진을 골라 준다.
- * 세계관 파일의 photo 사양(kind=face, gender, age)을 그대로 쓴다. 사진은 전부 AI로 만든 가상 인물.
+ * 기본 얼굴 사진 풀 — 직접 만든 캐릭터·세계관 인물에 성별·나이대에 맞는 기본 사진을 골라 준다.
+ * 사진은 전부 AI로 만든 가상 인물이고, 골라 둔 프리셋 목록(data/facePresets)만 쓴다.
  * 그 나이대 사진이 없으면 가장 가까운 나이대에서 고른다(10대 → 20대 초반, 50·60대 → 가장 나이 많은 사진).
  */
 import type { AgeGroup, Gender } from '../types';
 import { hashStr } from '../utils';
+import { FACE_PRESETS } from './facePresets';
 import { AVATARS } from './photos';
-import { WORLDS } from './worlds';
 
 export interface FaceEntry {
   key: string;
@@ -16,16 +16,7 @@ export interface FaceEntry {
 
 let cache: FaceEntry[] | null = null;
 export function faces(): FaceEntry[] {
-  if (!cache) {
-    cache = [];
-    for (const w of WORLDS) {
-      for (const s of w.cast) {
-        const p = s.photo;
-        const key = `${w.id}__${s.key}`;
-        if (p.kind === 'face' && p.gender && p.age && AVATARS[key]) cache.push({ key, gender: p.gender, age: p.age });
-      }
-    }
-  }
+  if (!cache) cache = FACE_PRESETS.filter((f) => !!AVATARS[f.key]);
   return cache;
 }
 
