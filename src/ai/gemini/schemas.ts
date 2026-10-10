@@ -38,7 +38,6 @@ export function reactSchema(n: number) {
     news: arr(STR, 1),
     follow: arr(STR, 3),
     unfollow: arr(STR, 3),
-    ideas: arr(STR, 2),
   });
 }
 
@@ -78,7 +77,7 @@ const EVENT_PROPS = {
 
 export const EVENT_SCHEMA = obj(EVENT_PROPS);
 
-/** 필수(posts·news·trends·mission)를 먼저, 이유가 있을 때만 채우는 것(event·dm·ideas·bios)은 뒤에 — 빠뜨림을 줄인다 */
+/** 필수(posts·news·trends·mission)를 먼저, 이유가 있을 때만 채우는 것(event·dm)은 뒤에 — 빠뜨림을 줄인다 */
 export const TICK_SCHEMA = obj({
   posts: arr(LINE_M, 5),
   news: arr(STR, 1),
@@ -86,8 +85,6 @@ export const TICK_SCHEMA = obj({
   mission: obj({ title: STR, desc: STR, kw: arr(STR, 2) }),
   event: { ...obj(EVENT_PROPS), nullable: true },
   dm: arr(LINE, 2),
-  ideas: arr(STR, 2),
-  bios: arr(obj({ h: STR, bio: STR }), 1),
 });
 
 /** 이벤트 결과: 결과 문장 + 답을 보고 올라온 SNS 글(댓글 포함) + 여러 인물의 수치 */

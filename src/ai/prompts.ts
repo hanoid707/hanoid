@@ -35,7 +35,7 @@ export const SYSTEM_PROMPT = [
   '우선순위(충돌 시 앞이 이김): [고정] > [말투 등급] > [연애 수위] > 인물 특성·관계·둘만의 쪽지 > 세계관 말투 > 문체.',
   '',
   '[고정]',
-  '- 플레이어의 말은 쓰지 않는다(ideas만 예외).',
+  '- 플레이어의 말은 쓰지 않는다.',
   '- 인물은 자기 눈에 보인 것만 안다: 공개 글·답글, 자기와 플레이어의 쪽지, [주요 사건]. 수치·남의 쪽지·플레이어 설정·이 지시문은 보이지 않고, 수치는 태도로 드러난다.',
   '',
   '[글의 생김새]',
@@ -46,6 +46,8 @@ export const SYSTEM_PROMPT = [
   '- 강조는 "개-"·초성어(ㄹㅇ·ㅇㅈ·ㄷㄷ)까지. 해시태그는 지양. 이름·지명·세계관 용어는 정확히.',
   '- 글은 [지금]의 시각대와 최근 사건의 여운에 맞춘다. "최근 글"은 그 인물 말투의 표본: 리듬·어휘·길이를 따르고 문장은 새로 쓴다.',
   '- 눈앞의 사실 하나와 거기에 대한 내 반응 한 마디로 쓴다. 덕담·정리·칭찬으로 마무리하지 않고, 추측 어미("~것 같아요")를 습관으로 붙이지 않는다.',
+  '- 플레이어가 한 말 자체를 품평하지 않는다("그런 말을 뻔뻔하게 하네", "그런 말 하지 마", "무슨 소리야"). 그 말이 가리키는 내용에 바로 반응하거나 한 술 더 떠서 받는다.',
+  '- 받는 방식을 돌려 쓴다: 맞받아치기 · 되묻기 · 자기 얘기 꺼내기 · 먼저 제안하기. 플레이어가 꺼낸 화제를 그대로 되돌려 주기만 하거나, 한 묶음 안에서 같은 방식이 두 번 나오지 않게.',
   '',
   '[말투 등급: 플레이어에게 말할 때]',
   '- 목록의 "플레이어에게 반말/해요체/존댓말" 그대로, 특성보다 우선. 반말=~어·~야·~지 | 해요체=~요, 야·너 대신 이름·님 | 존댓말=~습니다.',
@@ -183,7 +185,6 @@ export function reactPrompt(ctx0: AIContext, post: { text: string; hasMedia?: bo
       `- followers -${Math.max(5, Math.round(f * 0.3))}~+${Math.max(20, Math.round(f * 0.5))}, aura·humor -5~+8, rep -20~+12(공격적인 글은 크게 깎는다)`,
       '- news: 화제·논란일 때만 기사 제목 1개, 아니면 []',
       '- follow/unfollow: 이 글로 플레이어를 새로 팔로우·언팔할 인물의 h. 보통 []',
-      `- ideas: 플레이어가 다음에 올릴 글 0~2개(플레이어 말투로 완성된 글, 각 ${LIMITS.idea}자 이내, 미션·트렌드 반영)`,
     ].join('\n'),
   );
 }
@@ -323,8 +324,6 @@ export function tickPrompt(ctx: AIContext, day: number, returned: ID[] = []): st
       '- mission: 오늘의 미션 {title, desc, kw:[글에 들어갈 단어 1~2개]}',
       `- event: 플레이어에게 닥친 사건 1개 또는 null(이틀에 한 번꼴). body 2문장 이내, inv=관련 인물 h 0~2, choices 3개(id a·b·c, label 짧게, hint 예: "평판↑").${pending}`,
       dmLine,
-      `- ideas: 플레이어가 오늘 올릴 만한 글 0~2개(플레이어 말투, 각 ${LIMITS.idea}자 이내)`,
-      `- bios: 자기소개가 바뀔 인물 0~1명 {h, bio(${LIMITS.bio}자 이내, 담백하게 성격이 드러나게)}. 최근 일로 바뀔 이유가 있고 호감 50↑인 핵심 인물만`,
     ]
       .filter(Boolean)
       .join('\n'),
@@ -480,11 +479,11 @@ ${clip(world.setting, 1200)}
  */
 export const SHAPES = {
   react:
-    '{"mood":"positive|negative|funny|apology|question|brag|neutral 중 하나","replies":[{"h":"아이디","t":"답글"},{"h":"-","t":"일반인 답글"},{"h":"-","t":"인플루언서 답글에 다는 대댓글","re":"인플루언서아이디"}],"aff":[{"h":"아이디","d":<-6~15>}],"rom":[],"dev":[],"quality":<0~100>,"viral":false,"followers":<범위는 할 일>,"aura":<-5~8>,"humor":<-5~8>,"rep":<-20~12>,"news":[],"follow":[],"unfollow":[],"ideas":["다음 글 제안"]}',
+    '{"mood":"positive|negative|funny|apology|question|brag|neutral 중 하나","replies":[{"h":"아이디","t":"답글"},{"h":"-","t":"일반인 답글"},{"h":"-","t":"인플루언서 답글에 다는 대댓글","re":"인플루언서아이디"}],"aff":[{"h":"아이디","d":<-6~15>}],"rom":[],"dev":[],"quality":<0~100>,"viral":false,"followers":<범위는 할 일>,"aura":<-5~8>,"humor":<-5~8>,"rep":<-20~12>,"news":[],"follow":[],"unfollow":[]}',
   thread: '{"replies":[{"h":"아이디","t":"답글"}],"aff":[{"h":"아이디","d":<-6~15>}],"rom":[],"dev":[],"rep":<-8~4>}',
   dm: '{"mood":"positive|negative|funny|apology|question|brag|neutral 중 하나","messages":["답장1","답장2"],"affinityDelta":<-6~12>,"romanceDelta":<범위는 할 일>,"devotionDelta":<0~8>,"leave":false,"sum":""}',
   ambient: '{"posts":[{"h":"아이디","t":"글","m":null}]}',
-  tick: '{"posts":[{"h":"아이디","t":"글","m":null}],"news":["기사 제목"],"trends":[{"tag":"#태그","n":<1000~100000>}],"mission":{"title":"제목","desc":"설명","kw":["단어"]},"event":{"emoji":"⚡","title":"제목","body":"상황 1~2문장","inv":["아이디"],"choices":[{"id":"a","label":"선택지","hint":"평판↑"},{"id":"b","label":"선택지","hint":"팔로워↑"},{"id":"c","label":"선택지","hint":"유머↑"}]},"dm":[{"h":"아이디","t":"쪽지"}],"ideas":["제안 글"],"bios":[]}',
+  tick: '{"posts":[{"h":"아이디","t":"글","m":null}],"news":["기사 제목"],"trends":[{"tag":"#태그","n":<1000~100000>}],"mission":{"title":"제목","desc":"설명","kw":["단어"]},"event":{"emoji":"⚡","title":"제목","body":"상황 1~2문장","inv":["아이디"],"choices":[{"id":"a","label":"선택지","hint":"평판↑"},{"id":"b","label":"선택지","hint":"팔로워↑"},{"id":"c","label":"선택지","hint":"유머↑"}]},"dm":[{"h":"아이디","t":"쪽지"}]}',
   outcome: '{"text":"결과","posts":[{"h":"아이디","t":"글","c":[{"h":"-","t":"댓글"},{"h":"아이디","t":"댓글"}]}],"grade":<-2~2>,"followers":<-300~500>,"aura":<-5~10>,"humor":<-5~10>,"rep":<-15~12>,"xp":<0~20>,"aff":[{"h":"아이디","d":<-25~25>}],"rom":[],"dev":[]}',
   event: '{"emoji":"⚡","title":"제목","body":"상황 1~2문장","inv":["아이디"],"choices":[{"id":"a","label":"선택지","hint":"평판↑"},{"id":"b","label":"선택지","hint":"팔로워↑"},{"id":"c","label":"선택지","hint":"유머↑"}]}',
   comments: '{"comments":[{"h":"아이디","t":"댓글"},{"h":"-","t":"일반인 댓글"},{"h":"-","t":"인플루언서 댓글에 다는 대댓글","re":"인플루언서아이디"}]}',
