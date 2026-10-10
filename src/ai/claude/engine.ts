@@ -12,6 +12,7 @@ import type { AISettings } from '../../types';
 import { clamp, hashStr, wellFormed } from '../../utils';
 import * as N from '../normalize';
 import * as P from '../prompts';
+import { DEFAULT_TUNE } from '../tune';
 import type { AIContext, AIEngine } from '../types';
 
 type Raw = Record<string, unknown>;
@@ -102,7 +103,7 @@ export function createClaudeEngine(settings: AISettings): AIEngine {
     async dmReply(ctx, { characterId, history, message, priorSummary }) {
       if (!ctx.cast.some((x) => x.id === characterId)) return { mood: 'neutral', messages: [], leave: false, affinityDelta: 0, romanceDelta: 0, devotionDelta: 0 };
       const reg = ctx.cast.find((x) => x.id === characterId)?.register;
-      const r = N.normDM(await call(ctx, P.dmPrompt(ctx, { characterId, history, message, priorSummary }), P.SHAPES.dm, 'dm'), reg);
+      const r = N.normDM(await call(ctx, P.dmPrompt(ctx, { characterId, history, message, priorSummary }), P.SHAPES.dm, 'dm'), reg, (ctx.tune ?? DEFAULT_TUNE).dmBubbles);
       if (!r.messages.length && !r.leave) throw new ClaudeError('빈 답장이 왔어요', 'empty', false);
       return r;
     },
@@ -112,11 +113,11 @@ export function createClaudeEngine(settings: AISettings): AIEngine {
     },
 
     async worldTick(ctx, { day, returned }) {
-      return N.normTick(ctx, await call(ctx, P.tickPrompt(ctx, day, returned), P.SHAPES.tick, 'tick'));
+      return N.normTick(ctx, await call(ctx, P.tickPrompt(ctx, day, returned), P.tickShape(ctx.tune ?? DEFAULT_TUNE, returned?.length ?? 0), 'tick'));
     },
 
     async resolveEvent(ctx, { event, choiceId, customText }) {
-      return N.normOutcome(ctx, await call(ctx, P.outcomePrompt(ctx, event, choiceId, customText), P.SHAPES.outcome, 'event'), event);
+      return N.normOutcome(ctx, await call(ctx, P.outcomePrompt(ctx, event, choiceId, customText), P.outcomeShape(ctx.tune ?? DEFAULT_TUNE), 'event'), event);
     },
 
     async newEvent(ctx, { avoidTitles }) {

@@ -10,6 +10,7 @@ import { ghostAuthor } from './local/ghost';
 import { localBio, localEmoji, nameCore, toHandle } from './local/names';
 import { hasBanmalAddress, textRegister, toRegister } from './local/register';
 import { LIMITS } from './prompts';
+import { DEFAULT_TUNE } from './tune';
 import type { AIContext, CastDraft, CharacterDraft, CharacterDraftArgs, DMReaction, EventDraft, EventOutcome, GeneratedLine, Mood, PostReaction, ThreadReaction, TickResult } from './types';
 
 export type RawLine = { h?: string; handle?: string; t?: string; text?: string; m?: string | null; media?: string | null; re?: string | null };
@@ -202,7 +203,7 @@ export function normReact(ctx: AIContext, r: Raw, o: { n?: number; seed?: string
 
 export function normThread(ctx: AIContext, r: Raw, seed?: string): ThreadReaction {
   return {
-    replies: lines(ctx, r.replies, { ghost: true, seed, max: 8, maxLen: LIMITS.reply + 50, noNews: true, toPlayer: true }),
+    replies: lines(ctx, r.replies, { ghost: true, seed, max: Math.min(8, Math.max(1, (ctx.tune ?? DEFAULT_TUNE).thread)), maxLen: LIMITS.reply + 50, noNews: true, toPlayer: true }),
     deltas: {
       affinity: affinityMap(ctx, pick1(r, 'aff', 'affinity')),
       romance: affinityMap(ctx, pick1(r, 'rom', 'romance')),
@@ -223,11 +224,11 @@ function splitMessage(t: string): string[] {
   return [t.slice(0, at + 1).trim(), cleanText(t.slice(at + 1), 100)].filter(Boolean);
 }
 
-export function normDM(r: Raw, reg?: SpeechRegister): DMReaction {
+export function normDM(r: Raw, reg?: SpeechRegister, maxBubbles = 3): DMReaction {
   const raw = arr<string>(pick1(r, 'messages', 'lines'))
     .map((t) => fixRegister(cleanText(t, 160), reg))
     .filter(Boolean);
-  const messages = raw.flatMap(splitMessage).slice(0, 3);
+  const messages = raw.flatMap(splitMessage).slice(0, Math.min(3, Math.max(1, maxBubbles)));
   const summary = cleanText(str(pick1(r, 'sum', 'historySummary')), 260);
   return {
     mood: moodOf(r.mood),
@@ -249,16 +250,12 @@ export function normAmbient(ctx: AIContext, r: Raw, count: number): GeneratedLin
 
 // ───────────────────────── 이벤트
 
-type RawEvent = { emoji?: string; title?: string; body?: string; inv?: string[]; involved?: string[]; choices?: { id?: string; label?: string; hint?: string }[] };
+type RawEvent = { emoji?: string; title?: string; body?: string; inv?: string[]; involved?: string[] };
 
+/** 이벤트 = 상황만(선택지 없음 — 플레이어가 직접 답한다) */
 export function normEventDraft(ctx: AIContext, v: unknown): EventDraft | null {
   const ev = v as RawEvent | null;
-  if (!ev || typeof ev !== 'object' || !str(ev.title)) return null;
-  const choices = arr<{ id?: string; label?: string; hint?: string }>(ev.choices)
-    .filter((c) => str(c?.label))
-    .slice(0, 3);
-  if (choices.length < 2) return null;
-  const ids = new Set<string>();
+  if (!ev || typeof ev !== 'object' || !str(ev.title) || !str(ev.body)) return null;
   return {
     emoji: str(ev.emoji).match(EMOJI_RE)?.[0] ?? '⚡',
     title: cleanText(ev.title, 40),
@@ -266,12 +263,7 @@ export function normEventDraft(ctx: AIContext, v: unknown): EventDraft | null {
     involved: handles(ctx, ev.inv ?? ev.involved)
       .filter((id) => !ctx.cast.find((c) => c.id === id)?.isNews)
       .slice(0, 3),
-    choices: choices.map((c, i) => {
-      let id = str(c.id).toLowerCase().replace(/[^a-z0-9_]/g, '') || String.fromCharCode(97 + i);
-      if (ids.has(id)) id = String.fromCharCode(97 + i);
-      ids.add(id);
-      return { id, label: cleanText(c.label, 40) || `선택 ${i + 1}`, hint: cleanText(c.hint, 20) || undefined };
-    }),
+    choices: [],
   };
 }
 
@@ -291,7 +283,7 @@ export function normTick(ctx: AIContext, r: Raw): TickResult {
       .slice(0, 8)
       .map((t, i) => ({ tag: str(t.tag).startsWith('#') ? str(t.tag).replace(/\s+/g, '') : `#${str(t.tag).replace(/\s+/g, '')}`, count: Math.max(100, num(t.n ?? t.count, 1000)), hot: i === 0 })),
     event: normEventDraft(ctx, r.event),
-    dmOpeners: lines(ctx, pick1(r, 'dm', 'dmOpeners'), { max: 2, maxLen: 120, noNews: true, toPlayer: true }).filter((l) => ctx.cast.find((c) => c.id === l.authorId)?.tier !== 'crowd'),
+    dmOpeners: lines(ctx, pick1(r, 'dm', 'dmOpeners'), { max: 4, maxLen: 120, noNews: true, toPlayer: true }).filter((l) => ctx.cast.find((c) => c.id === l.authorId)?.tier !== 'crowd'),
     mission: str(mission?.title) && kw.length ? { title: cleanText(mission!.title, 30), desc: cleanText(mission!.desc, 80), keyword: kw } : null,
     ideas: ideasOf(r.ideas),
     bios: arr<{ h?: string; handle?: string; bio?: string }>(r.bios)
@@ -317,7 +309,7 @@ export function normOutcome(ctx: AIContext, r: Raw, event?: Pick<GameEvent, 'inv
   const text = cleanText(r.text, 200);
   // 답을 보고 올라온 글(댓글 포함) — 댓글 없는 글은 버린다(시스템 글처럼 보이지 않게)
   const posts: GeneratedLine[] = [];
-  arr<Raw>(r.posts).slice(0, 4).forEach((p, i) => {
+  arr<Raw>(r.posts).slice(0, Math.min(4, (ctx.tune ?? DEFAULT_TUNE).eventPosts)).forEach((p, i) => {
     const main = lines(ctx, [p], { ghost: true, seed: `ev${i}:${text.slice(0, 12)}`, max: 1, maxLen: LIMITS.post + 40 })[0];
     if (!main) return;
     const comments = lines(ctx, pick1(p, 'c', 'comments'), { ghost: true, seed: `evc${i}:${main.text.slice(0, 12)}`, max: 3, maxLen: LIMITS.reply + 40, noNews: true, exclude: main.authorId.startsWith('__') ? [] : [main.authorId] });

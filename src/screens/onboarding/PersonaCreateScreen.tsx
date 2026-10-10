@@ -9,6 +9,7 @@ import { usePhotoPicker } from '../../components/PhotoCropper';
 import { Screen, TopBar } from '../../components/Screen';
 import { Button, Chip, Field } from '../../components/ui';
 import { AVATAR_COLORS, AVATAR_EMOJIS } from '../../data/avatars';
+import { resolveFace } from '../../data/facePool';
 import { getWorldTemplate } from '../../data/worlds';
 import type { RootNav } from '../../navigation/types';
 import { useDraft } from '../../store/draft';
@@ -34,7 +35,7 @@ export function PersonaCreateScreen() {
   const [mediaId, setMediaId] = useState<string | undefined>(draft.persona?.avatar.mediaId);
   const [photo, setPhoto] = useState<string | undefined>(draft.persona?.avatar.photo);
   // 이 세계 인물이 쓰는 기본 사진은 프리셋에서 뺀다
-  const usedFaces = useMemo(() => new Set(tpl ? tpl.cast.map((x) => `${tpl.id}__${x.key}`) : []), [tpl]);
+  const usedFaces = useMemo(() => new Set(tpl ? tpl.cast.map((x) => resolveFace(`${tpl.id}__${x.key}`)) : []), [tpl]);
   const [role, setRole] = useState(draft.persona?.role ?? roles[0]);
   const [bio, setBio] = useState(draft.persona?.bio ?? tpl?.personaHint.bio ?? '');
   const [desc, setDesc] = useState(draft.persona?.description ?? tpl?.personaHint.description ?? '');

@@ -4,17 +4,19 @@
  *   - 다른 기기에서 바뀐 세이브는 주기적으로(앱 15초 · 아티팩트 45초) + 앱으로 돌아올 때 받아온다
  *   - 직접 고른 사진은 업로드 대기열로 올리고, 필요할 때 내려받는다
  *   - 공통 캐릭터 목록은 공간 설정(aisns.settings)으로 올리고 받는다(항목마다 최신이 이김)
+ *   - AI 키·모델·AI 조절값(답글·쪽지·새 글 수 …)도 공간 설정에 같이 둔다 → 한 기기에서 바꾸면 다른 기기에도 적용(더 최신인 쪽이 이김)
  * 서버: Supabase aisns 스키마(supabase/aisns.sql 참고)
  */
 import { AppState, Platform } from 'react-native';
 import { create } from 'zustand';
 import { CONFIG, getArtifactCapability, isArtifactRuntime } from '../config';
 import { applyRemotePrompts, hydratePrompts } from '../ai/promptStore';
+import { normTune, sameTune } from '../ai/tune';
 import { migrateScenario, useGame } from '../store/game';
 import { cacheMedia, connectMediaSync, getMediaNow } from '../store/media';
 import { loadMediaLocal, loadSyncLocal, saveSyncLocal, type PendingMedia, type SyncLocal } from '../store/persistence';
 import { applyRemoteRoster, rosterSnapshot, useRoster } from '../store/roster';
-import type { ID, RosterEntry, Scenario } from '../types';
+import type { AITune, ID, RosterEntry, Scenario } from '../types';
 import { createMcpBackend, createRestBackend, SyncError, type PushItem, type SyncBackend } from './backend';
 
 export type SyncStatus = 'off' | 'idle' | 'syncing' | 'error' | 'blocked';
@@ -49,6 +51,8 @@ let unsubAI: (() => void) | null = null;
 let aiDirty = false;
 let applyingRemoteAI = false;
 let aiTs = 0;
+/** DB에서 마지막으로 본 AI 키·모델 — 이 기기에 키가 없을 때(아티팩트 등) 올리면서 지우지 않게 */
+let remoteAI: { apiKey?: string; model?: string } = {};
 /** AI 지시문(aisns.prompts)을 마지막으로 받은 시각 — 5분마다 다시 받는다 */
 let promptsAt = 0;
 const PROMPTS_EVERY = 5 * 60_000;
@@ -101,12 +105,12 @@ export async function startSync() {
   // AI 키·모델 변화 감시 — PC에서 한 번 넣으면 폰에서도 그대로 쓰게 된다
   unsubAI = useGame.subscribe((g, prevG) => {
     if (applyingRemoteAI || g.settings.ai === prevG.settings.ai) return;
-    if (g.settings.ai.apiKey === prevG.settings.ai.apiKey && g.settings.ai.model === prevG.settings.ai.model) return;
+    if (g.settings.ai.apiKey === prevG.settings.ai.apiKey && g.settings.ai.model === prevG.settings.ai.model && g.settings.ai.tuneTs === prevG.settings.ai.tuneTs) return;
     aiTs = Date.now();
     aiDirty = true;
     schedulePush();
   });
-  if (useGame.getState().settings.ai.apiKey) aiDirty = true;
+  if (useGame.getState().settings.ai.apiKey || useGame.getState().settings.ai.tuneTs) aiDirty = true;
 
   // 처음엔 기기에만 있던 세이브도 전부 올릴 후보
   for (const id of Object.keys(useGame.getState().scenarios)) dirty.add(id);
@@ -196,7 +200,10 @@ async function pushSettings() {
   aiDirty = false;
   try {
     // settingsPut 은 blob 을 통째로 덮어쓰므로 roster 와 ai 를 항상 같이 보낸다
-    await backend.settingsPut({ roster: snap, ai: { apiKey: ai.apiKey, model: ai.model, ts: aiTs } }, Math.max(1, snap.ts, aiTs));
+    await backend.settingsPut(
+      { roster: snap, ai: { apiKey: ai.apiKey || remoteAI.apiKey || '', model: ai.model || remoteAI.model || '', ts: aiTs, ...(ai.tuneTs ? { tune: normTune(ai.tune), tuneTs: ai.tuneTs } : {}) } },
+      Math.max(1, snap.ts, aiTs, ai.tuneTs ?? 0),
+    );
   } catch (e) {
     rosterDirty = hadRoster;
     aiDirty = hadAI;
@@ -264,8 +271,23 @@ async function pull() {
     if (before > ts) rosterDirty = true;
   }
   // AI 키·모델(다른 기기에서 넣은 것) — 더 최신인 쪽이 이긴다
-  const rai = r.settings?.data?.ai as { apiKey?: string; model?: string; ts?: number } | undefined;
+  const rai = r.settings?.data?.ai as { apiKey?: string; model?: string; ts?: number; tune?: Partial<AITune>; tuneTs?: number } | undefined;
   if (rai) {
+    remoteAI = { apiKey: rai.apiKey, model: rai.model };
+    // AI 조절값: 더 최신인 쪽이 이긴다(이 기기에서 바꾼 값이 더 새로우면 다시 올린다)
+    const mine = useGame.getState().settings.ai;
+    const remoteTuneTs = rai.tuneTs ?? 0;
+    if (rai.tune && remoteTuneTs > (mine.tuneTs ?? 0)) {
+      applyingRemoteAI = true;
+      try {
+        if (sameTune(rai.tune, mine.tune)) useGame.getState().setAI({ tuneTs: remoteTuneTs });
+        else useGame.getState().setAI({ tune: normTune(rai.tune), tuneTs: remoteTuneTs });
+      } finally {
+        applyingRemoteAI = false;
+      }
+    } else if ((mine.tuneTs ?? 0) > remoteTuneTs) {
+      aiDirty = true;
+    }
     const ts = rai.ts ?? r.settings?.updatedTs ?? 0;
     if (ts > aiTs) {
       const cur = useGame.getState().settings.ai;

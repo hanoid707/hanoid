@@ -4,10 +4,11 @@
  */
 import { buildContext, createEngine } from '../ai';
 import { ghostAuthor } from '../ai/local/ghost';
+import { normTune } from '../ai/tune';
 import type { AIEngine, GeneratedLine } from '../ai/types';
 import { sceneKey } from '../data/worlds';
 import { useGame } from '../store/game';
-import { GHOST, type BackgroundAI, type Character, type Conversation, type GhostAuthor, type ID, type PhotoRef, type Scenario } from '../types';
+import { GHOST, type AITune, type Character, type Conversation, type GhostAuthor, type ID, type PhotoRef, type Scenario } from '../types';
 import { npcEngagement } from './engagement';
 import { addPost, addReply } from './progress';
 import { KEEP } from './rules';
@@ -73,14 +74,15 @@ export function engine(): GameAI {
   };
 }
 
-/** 뒤에서 도는 AI를 얼마나 쓸지(설정 없으면 'full' = 전부. 절약은 AI 연결 화면에서 직접 고를 때만) */
-export function backgroundAI(): BackgroundAI {
-  return G().settings.ai.background ?? 'full';
+/** 지금 AI 조절값(답글·댓글·쪽지·새 글 수 …). 설정에서 바꾸면 다음 호출부터 바로 반영된다 */
+export function tune(): AITune {
+  return normTune(G().settings.ai.tune);
 }
 
+/** AI에게 넘길 요약본 + 지금 조절값 */
 export function ctxOf(sid: ID) {
   const sc = G().scenarios[sid];
-  return sc ? buildContext(sc) : null;
+  return sc ? { ...buildContext(sc), tune: tune() } : null;
 }
 
 // ───────────────────────── 비동기 흐름 보호

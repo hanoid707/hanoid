@@ -104,9 +104,9 @@ export function priceOf(model: string): { in: number; out: number; cachedIn?: nu
  */
 export const PLAY_PROFILE = { calls: 13, inTok: 45_000, cachedTok: 0, outTok: 4_300 } as const;
 
-/** 이 모델로 한 판 했을 때 예상 요금(달러) */
-export function playCostUsd(model: string): number {
-  return costOf({ provider: 'gemini', model, inTok: PLAY_PROFILE.inTok, outTok: PLAY_PROFILE.outTok, cachedTok: PLAY_PROFILE.cachedTok });
+/** 이 모델로 한 판 했을 때 예상 요금(달러). profile = AI 조절값을 반영한 한 판 토큰(ai/tune.ts playCost), 없으면 기본 한 판 */
+export function playCostUsd(model: string, profile: { inTok: number; outTok: number } = PLAY_PROFILE): number {
+  return costOf({ provider: 'gemini', model, inTok: profile.inTok, outTok: profile.outTok, cachedTok: 0 });
 }
 
 /** 한 번 호출의 예상 요금(달러) */

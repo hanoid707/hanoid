@@ -5,8 +5,39 @@
  */
 import type { AgeGroup, Gender } from '../types';
 import { hashStr } from '../utils';
+import { FACE_ALIAS } from './faceAlias';
 import { FACE_PRESETS } from './facePresets';
 import { AVATARS } from './photos';
+
+/**
+ * 사진 키 → 실제로 보이는 사진 키.
+ * 기본 세계관 인물 중 자기 얼굴 사진이 없는 사람은 프리셋 얼굴을 대신 쓴다(data/faceAlias, 예전 세이브의 키도 그대로 통한다).
+ */
+export function resolveFace(key: string): string {
+  return FACE_ALIAS[key] ?? key;
+}
+
+/** 이 사람들이 이미 쓰는 얼굴 사진(실제로 보이는 키) — 새 얼굴을 고를 때 겹치지 않게 */
+export function usedFaceKeys(list: Iterable<{ avatar: { photo?: string } }>, skipId?: (x: { avatar: { photo?: string } }) => boolean): Set<string> {
+  const out = new Set<string>();
+  for (const x of list) if (x.avatar.photo && !skipId?.(x)) out.add(resolveFace(x.avatar.photo));
+  return out;
+}
+
+/** 프리셋 얼굴의 나이대(프리셋이 아니면 undefined) */
+export function faceAgeGroup(key: string | undefined): AgeGroup | undefined {
+  if (!key) return undefined;
+  const k = resolveFace(key);
+  const f = faces().find((x) => x.key === k);
+  return f ? (Math.min(60, Math.max(10, Math.floor(f.age / 10) * 10)) as AgeGroup) : undefined;
+}
+
+/** 프리셋 얼굴의 성별(프리셋이 아니면 undefined) */
+export function faceGender(key: string | undefined): Gender | undefined {
+  if (!key) return undefined;
+  const k = resolveFace(key);
+  return faces().find((f) => f.key === k)?.gender;
+}
 
 export interface FaceEntry {
   key: string;

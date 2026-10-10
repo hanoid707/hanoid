@@ -7,7 +7,7 @@
 import { peerRegisterHint } from '../ai/local/register';
 import type { CastDraft } from '../ai/types';
 import { ARCHETYPE_DEFAULTS, AVATAR_COLORS, AVATAR_EMOJIS } from '../data/avatars';
-import { pickFace } from '../data/facePool';
+import { pickFace, usedFaceKeys } from '../data/facePool';
 import { getWorldTemplate, sceneKey, WORLDS, type CharacterSeed, type WorldTemplate } from '../data/worlds';
 import type { CustomWorldInput } from '../store/draft';
 import { useRoster } from '../store/roster';
@@ -82,13 +82,15 @@ export function castPreview(templateId: string | null, customCast: CastDraft[] |
   }));
 }
 
-/** 직접 만든 세계관 인물의 기본 사진: 성별·나이대에 맞게, 서로 겹치지 않게(같은 인물 목록이면 늘 같은 결과). 뉴스 계정·성별 없는 인물은 사진 없이 이모지 */
+/** 직접 만든 세계관 인물의 기본 사진: 성별·나이대에 맞게, 서로 겹치지 않게(같은 인물 목록이면 늘 같은 결과). 뉴스 계정만 사진 없이 이모지 — 사람은 반드시 얼굴 사진 */
 function customFaces(cast: CastDraft[]): (string | undefined)[] {
   const used = new Set<string>();
   return cast.map((c) => {
-    if (c.isNews || !c.gender) return undefined;
+    if (c.isNews) return undefined;
     const ageGroup = (Math.min(60, Math.max(20, Math.floor((c.age ?? 25) / 10) * 10)) as AgeGroup);
-    const key = pickFace(c.gender, ageGroup, used, `${c.handle}:${c.name}`);
+    // AI가 성별을 빠뜨렸으면 아이디로 정한다(같은 인물이면 늘 같은 쪽)
+    const gender: Gender = c.gender ?? (hashStr(c.handle) % 2 ? 'm' : 'f');
+    const key = pickFace(gender, ageGroup, used, `${c.handle}:${c.name}`);
     if (key) used.add(key);
     return key;
   });
@@ -245,7 +247,7 @@ function starterQuests(input: NewScenarioInput, firstFollowerName: string): Ques
     q('첫 게시물 올리기', '타임라인에 첫 글을 올려보세요.', 'post', 1, { xp: 15 }),
     q(`${firstFollowerName}에게 쪽지 보내기`, '첫 팔로워에게 쪽지를 보내보세요.', 'dm', 1, { xp: 20 }),
     q('답글 3개 달기', '다른 사람 글에 답글을 달아보세요.', 'reply', 3, { xp: 20 }),
-    q('이벤트 해결하기', '타임라인에 뜬 이벤트에서 선택을 내려보세요.', 'event', 1, { xp: 25 }),
+    q('이벤트 해결하기', '타임라인에 뜬 이벤트에 내 말로 답해 보세요.', 'event', 1, { xp: 25 }),
     q('팔로워 100명 달성', '화제가 될 글을 올려 팔로워를 모으세요.', 'followers', 100, { xp: 40 }),
     q('레벨 3 달성', '활동해서 경험치를 쌓으세요.', 'level', 3, { xp: 40, followers: 30 }),
   ];
@@ -274,7 +276,7 @@ export function createScenario(input: NewScenarioInput): Scenario {
       worldName: world.name,
       taken: new Set([input.persona.handle.toLowerCase(), ...chars.map((c) => c.handle.toLowerCase())]),
       takenNames: [input.persona.name, ...chars.map((c) => c.name)],
-      usedFaces: new Set(chars.map((c) => c.avatar.photo).filter((x): x is string => !!x)),
+      usedFaces: usedFaceKeys(chars),
       seed: `${now}:${input.persona.handle}`,
     });
     chars.unshift(first);

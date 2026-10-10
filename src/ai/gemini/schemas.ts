@@ -6,6 +6,8 @@
  * - maxItems: 배열이 길어지지 않게.
  */
 
+import type { AITune } from '../../types';
+
 const STR = { type: 'STRING' } as const;
 const INT = { type: 'INTEGER' } as const;
 const BOOL = { type: 'BOOLEAN' } as const;
@@ -41,18 +43,22 @@ export function reactSchema(n: number) {
   });
 }
 
-export const THREAD_SCHEMA = obj({
-  replies: arr(LINE, 8),
-  aff: arr(DELTA, 8),
-  rom: arr(DELTA, 4),
-  dev: arr(DELTA, 4),
-  rep: INT,
-});
+/** 내 답글에 달리는 답글: 조절값(n)만큼만 */
+export function threadSchema(n: number) {
+  return obj({
+    replies: arr(LINE, Math.min(8, Math.max(1, n))),
+    aff: arr(DELTA, 8),
+    rom: arr(DELTA, 4),
+    dev: arr(DELTA, 4),
+    rep: INT,
+  });
+}
 
-export const DM_SCHEMA = obj(
+/** 쪽지 답장: 말풍선 최대 수(조절값) */
+export const dmSchema = (bubbles: number) => obj(
   {
     mood: MOOD,
-    messages: arr(STR, 3),
+    messages: arr(STR, Math.min(3, Math.max(1, bubbles))),
     affinityDelta: INT,
     romanceDelta: INT,
     devotionDelta: INT,
@@ -72,35 +78,41 @@ const EVENT_PROPS = {
   title: STR,
   body: STR,
   inv: arr(STR, 3),
-  choices: arr(obj({ id: STR, label: STR, hint: STR }), 3),
 };
 
 export const EVENT_SCHEMA = obj(EVENT_PROPS);
 
-/** 필수(posts·news·trends·mission)를 먼저, 이유가 있을 때만 채우는 것(event·dm)은 뒤에 — 빠뜨림을 줄인다 */
-export const TICK_SCHEMA = obj({
-  posts: arr(LINE_M, 5),
-  news: arr(STR, 1),
-  trends: arr(obj({ tag: STR, n: INT }), 6),
-  mission: obj({ title: STR, desc: STR, kw: arr(STR, 2) }),
-  event: { ...obj(EVENT_PROPS), nullable: true },
-  dm: arr(LINE, 2),
-});
+/**
+ * 하루 정산: 조절값에서 켠 항목만 넣는다(끈 항목은 아예 쓰지 않게).
+ * 필수(posts·news·trends·mission)를 먼저, 이유가 있을 때만 채우는 것(event·dm)은 뒤에 — 빠뜨림을 줄인다
+ */
+export function tickSchema(t: AITune, returned = 0) {
+  const props: Record<string, object> = {};
+  if (t.dayPosts > 0) props.posts = arr(LINE_M, t.dayPosts);
+  if (t.dayNews) props.news = arr(STR, 1);
+  if (t.dayTrends) props.trends = arr(obj({ tag: STR, n: INT }), 6);
+  if (t.dayMission) props.mission = obj({ title: STR, desc: STR, kw: arr(STR, 2) });
+  if (t.dayEvent) props.event = { ...obj(EVENT_PROPS), nullable: true };
+  if (t.dayDMs > 0 || returned > 0) props.dm = arr(LINE, Math.max(1, t.dayDMs, returned));
+  return obj(props);
+}
 
-/** 이벤트 결과: 결과 문장 + 답을 보고 올라온 SNS 글(댓글 포함) + 여러 인물의 수치 */
-export const OUTCOME_SCHEMA = obj({
-  text: STR,
-  posts: arr(obj({ h: STR, t: STR, c: arr(LINE, 3) }), 4),
-  grade: INT,
-  followers: INT,
-  aura: INT,
-  humor: INT,
-  rep: INT,
-  xp: INT,
-  aff: arr(DELTA, 8),
-  rom: arr(DELTA, 4),
-  dev: arr(DELTA, 6),
-});
+/** 이벤트 결과: 결과 문장 + 답을 보고 올라온 SNS 글(댓글 포함, 조절값이 0이면 없음) + 여러 인물의 수치 */
+export function outcomeSchema(posts: number) {
+  return obj({
+    text: STR,
+    ...(posts > 0 ? { posts: arr(obj({ h: STR, t: STR, c: arr(LINE, 3) }), Math.min(4, posts)) } : {}),
+    grade: INT,
+    followers: INT,
+    aura: INT,
+    humor: INT,
+    rep: INT,
+    xp: INT,
+    aff: arr(DELTA, 8),
+    rom: arr(DELTA, 4),
+    dev: arr(DELTA, 6),
+  });
+}
 
 export function commentsSchema(count: number) {
   return obj({ comments: arr(LINE_RE, Math.min(10, Math.max(1, count) + 3)) });

@@ -1,5 +1,5 @@
 /**
- * AI 연결 — 쓸 수 있는 AI 고르기 · AI를 쓰는 범위(절약) · 제미나이 모델(가격 · 한 판 예상 요금) · 키 · 연결 테스트 · 클로드 모드
+ * AI 연결 — 쓸 수 있는 AI 고르기 · AI 조절(답글·댓글·쪽지·새 글 수와 예상 소모) · 제미나이 모델(가격 · 한 판 예상 요금) · 키 · 연결 테스트 · 클로드 모드
  *   + 사용량: 오늘 / 이번 달 / 전체(호출·토큰·예상 요금·원화) · 기능별 · 마지막 호출 · 충전 금액 대비 남은 예상 금액
  * 사용량은 이 기기에서 센 추정치다(응답에 적힌 토큰 × 가격표). 정확한 청구·한도는 Google AI Studio에서 본다.
  */
@@ -8,22 +8,17 @@ import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-na
 import { availableProviders, engineLabel, GEMINI_MODEL_PRESETS, resetEngineState } from '../../ai';
 import { claudeAvailable } from '../../ai/claude/engine';
 import { pingGemini } from '../../ai/gemini/engine';
+import { normTune, playCost } from '../../ai/tune';
+import { AITuneList } from '../../components/AITuneList';
 import { IconExternalLink } from '../../components/icons';
 import { Screen, TopBar } from '../../components/Screen';
-import { Button, Field, ProgressBar, Segmented } from '../../components/ui';
+import { Button, Divider, Field, ProgressBar, Segmented } from '../../components/ui';
 import { isArtifactRuntime } from '../../config';
 import { useGame } from '../../store/game';
-import { emptyBucket, PLAY_PROFILE, playCostUsd, PRICES, resetUsage, useUsage, type UsageBucket, type UsageEvent } from '../../store/usage';
+import { emptyBucket, playCostUsd, PRICES, resetUsage, useUsage, type UsageBucket, type UsageEvent } from '../../store/usage';
 import { font, radius, space, useTheme } from '../../theme';
-import type { AISettings, BackgroundAI } from '../../types';
+import type { AISettings } from '../../types';
 import { formatCount } from '../../utils';
-
-/** 'AI를 쓰는 범위' 단계별 설명 */
-const BACKGROUND_DESC: Record<BackgroundAI, string> = {
-  off: '쪽지·내 글·답글·댓글·이벤트 선택처럼 내가 한 행동에만 AI를 써요. 날이 바뀌어도 남의 새 글·뉴스·트렌드·오늘의 미션·먼저 오는 쪽지는 생기지 않고, 이벤트는 내장된 것만 나와요.',
-  lite: '내 행동 + 날이 바뀔 때 남의 새 글 3개만 받아요(빠른 호출 1번). 뉴스·트렌드·오늘의 미션·먼저 오는 쪽지는 없어요.',
-  full: '하루 정산(새 글·뉴스·트렌드·이벤트·오늘의 미션·먼저 오는 쪽지), 새 이야기의 첫 쪽지, 댓글 보충까지 전부 써요.',
-};
 
 // ───────────────────────── 사용량 표시 도우미(나 탭에서도 쓴다)
 
@@ -79,9 +74,9 @@ export function fmtKrw(usd: number, rate: number): string {
   return `${Math.round(won).toLocaleString('ko-KR')}원`;
 }
 
-/** 한 판 예상 요금 표시: "한 판 약 17원" */
-export function playCostLabel(model: string, rate: number): string {
-  const won = playCostUsd(model) * rate;
+/** 한 판 예상 요금 표시: "한 판 약 17원" (profile = AI 조절값을 반영한 한 판 토큰) */
+export function playCostLabel(model: string, rate: number, profile?: { inTok: number; outTok: number }): string {
+  const won = playCostUsd(model, profile) * rate;
   if (won < 1) return '한 판 1원 미만';
   return `한 판 약 ${won < 10 ? won.toFixed(1) : Math.round(won).toLocaleString('ko-KR')}원`;
 }
@@ -119,21 +114,6 @@ const VIA_LABEL: Record<UsageEvent['via'], string> = {
 const tok = (n: number) => formatCount(Math.round(n));
 
 // ───────────────────────── 화면
-
-/** AI가 쓰이는 자리 — 행동 1번에 호출 몇 번인지(토큰 절약 규칙) */
-const USES: [string, string][] = [
-  ['내 글 반응', '글 1개 = 1번. 답글 5~6개(인플루언서가 달면 대댓글 2~3개 더, 최대 8개)를 한 번에 받아 나눠 보여 줘요'],
-  ['남의 글 댓글', '처음 열 때만 1번(다시 열면 0번)'],
-  ['답글 스레드', '내 답글 1개 = 1번'],
-  ['쪽지 답장', '메시지 1개 = 1번(한 줄씩 나눠 도착)'],
-  ['첫 쪽지', '새 이야기를 시작할 때 1번'],
-  ['하루 정산', '하루 1번(뒤에서): 캐릭터 글·뉴스·트렌드·이벤트·미션'],
-  ['이벤트 결과', '답 1번 = 1번'],
-  ['다른 이벤트', '세계관에 준비된 이벤트가 바닥났을 때만'],
-  ['글쓰기 제안', '내 글 반응·하루 정산에 얹어 받음 · "다른 제안"은 모아 둔 것 중에서(0번)'],
-  ['캐릭터 만들기', '이름·소개·첫 글 짧게 1번'],
-  ['타임라인 새로고침', '당겨서 새로고침할 때 1번'],
-];
 
 const MODEL_NOTE: Record<string, string> = {
   'gemini-3.5-flash-lite': '가장 빠름 · 기본값',
@@ -247,7 +227,8 @@ export function AISettingsScreen() {
   if (total.errors > 0) tableRows.push({ label: '실패', val: (b) => `${b.errors}회` });
 
   const last = usage.last;
-  const background: BackgroundAI = ai.background ?? 'full';
+  // 한 판 예상(지금 AI 조절값 기준)
+  const play = playCost(normTune(ai.tune));
   const head = (t: string, sub?: string) => (
     <View style={{ gap: 2 }}>
       <Text style={{ color: c.text, fontSize: font.h2, fontWeight: '800' }} accessibilityRole="header">
@@ -299,7 +280,7 @@ export function AISettingsScreen() {
                   <View style={{ flex: 1, gap: 2 }}>
                     <Text style={{ color: p.available ? c.text : c.faint, fontWeight: '800', fontSize: font.body }}>
                       {p.label}
-                      <Text style={{ color: c.subtext, fontWeight: '600', fontSize: font.small }}> ({p.id === 'claude' ? '한 판 0원 · Claude 사용량' : playCostLabel(ai.model?.trim() || GEMINI_MODEL_PRESETS[0], rate)})</Text>
+                      <Text style={{ color: c.subtext, fontWeight: '600', fontSize: font.small }}> ({p.id === 'claude' ? '한 판 0원 · Claude 사용량' : playCostLabel(ai.model?.trim() || GEMINI_MODEL_PRESETS[0], rate, play)})</Text>
                       {on ? <Text style={{ color: c.primary }}> · 선택됨</Text> : null}
                     </Text>
                     <Text style={{ color: c.subtext, fontSize: font.small, lineHeight: 18 }}>{p.desc}</Text>
@@ -314,20 +295,10 @@ export function AISettingsScreen() {
           ) : null}
         </View>
 
-        {/* AI를 쓰는 범위(토큰 절약) */}
-        <View style={{ gap: space.sm }}>
-          {head('AI를 쓰는 범위', '기본은 전부예요. 토큰을 아끼고 싶을 때만 줄이세요(먼저 오는 쪽지·새 글이 줄어들어요).')}
-          <Segmented<BackgroundAI>
-            options={[
-              { key: 'full', label: '전부' },
-              { key: 'lite', label: '새 글만' },
-              { key: 'off', label: '내 행동만' },
-            ]}
-            value={background}
-            onChange={(next) => setAI({ background: next })}
-          />
-          <Text style={{ color: c.subtext, fontSize: font.small, lineHeight: 19 }}>{BACKGROUND_DESC[background]}</Text>
-        </View>
+        {/* AI 조절: 한 번에 받는 양(답글·댓글·쪽지·새 글 수) + 예상 소모 */}
+        <Divider />
+        <AITuneList rate={rate} />
+        <Divider />
 
         {/* AI별 설정 */}
         {ai.provider === 'gemini' ? (
@@ -372,7 +343,7 @@ export function AISettingsScreen() {
                     <View style={{ flex: 1, gap: 1 }}>
                       <Text style={{ color: c.text, fontWeight: '800', fontSize: font.body }} numberOfLines={1}>
                         {m}
-                        <Text style={{ color: c.primary, fontWeight: '700', fontSize: font.small }}> ({playCostLabel(m, rate)})</Text>
+                        <Text style={{ color: c.primary, fontWeight: '700', fontSize: font.small }}> ({playCostLabel(m, rate, play)})</Text>
                         {MODEL_NOTE[m] ? <Text style={{ color: c.subtext, fontWeight: '400', fontSize: font.small }}> · {MODEL_NOTE[m]}</Text> : null}
                       </Text>
                       <Text style={{ color: c.subtext, fontSize: font.small }}>
@@ -384,7 +355,7 @@ export function AISettingsScreen() {
               })}
             </View>
             <Text style={{ color: c.subtext, fontSize: font.small, lineHeight: 18 }}>
-              한 판 = 새 이야기 시작(첫 쪽지)·내 글 2개·답글·남의 글 댓글 2번·쪽지 2번·이벤트·하루 정산·캐릭터 만들기 정도(약 {PLAY_PROFILE.calls}번 호출, 입력 {tok(PLAY_PROFILE.inTok)}·출력 {tok(PLAY_PROFILE.outTok)} 토큰). 1달러 = {rate.toLocaleString('ko-KR')}원
+              한 판 = 새 이야기 시작(첫 쪽지)·내 글 2개·답글·남의 글 댓글 2번·쪽지 2번·이벤트·하루 정산·캐릭터 만들기 정도(지금 AI 조절 기준 약 {play.calls}번 호출, 입력 {tok(play.inTok)}·출력 {tok(play.outTok)} 토큰). 1달러 = {rate.toLocaleString('ko-KR')}원
             </Text>
             <Field label="모델 직접 입력" value={ai.model} onChangeText={(model) => {
                 resetEngineState();
@@ -510,19 +481,9 @@ export function AISettingsScreen() {
           <Button title={confirmReset ? '정말 비울까요?' : '사용량 기록 비우기'} variant="danger" size="sm" onPress={reset} style={{ alignSelf: 'flex-start' }} />
         </View>
 
-        {/* 쓰이는 자리 */}
-        <View>
-          {head('AI가 쓰이는 자리', '행동 1번에 호출 몇 번인지 — 숫자(좋아요·조회수)·자동완성은 기기에서 계산해요. 글은 전부 AI가 쓰고, 이미지·영상은 만들지 않아요.')}
-          <View style={{ marginTop: 6 }}>
-            {USES.map(([title, desc]) => (
-              <View key={title} style={[styles.useRow, { borderBottomColor: c.border }]}>
-                <Text style={{ color: c.text, fontWeight: '700', width: 116, fontSize: font.small }}>{title}</Text>
-                <Text style={{ color: c.subtext, fontSize: font.small, flex: 1, lineHeight: 18 }}>{desc}</Text>
-              </View>
-            ))}
-          </View>
-          <Text style={{ color: c.subtext, fontSize: font.small, marginTop: 8, lineHeight: 19 }}>호출이 실패하면 한 번 더 시도하고, 그래도 안 되면 그 반응은 비워 둬요(미리 써 둔 문장으로 채우지 않음).</Text>
-        </View>
+        <Text style={{ color: c.subtext, fontSize: font.small, lineHeight: 19 }}>
+          글은 전부 AI가 쓰고 숫자(좋아요·조회수)·자동완성은 기기에서 계산해요. 이미지·영상은 만들지 않아요. 호출이 실패하면 한 번 더 시도하고, 그래도 안 되면 그 반응은 비워 둬요.
+        </Text>
       </ScrollView>
     </Screen>
   );
@@ -538,5 +499,4 @@ const styles = StyleSheet.create({
   tr: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: space.md, paddingVertical: 9, borderBottomWidth: 0 },
   th: { width: 72, fontSize: font.small, fontWeight: '700' },
   td: { flex: 1, fontSize: font.small, textAlign: 'right' },
-  useRow: { flexDirection: 'row', alignItems: 'center', gap: space.sm, paddingVertical: 9, borderBottomWidth: StyleSheet.hairlineWidth },
 });

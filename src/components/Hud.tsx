@@ -73,7 +73,7 @@ export function EventCard({ ev }: { ev: GameEvent }) {
         <Text numberOfLines={3} style={{ color: c.text, fontSize: font.body, lineHeight: 21 }}>
           {ev.body}
         </Text>
-        <Button title="선택하기" size="sm" variant="ink" onPress={() => nav.navigate('Event', { eventId: ev.id })} style={{ alignSelf: 'flex-start' }} />
+        <Button title="답하기" size="sm" variant="ink" onPress={() => nav.navigate('Event', { eventId: ev.id })} style={{ alignSelf: 'flex-start' }} />
       </View>
     </Pressable>
   );

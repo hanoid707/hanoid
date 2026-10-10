@@ -9,6 +9,7 @@ import { Photo } from '../../components/Photo';
 import { usePhotoPicker } from '../../components/PhotoCropper';
 import { Screen, TopBar } from '../../components/Screen';
 import { Button, Chip, Field } from '../../components/ui';
+import { usedFaceKeys } from '../../data/facePool';
 import { savePersona } from '../../game/actions';
 import type { RootNav } from '../../navigation/types';
 import { useActive, useGame } from '../../store/game';
@@ -33,11 +34,7 @@ export function ProfileEditScreen() {
   const [desc, setDesc] = useState(p?.description ?? '');
   const [badge, setBadge] = useState<BadgeKind | null>(p?.badge ?? null);
   // 이 세계에서 다른 인물이 쓰는 기본 사진은 프리셋에서 뺀다
-  const usedFaces = useMemo(() => {
-    const out = new Set<string>();
-    for (const ch of Object.values(sc?.characters ?? {})) if (ch.avatar.photo) out.add(ch.avatar.photo);
-    return out;
-  }, [sc?.characters]);
+  const usedFaces = useMemo(() => usedFaceKeys(Object.values(sc?.characters ?? {})), [sc?.characters]);
   if (!sc || !p || !avatar) return null;
 
   const save = () => {

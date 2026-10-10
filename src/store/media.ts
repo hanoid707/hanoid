@@ -5,6 +5,7 @@
  * 기본 사진(AI로 만든 가상 인물)은 src/data/photos.ts에 앱과 함께 들어 있어서 여기를 거치지 않는다.
  */
 import { useEffect, useState } from 'react';
+import { resolveFace } from '../data/facePool';
 import { AVATARS, BANNERS, SCENES } from '../data/photos';
 import type { PhotoRef } from '../types';
 import { uid } from '../utils';
@@ -102,17 +103,19 @@ export function useMediaUri(id?: string): string | undefined {
 
 type Table = 'avatar' | 'banner' | 'scene';
 const TABLE: Record<Table, Record<string, string>> = { avatar: AVATARS, banner: BANNERS, scene: SCENES };
+/** 기본 사진 찾기(프로필 사진은 '대신 쓰기 표'를 거친다 — data/faceAlias) */
+const builtin = (table: Table, key: string): string | undefined => TABLE[table][table === 'avatar' ? resolveFace(key) : key];
 
 /** 사진 참조(기본 사진·직접 고른 사진·옛 data URI) → 주소 */
 export function usePhotoUri(ref: PhotoRef | undefined, table: Table): string | undefined {
   const media = useMediaUri(ref?.mediaId);
   if (!ref) return undefined;
-  if (ref.mediaId) return media ?? (ref.photo ? TABLE[table][ref.photo] : ref.url);
-  if (ref.photo) return TABLE[table][ref.photo] ?? ref.image ?? ref.url;
+  if (ref.mediaId) return media ?? (ref.photo ? builtin(table, ref.photo) : ref.url);
+  if (ref.photo) return builtin(table, ref.photo) ?? ref.image ?? ref.url;
   return ref.image ?? ref.url;
 }
 
 export function hasPhoto(ref: PhotoRef | undefined, table: Table): boolean {
   if (!ref) return false;
-  return !!(ref.mediaId || ref.image || ref.url || (ref.photo && TABLE[table][ref.photo]));
+  return !!(ref.mediaId || ref.image || ref.url || (ref.photo && builtin(table, ref.photo)));
 }

@@ -1,12 +1,12 @@
 /**
  * 사진 프리셋 고르기 — 미리 넣어 둔 가상 인물 사진(data/facePresets) 중에서 프로필 사진을 고른다.
  * 캐릭터 만들기·캐릭터 설정·내 계정 만들기·프로필 수정이 같이 쓴다. 직접 찍은 사진·이모지 대신 고르는 "기본값".
- *   gender : 처음 보여 줄 성별(캐릭터 성별을 따라간다). 위 칩으로 바꿀 수 있다
+ *   gender : (선택) 처음 보여 줄 성별. 안 주면 전체. 위 칩으로 바꿀 수 있다
  *   exclude: 이 세계에서 이미 다른 인물이 쓰는 사진(목록에서 뺀다)
  */
 import { useEffect, useMemo, useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { faces } from '../data/facePool';
+import { faces, resolveFace } from '../data/facePool';
 import { AVATARS } from '../data/photos';
 import { font, useTheme } from '../theme';
 import type { Gender } from '../types';
@@ -23,12 +23,15 @@ export function FacePicker({ value, onPick, gender, exclude, label = '사진 프
     if (gender) setFilter(gender);
   }, [gender]);
 
+  // 지금 고른 사진(대신 쓰기 표를 거친 실제 키)
+  const cur = value ? resolveFace(value) : undefined;
   const list = useMemo(
     () =>
       faces()
-        .filter((f) => (filter === 'all' || f.gender === filter) && (f.key === value || !exclude?.has(f.key)))
-        .sort((a, b) => a.age - b.age),
-    [filter, exclude, value],
+        .filter((f) => (filter === 'all' || f.gender === filter) && (f.key === cur || !exclude?.has(f.key)))
+        // 지금 고른 사진을 맨 앞에, 나머지는 나이순
+        .sort((a, b) => (a.key === cur ? -1 : b.key === cur ? 1 : a.age - b.age)),
+    [filter, exclude, cur],
   );
 
   return (
@@ -42,7 +45,7 @@ export function FacePicker({ value, onPick, gender, exclude, label = '사진 프
       {list.length ? (
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingVertical: 2 }}>
           {list.map((f) => {
-            const on = f.key === value;
+            const on = f.key === cur;
             return (
               <Pressable
                 key={f.key}

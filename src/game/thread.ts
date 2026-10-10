@@ -16,9 +16,9 @@ import { GHOST, ME, SYSTEM, type Character, type GameTime, type ID, type Post, t
 import { cutText, rand, uid, viewsOf } from '../utils';
 import { tap } from '../utils/haptics';
 import { advanceClock, minutesBetween } from './clock';
-import { activeChar, alive, backgroundAI, beginFlow, ctxOf, editIf, engine, fail, G, lineAuthor, OK, revealLater, type ActionResult, type Flow } from './core';
+import { activeChar, alive, beginFlow, ctxOf, editIf, engine, fail, G, lineAuthor, OK, revealLater, tune, type ActionResult, type Flow } from './core';
 import { diffOf, scaleSocial } from './difficulty';
-import { burstCount, burstDelays, isInfluencer, npcEngagement } from './engagement';
+import { burstDelays, isInfluencer, npcEngagement } from './engagement';
 import { dedupeLines, replyLikes } from './post';
 import { addReply, addXp, applyDeltas, consumeBoost, logActivity, questProgress, recomputeStatus, tickClock } from './progress';
 import { POST_MAX_LEN, TIME_COST, XP } from './rules';
@@ -201,9 +201,10 @@ export async function ensureThreadComments(postId: ID): Promise<void> {
   if (!post || !author) return;
   const key = `thread:${postId}`;
   if (G().busy[key]) return;
+  // AI 조절: 남의 글 댓글 0 = 만들지 않는다(기록도 남기지 않아서, 나중에 다시 켜면 그때 달린다)
+  if (tune().comments <= 0) return;
   const gen = post.threadGen;
   if (gen && author.followers < gen.followers * 1.5) return; // 이미 만든 스레드: 그대로
-  if (gen && backgroundAI() !== 'full') return; // 절약: 이미 댓글이 있는 글에 더 붙이지 않는다
   const flow = beginFlow(sc.id);
   G().setBusy(key, true);
   try {
@@ -221,7 +222,7 @@ async function firstFill(flow: Flow, postId: ID, author: Character) {
   const sc = G().scenarios[sid];
   const post = sc?.posts[postId];
   if (!sc || !post) return;
-  const n = burstCount();
+  const n = tune().comments;
 
   // ① 바로: 기록 + 숫자 보정(댓글은 AI가 쓴 것만 붙인다 — 그동안 "댓글 불러오는 중…")
   editIf(flow, (d) => {
@@ -236,8 +237,7 @@ async function firstFill(flow: Flow, postId: ID, author: Character) {
   // ② AI 댓글(1회) — 글 내용에 맞춘 것만. 너무 적게 오면(3개 미만) 한 번 더
   let lines = await commentsFor(sid, post, n - already, []);
   if (!alive(flow)) return;
-  // 절약(뒤에서 도는 AI가 전부가 아닐 때)이면 보충 호출 없이 온 만큼만 쓴다
-  if (backgroundAI() === 'full' && lines.filter((l) => !l.replyTo).length < Math.min(3, n - already)) {
+  if (lines.filter((l) => !l.replyTo).length < Math.min(3, n - already)) {
     const more = await commentsFor(sid, post, n - already - lines.length, lines.map((l) => l.text));
     if (!alive(flow)) return;
     lines = [...lines, ...more.filter((l) => !l.replyTo)].slice(0, 10);
@@ -304,7 +304,7 @@ async function growThread(flow: Flow, postId: ID, author: Character, gen: NonNul
   const sc = G().scenarios[sid];
   const post = sc?.posts[postId];
   if (!sc || !post) return;
-  const extra = rand(2, 3);
+  const extra = Math.min(rand(2, 3), tune().comments);
   const existing = post.replies.map((id) => sc.posts[id]?.text).filter((t): t is string => !!t);
   const lines = (await commentsFor(sid, post, extra, existing)).filter((l) => !l.replyTo).slice(0, extra);
   if (!alive(flow)) return;

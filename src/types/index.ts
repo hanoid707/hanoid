@@ -479,7 +479,38 @@ export interface Scenario {
 /** 쓸 AI(예전 세이브의 'mock'은 불러올 때 'gemini'로 바뀐다) */
 export type AIProvider = 'gemini' | 'claude';
 
-export type BackgroundAI = 'off' | 'lite' | 'full';
+/**
+ * AI 조절값 — AI가 한 번에 써 주는 양. 사용자가 AI 연결 화면에서 직접 정한다(기본값·범위·예상 소모는 ai/tune.ts).
+ * 0 = 그 일에 AI를 쓰지 않음. 켬/끔 항목은 1/0.
+ */
+export interface AITune {
+  /** 내 글 1개에 달리는 답글 수 */
+  replies: number;
+  /** 내 답글 1개에 달리는 답글 수(상대 1 + 끼어드는 사람) */
+  thread: number;
+  /** 쪽지 답장 말풍선 최대 수 */
+  dmBubbles: number;
+  /** 이벤트에 답한 뒤 올라오는 글 수 */
+  eventPosts: number;
+  /** 남의 글을 처음 열 때 달려 있는 댓글 수(0 = 만들지 않음) */
+  comments: number;
+  /** 타임라인을 당겨서 새로고침할 때 새 글 수(0 = 새 글 없음) */
+  refreshPosts: number;
+  /** 하루가 바뀔 때: 남의 새 글 수 */
+  dayPosts: number;
+  /** 하루가 바뀔 때: 먼저 쪽지를 보내는 인물 수(최대) */
+  dayDMs: number;
+  /** 하루가 바뀔 때: 뉴스(1/0) */
+  dayNews: number;
+  /** 하루가 바뀔 때: 트렌드(1/0) */
+  dayTrends: number;
+  /** 하루가 바뀔 때: 오늘의 미션(1/0) */
+  dayMission: number;
+  /** 하루가 바뀔 때: AI가 새 이벤트를 만든다(1/0, 끄면 세계관에 내장된 이벤트만) */
+  dayEvent: number;
+  /** 새 이야기를 시작할 때 첫 팔로워의 첫 쪽지(1/0) */
+  firstDM: number;
+}
 
 export interface AISettings {
   provider: AIProvider;
@@ -487,12 +518,10 @@ export interface AISettings {
   model: string;
   /** 클로드(웹 아티팩트 전용) 속도/품질: 빠름 · 균형 · 고품질 */
   claudeMode?: 'fast' | 'balanced' | 'quality';
-  /**
-   * 내가 시키지 않아도 뒤에서 도는 AI(하루 정산·첫 쪽지·댓글 보충)를 얼마나 쓸지. 없으면 'full'(전부).
-   * 줄이는 건 사용자가 AI 연결 화면에서 직접 고를 때만이다(먼저 오는 쪽지·새 글이 사라지므로 기본으로 끄지 않는다).
-   *  off  = 안 쓴다(쪽지·내 글·댓글·이벤트 선택처럼 내 행동에만 AI) · lite = 날이 바뀔 때 남의 새 글 3개만(빠른 호출 1회) · full = 전부
-   */
-  background?: BackgroundAI;
+  /** AI 조절값(없는 항목은 기본값). 바꾸면 다음 호출부터 바로 반영되고, DB 동기화로 다른 기기에도 간다 */
+  tune?: Partial<AITune>;
+  /** 조절값을 마지막으로 바꾼 시각(기기 간 동기화: 더 최신인 쪽이 이김) */
+  tuneTs?: number;
   /** 사용자가 AI 연결 화면에서 직접 고른 적이 있는지(없으면 실행 환경에 맞게 자동 선택) */
   chosen?: boolean;
   /** 사용량 화면: 남은 예산 계산용(충전한 금액, 달러) */

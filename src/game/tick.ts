@@ -5,12 +5,14 @@
  * (v3.1) 시간 건너뛰기는 ①만 기다리고 바로 끝난다 — ②는 뒤에서 돌고 시계 칩에 ⏳로 보인다.
  *        ②가 실패하면 그날 AI 몫을 비워 두지 않고 다음 새로고침·시간 이동 때 다시 시도한다(틀 문장으로 채우지 않음).
  * 이미지·영상 생성은 어디에서도 하지 않는다(글만 AI가 쓴다).
- * (절약) 기본은 전부(②까지). 사용자가 AI 연결 화면에서 줄였을 때만 ②를 부르지 않는다 — 내 행동만: 내장 이벤트만(토큰 0) · 새 글만: 남의 새 글 3개(빠른 호출 1회) + 내장 이벤트.
+ * (AI 조절) ②에서 무엇을 얼마나 받을지는 AI 연결 화면의 조절값(ai/tune.ts)을 따른다 — 새 글 수·먼저 오는 쪽지 수·뉴스·트렌드·미션·이벤트.
+ *   전부 0/끔 = ②를 부르지 않음(내장 이벤트만, 토큰 0) · 새 글만 켬 = 새 글만 받는 빠른 호출 1회 · 그 밖 = 하루 정산 1회.
  */
 import { getActive } from '../store/game';
 import type { ID, Scenario } from '../types';
+import { DEFAULT_TUNE, dayPlan } from '../ai/tune';
 import { cutText, rand, sleep, uid } from '../utils';
-import { addNpcLines, activeChar, alive, backgroundAI, beginFlow, ctxOf, engine, ensureConversation, G } from './core';
+import { addNpcLines, activeChar, alive, beginFlow, ctxOf, engine, ensureConversation, G, tune } from './core';
 import { pickLocalEvent } from './localEvents';
 import { saveIdeas } from './ideas';
 import { addNewsPost, dailyHousekeeping, logActivity, pushItemLog, pushNoti, tickClock } from './progress';
@@ -61,7 +63,7 @@ function addLocalEvent(d: Scenario) {
   pushNoti(d, { type: 'event', eventId: id, text: `새 이벤트: ${v.title}` });
 }
 
-/** force: 설정과 상관없이 AI 하루 정산까지(직접 만든 세계관의 첫날 — 타임라인이 비어 있어서) */
+/** force: 조절값과 상관없이 기본값으로 AI 하루 정산(직접 만든 세계관의 첫날 — 타임라인이 비어 있어서) */
 export async function runDayTick(sid: ID, opts: { force?: boolean } = {}) {
   const sc = G().scenarios[sid];
   if (!tickDue(sc)) return;
@@ -81,13 +83,16 @@ export async function runDayTick(sid: ID, opts: { force?: boolean } = {}) {
       });
     }
     // ② AI 몫(실패하면 tickAIDay를 그대로 둬서 다음에 다시)
-    const ctx = ctxOf(sid);
+    const base = ctxOf(sid);
     const cur = G().scenarios[sid];
-    if (!ctx || !cur) return;
-    const mode = opts.force ? 'full' : backgroundAI();
-    if (mode !== 'full') {
-      // 절약: 하루 정산 AI를 부르지 않는다. '가볍게'면 남의 새 글 3개만(실패하면 다음에 다시)
-      const lines = mode === 'lite' ? await engine().ambientPosts(ctx, 3) : [];
+    if (!base || !cur) return;
+    // 무엇을 얼마나 받을지(AI 조절값). force면 기본값으로
+    const t = opts.force ? DEFAULT_TUNE : tune();
+    const ctx = { ...base, tune: t };
+    const plan = dayPlan(t);
+    if (plan !== 'full') {
+      // 하루 정산 AI를 부르지 않는다. 새 글만 켜 둔 경우엔 새 글만 받는 빠른 호출 1회(실패하면 다음에 다시)
+      const lines = plan === 'posts' ? await engine().ambientPosts(ctx, t.dayPosts) : [];
       if (!alive(flow) || !lines) return;
       G().edit(sid, (d) => {
         d.tickAIDay = day;
@@ -102,18 +107,23 @@ export async function runDayTick(sid: ID, opts: { force?: boolean } = {}) {
     if (!alive(flow) || !r) return;
     G().edit(sid, (d) => {
       d.tickAIDay = day;
-      for (const n of r.news) addNewsPost(d, n);
-      addNpcLines(d, r.npcPosts);
-      if (r.trends.length) d.trends = r.trends.slice(0, 8);
+      if (t.dayNews) for (const n of r.news) addNewsPost(d, n);
+      if (t.dayPosts > 0) addNpcLines(d, r.npcPosts.slice(0, t.dayPosts));
+      if (t.dayTrends && r.trends.length) d.trends = r.trends.slice(0, 8);
       const pending = d.events.filter((e) => e.status === 'pending').length;
-      if (r.event && pending < 2) {
+      // AI 이벤트를 꺼 두었으면 세계관에 내장된 이벤트만(토큰 0)
+      if (!t.dayEvent) addLocalEvent(d);
+      if (t.dayEvent && r.event && pending < 2) {
         const id = uid('ev');
         const involved = r.event.involved.filter((x) => activeChar(d, x));
         d.events.push({ id, ...r.event, involved, at: { ...d.clock }, status: 'pending' });
         pushNoti(d, { type: 'event', eventId: id, text: `새 이벤트: ${r.event.title}` });
       }
+      // 먼저 오는 쪽지: 돌아온 인물은 전부, 그 밖은 조절값(먼저 쪽지 보내는 인물 수)까지
+      let openers = 0;
       for (const o of r.dmOpeners) {
         if (!activeChar(d, o.authorId)) continue;
+        if (!returned.includes(o.authorId) && ++openers > t.dayDMs) continue;
         if (d.dms[o.authorId]?.typing) continue;
         const cv = ensureConversation(d, o.authorId);
         if (cv.leftUntilDay !== null) continue;
@@ -122,7 +132,7 @@ export async function runDayTick(sid: ID, opts: { force?: boolean } = {}) {
         cv.updatedTs = Date.now();
         pushNoti(d, { type: 'dm', actorId: o.authorId, text: '님이 쪽지를 보냈습니다' });
       }
-      if (r.mission) {
+      if (t.dayMission && r.mission) {
         d.quests.unshift({
           id: uid('q'),
           title: `오늘의 미션: ${r.mission.title}`,
@@ -197,7 +207,7 @@ export async function skipToNextDay() {
 // ───────────────────────── 타임라인 새로고침(당겨서 새로고침)
 
 let lastAmbient = 0;
-/** 15초에 한 번까지만 AI에게 새 글 3~4개를 받는다(그 사이엔 기다리는 척만) */
+/** 15초에 한 번까지만 AI에게 새 글을 받는다(개수는 AI 조절값, 그 사이엔 기다리는 척만) */
 export async function refreshFeed(): Promise<void> {
   const sc = getActive();
   if (!sc) return;
@@ -209,10 +219,16 @@ export async function refreshFeed(): Promise<void> {
   const sid = sc.id;
   // 밀린 하루 정산이 있으면 먼저(앱을 껐다 켠 경우 등)
   if (tickDue(sc)) await runDayTick(sid);
+  // AI 조절: 새로고침 새 글 0 = AI를 부르지 않는다
+  const count = tune().refreshPosts;
+  if (count <= 0) {
+    await sleep(400);
+    return;
+  }
   const flow = beginFlow(sid);
   const ctx = ctxOf(sid);
   if (!ctx) return;
-  const lines = await engine().ambientPosts(ctx, rand(3, 4));
+  const lines = await engine().ambientPosts(ctx, count);
   if (!lines?.length || !alive(flow)) return;
   let days = 0;
   G().edit(sid, (d) => {

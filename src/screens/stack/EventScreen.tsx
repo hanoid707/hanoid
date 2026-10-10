@@ -1,7 +1,8 @@
 /**
- * 이벤트 — 선택지를 고르거나 직접 답을 쓰면, 결과와 수치 변화(호감도·설렘·관계·팔로워…)가 툭 투둑 튀어나온다.
+ * 이벤트 — 상황을 보고 내 말로 답하면, 결과와 수치 변화(호감도·설렘·관계·팔로워…)가 툭 투둑 튀어나온다.
+ *   (v3.3) 미리 써 주던 추천 행동(선택지·힌트)은 없앴다 — 답은 항상 직접 쓴다(AI가 선택지를 쓰는 토큰도 아낀다).
  *   ◀ 1/2 ▶ : "다른 이벤트"로 바꿔 본 후보를 오가며 고를 수 있다(로컬 후보 우선, 바닥나면 AI)
- *   수정     : 이모지·제목·내용·선택지 글자를 직접 고친다
+ *   수정     : 이모지·제목·내용을 직접 고친다
  *   난이도   : 나 탭에서 바꾼다(쉬움 = 잘 오르고 덜 떨어짐, 어려움 = 쉽게 떨어짐)
  * 이미 끝난 이벤트는 결과와 칩을 움직임 없이 보여 준다.
  */
@@ -15,7 +16,7 @@ import { RelationChip } from '../../components/RelationChip';
 import { Screen, TopBar } from '../../components/Screen';
 import { TypingDots } from '../../components/TypingDots';
 import { AppearIn, Button, Card, EmptyState, Field } from '../../components/ui';
-import { answerEventCustom, chooseEventOption, editEvent, refreshEventVariant, setEventVariant } from '../../game/actions';
+import { answerEventCustom, editEvent, refreshEventVariant, setEventVariant } from '../../game/actions';
 import type { RootNav, RootStackParamList } from '../../navigation/types';
 import { useActive, useGame } from '../../store/game';
 import { font, noOutline, radius, space, useTheme } from '../../theme';
@@ -33,10 +34,9 @@ interface EditDraft {
   emoji: string;
   title: string;
   body: string;
-  choices: string[];
 }
 
-const draftOf = (ev: GameEvent): EditDraft => ({ emoji: ev.emoji, title: ev.title, body: ev.body, choices: ev.choices.map((x) => x.label) });
+const draftOf = (ev: GameEvent): EditDraft => ({ emoji: ev.emoji, title: ev.title, body: ev.body });
 
 export function EventScreen() {
   const { c } = useTheme();
@@ -49,7 +49,7 @@ export function EventScreen() {
 
   const [editing, setEditing] = useState<EditDraft | null>(null);
   const [custom, setCustom] = useState('');
-  const [submitted, setSubmitted] = useState<{ kind: 'choice' | 'custom'; text: string } | null>(null);
+  const [submitted, setSubmitted] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   // 이 화면에서 답을 기다린 이벤트면 결과를 움직여 보여 준다(이미 끝난 이벤트를 다시 열면 정지 화면)
   const live = useRef(ev?.status === 'pending');
@@ -79,19 +79,12 @@ export function EventScreen() {
   const people = ev.involved.map((id) => sc.characters[id]).filter(Boolean);
   const res = ev.result;
 
-  const choose = (id: string, label: string) => {
-    if (locked || refreshing) return;
-    const r = chooseEventOption(ev.id, id);
-    if (r.ok) setSubmitted({ kind: 'choice', text: label });
-    else if (r.reason === 'busy') showToast('결과를 계산하는 중이에요', 'info');
-  };
-
   const answer = () => {
     const t = custom.trim();
     if (!t || locked || refreshing) return;
     const r = answerEventCustom(ev.id, t);
     if (r.ok) {
-      setSubmitted({ kind: 'custom', text: t });
+      setSubmitted(t);
       setCustom('');
     } else if (r.reason === 'busy') showToast('결과를 계산하는 중이에요', 'info');
     else showToast('지금은 직접 답할 수 없어요', 'error');
@@ -119,7 +112,6 @@ export function EventScreen() {
       emoji: editing.emoji.trim() || ev.emoji,
       title: editing.title.trim() || ev.title,
       body: editing.body.trim() || ev.body,
-      choices: ev.choices.map((ch, i) => ({ ...ch, label: editing.choices[i]?.trim() || ch.label })),
     });
     setEditing(null);
     showToast('이벤트를 고쳤어요', 'success');
@@ -219,16 +211,6 @@ export function EventScreen() {
               <Field label="이모지" value={editing.emoji} onChangeText={(t) => setEditing({ ...editing, emoji: t })} maxLength={4} />
               <Field label="제목" value={editing.title} onChangeText={(t) => setEditing({ ...editing, title: t })} maxLength={40} counter />
               <Field label="내용" value={editing.body} onChangeText={(t) => setEditing({ ...editing, body: t })} maxLength={300} counter multiline />
-              {editing.choices.map((label, i) => (
-                <Field
-                  key={ev.choices[i]?.id ?? i}
-                  label={`선택지 ${i + 1}`}
-                  value={label}
-                  onChangeText={(t) => setEditing({ ...editing, choices: editing.choices.map((x, k) => (k === i ? t : x)) })}
-                  maxLength={60}
-                  hint={ev.choices[i]?.hint ? `힌트: ${ev.choices[i].hint}` : undefined}
-                />
-              ))}
               <View style={{ flexDirection: 'row', gap: space.sm }}>
                 <Button title="그만두기" variant="outline" style={{ flex: 1 }} onPress={() => setEditing(null)} />
                 <Button title="저장" variant="ink" style={{ flex: 1 }} onPress={saveEdit} accessibilityLabel="이벤트 저장" />
@@ -256,30 +238,15 @@ export function EventScreen() {
 
               {pending && !waiting && !submitted && (
                 <View style={{ gap: space.sm }}>
-                  {ev.choices.map((ch) => (
-                    <Pressable
-                      key={ch.id}
-                      testID="event-choice"
-                      onPress={() => choose(ch.id, ch.label)}
-                      disabled={refreshing}
-                      accessibilityRole="button"
-                      style={({ pressed }) => [styles.choice, { backgroundColor: pressed ? c.hover : c.surface, borderColor: c.borderStrong, opacity: refreshing ? 0.5 : 1 }]}
-                    >
-                      <View style={{ flex: 1 }}>
-                        <Text style={{ color: c.text, fontWeight: '800', fontSize: font.body }}>{ch.label}</Text>
-                        {ch.hint ? <Text style={{ color: c.subtext, fontSize: font.small, marginTop: 2 }}>{ch.hint}</Text> : null}
-                      </View>
-                    </Pressable>
-                  ))}
                   <View style={[styles.customBox, { borderColor: c.borderStrong, backgroundColor: c.surfaceAlt }]}>
-                    <Text style={{ color: c.subtext, fontSize: font.small, fontWeight: '700' }}>직접 답하기</Text>
+                    <Text style={{ color: c.subtext, fontSize: font.small, fontWeight: '700' }}>어떻게 할까요?</Text>
                     <TextInput
                       testID="event-custom-input"
                       value={custom}
                       onChangeText={setCustom}
-                      placeholder="내 말로 반응해 보세요 (예: 일단 웃으면서 넘긴다)"
+                      placeholder="내 말로 답해 보세요 (예: 일단 웃으면서 넘긴다)"
                       placeholderTextColor={c.faint}
-                      accessibilityLabel="직접 답하기"
+                      accessibilityLabel="이벤트에 답하기"
                       multiline
                       maxLength={CUSTOM_MAX}
                       style={[styles.customInput, noOutline, { color: c.text }]}
@@ -298,7 +265,7 @@ export function EventScreen() {
                 <Card style={{ alignItems: 'center', gap: 10 }}>
                   {submitted ? (
                     <Text style={{ color: c.primary, fontWeight: '800', fontSize: font.small, textAlign: 'center' }}>
-                      {submitted.kind === 'custom' ? `내 답: “${submitted.text}”` : `내 선택: ${submitted.text}`}
+                      {`내 답: “${submitted}”`}
                     </Text>
                   ) : null}
                   <TypingDots color={c.primary} size={8} />
@@ -337,7 +304,6 @@ const styles = StyleSheet.create({
   refresh: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, borderWidth: 1, borderRadius: radius.pill, height: 36, alignSelf: 'center', paddingHorizontal: 16 },
   editBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, borderWidth: 1, borderRadius: radius.pill, paddingHorizontal: 12, height: 32, marginRight: 6 },
   people: { flexDirection: 'row', justifyContent: 'center', flexWrap: 'wrap', gap: space.lg },
-  choice: { flexDirection: 'row', alignItems: 'center', gap: space.md, padding: space.lg, borderRadius: radius.lg, borderWidth: 1 },
-  customBox: { borderWidth: 1, borderRadius: radius.lg, padding: space.md, gap: 6, marginTop: 4 },
+  customBox: { borderWidth: 1, borderRadius: radius.lg, padding: space.md, gap: 6 },
   customInput: { minHeight: 56, maxHeight: 140, fontSize: font.body, lineHeight: 21, textAlignVertical: 'top', paddingVertical: 4 },
 });

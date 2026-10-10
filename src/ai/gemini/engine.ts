@@ -10,6 +10,7 @@ import type { AISettings } from '../../types';
 import { clamp, hashStr } from '../../utils';
 import * as N from '../normalize';
 import * as P from '../prompts';
+import { DEFAULT_TUNE } from '../tune';
 import type { AIContext, AIEngine } from '../types';
 import { DEFAULT_GEMINI_MODEL, GeminiError, generateJSON, type GeminiVia } from './client';
 import * as S from './schemas';
@@ -46,14 +47,16 @@ export function createGeminiEngine(settings: AISettings, opts: { via?: GeminiVia
     },
 
     async replyInThread(ctx, { target, reply, thread }) {
-      const r = await call(ctx, P.threadPrompt(ctx, { target, reply, thread: thread ?? [] }), S.THREAD_SCHEMA, 'thread', MAX_OUT.thread);
+      const n = (ctx.tune ?? DEFAULT_TUNE).thread;
+      const r = await call(ctx, P.threadPrompt(ctx, { target, reply, thread: thread ?? [] }), S.threadSchema(n), 'thread', MAX_OUT.thread);
       return N.normThread(ctx, r, `t${hashStr(reply)}`);
     },
 
     async dmReply(ctx, { characterId, history, message, priorSummary }) {
       if (!ctx.cast.some((x) => x.id === characterId)) return { mood: 'neutral', messages: [], leave: false, affinityDelta: 0, romanceDelta: 0, devotionDelta: 0 };
       const reg = ctx.cast.find((x) => x.id === characterId)?.register;
-      const r = N.normDM(await call(ctx, P.dmPrompt(ctx, { characterId, history, message, priorSummary }), S.DM_SCHEMA, 'dm', MAX_OUT.dm), reg);
+      const bubbles = (ctx.tune ?? DEFAULT_TUNE).dmBubbles;
+      const r = N.normDM(await call(ctx, P.dmPrompt(ctx, { characterId, history, message, priorSummary }), S.dmSchema(bubbles), 'dm', MAX_OUT.dm), reg, bubbles);
       if (!r.messages.length && !r.leave) throw new GeminiError('빈 답장이 왔어요', 200, false, 'empty');
       return r;
     },
@@ -63,11 +66,11 @@ export function createGeminiEngine(settings: AISettings, opts: { via?: GeminiVia
     },
 
     async worldTick(ctx, { day, returned }) {
-      return N.normTick(ctx, await call(ctx, P.tickPrompt(ctx, day, returned), S.TICK_SCHEMA, 'tick', MAX_OUT.tick));
+      return N.normTick(ctx, await call(ctx, P.tickPrompt(ctx, day, returned), S.tickSchema(ctx.tune ?? DEFAULT_TUNE, returned?.length ?? 0), 'tick', MAX_OUT.tick));
     },
 
     async resolveEvent(ctx, { event, choiceId, customText }) {
-      const r = await call(ctx, P.outcomePrompt(ctx, event, choiceId, customText), S.OUTCOME_SCHEMA, 'event', MAX_OUT.event, 0.8);
+      const r = await call(ctx, P.outcomePrompt(ctx, event, choiceId, customText), S.outcomeSchema((ctx.tune ?? DEFAULT_TUNE).eventPosts), 'event', MAX_OUT.event, 0.8);
       return N.normOutcome(ctx, r, event);
     },
 

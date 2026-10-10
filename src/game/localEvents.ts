@@ -35,7 +35,8 @@ export function localVariant(sc: Scenario, t: EventTemplate): EventVariant | nul
     emoji: t.emoji,
     title: fill(t.title, vars),
     body: fill(t.body, vars),
-    choices: t.choices.map((c) => ({ id: c.id, label: fill(c.label, vars), ...(c.hint ? { hint: c.hint } : {}) })),
+    // 선택지는 쓰지 않는다(플레이어가 직접 답한다)
+    choices: [],
     involved: out,
     templateKey: t.key,
   };

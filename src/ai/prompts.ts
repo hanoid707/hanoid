@@ -15,9 +15,10 @@
  *  - 지시문 본문에 줄표(—)·세미콜론·번호 목록·마크다운 제목을 쓰지 않는다(문체가 출력에 샌다). 블록 라벨은 [대괄호] 하나로 통일하고 규칙에서 라벨 이름으로 가리킨다.
  */
 import { CROWD_LABEL, PERSONALITY_PRESETS, RELATION_LABEL, SPEECH_PRESETS, isRelationKind } from '../game/relationship';
-import type { CrowdRole, GameEvent, ID, RomanceLevel } from '../types';
+import type { AITune, CrowdRole, GameEvent, ID, RomanceLevel } from '../types';
 import { castBlock, clip, DIFFICULTY_LABEL, fullEntry, hooksBlock, memoryBlock, mentionedIds, nowLine, pickCast, recentBlock, registerMap, registerText } from './context';
 import { getPrompt } from './promptStore';
+import { DEFAULT_TUNE } from './tune';
 import type { AIContext, CastInfo, CharacterDraftArgs } from './types';
 import { WORLD_VOICE } from './voice';
 
@@ -134,6 +135,8 @@ export function systemFor(ctx: AIContext | null): string {
 }
 
 const join = (...parts: (string | false | undefined | null)[]) => parts.filter(Boolean).join('\n\n');
+/** 이번 호출의 AI 조절값(답글·쪽지·새 글 수 …) */
+const tuneOf = (ctx: AIContext): AITune => ctx.tune ?? DEFAULT_TUNE;
 const nameOf = (ctx: AIContext, id: ID) => (id === 'me' ? '플레이어' : (ctx.cast.find((c) => c.id === id)?.name ?? '누군가'));
 const GRADE_TONE = { easy: '후하게', normal: '공정하게', hard: '깐깐하게' } as const;
 
@@ -172,6 +175,13 @@ export function reactPrompt(ctx0: AIContext, post: { text: string; hasMedia?: bo
   const R = romRangeOf(ctx);
   const pick = pickCast(ctx, { text: post.text, full: 4, brief: 5, crowd: 6, seed: post.text, crowdFirst: ['fan', 'superfan', 'antifan'] });
   const core = n <= 5 ? '1~2' : n <= 8 ? '2~3' : '2~4';
+  // 답글 수를 줄였을 때(1~2개)는 핵심 인물 위주로
+  const who =
+    n <= 1
+      ? '핵심 인물 1명(멘션된 인물이 있으면 그 사람)'
+      : n === 2
+        ? '핵심 인물 1명(멘션된 인물 필수) + 일반 유저나 이름 없는 일반인(h "-") 1명'
+        : `핵심 인물 ${core}명(멘션된 인물 필수) + 목록의 일반 유저 1~2명 + 나머지는 이름 없는 일반인(h "-")`;
   return join(
     castBlock(pick, { descMax: 150 }),
     recentBlock(ctx, 5),
@@ -182,8 +192,8 @@ export function reactPrompt(ctx0: AIContext, post: { text: string; hasMedia?: bo
     registerMap(pick),
     [
       '[할 일] 이 글에 대한 반응 JSON',
-      `- replies ${n}개: 핵심 인물 ${core}명(멘션된 인물 필수) + 목록의 일반 유저 1~2명 + 나머지는 이름 없는 일반인(h "-"). 각 ${LIMITS.reply}자 이내`,
-      '- 답글 단 사람 중 인플루언서(팔로워 10만↑·셀럽)가 있으면 그 답글 아래 대댓글 2~3개를 더 쓰고 re에 그 아이디',
+      `- replies ${n}개: ${who}. 각 ${LIMITS.reply}자 이내`,
+      n >= 4 ? '- 답글 단 사람 중 인플루언서(팔로워 10만↑·셀럽)가 있으면 그 답글 아래 대댓글 2~3개를 더 쓰고 re에 그 아이디' : '',
       `- aff: 답글 단 인물의 호감 변화. ${AFF_SCALE}`,
       `- rom: 설렘 있는 인물만, 플러팅·애정 표현이 있을 때 ${R.react}(무례·강요면 -2~-6). 없으면 []`,
       '- dev: 플레이어에게 빠져드는 인물(팬·가까운 사람)의 정복 변화 0~+8. 보통 []',
@@ -192,7 +202,9 @@ export function reactPrompt(ctx0: AIContext, post: { text: string; hasMedia?: bo
       `- followers -${Math.max(5, Math.round(f * 0.3))}~+${Math.max(20, Math.round(f * 0.5))}, aura·humor -5~+8, rep -20~+12(공격적인 글은 크게 깎는다)`,
       '- news: 화제·논란일 때만 기사 제목 1개, 아니면 []',
       '- follow/unfollow: 이 글로 플레이어를 새로 팔로우·언팔할 인물의 h. 보통 []',
-    ].join('\n'),
+    ]
+      .filter(Boolean)
+      .join('\n'),
   );
 }
 
@@ -209,6 +221,7 @@ export function threadPrompt(
   const flow = args.thread.slice(-6).map((l) => `- ${l.name ?? nameOf(ctx, l.authorId)}: ${clip(l.text, 70)}`);
   // 답글 대상이 목록에 없는 일반 유저(임시 계정)면 h:"-"로 답하게(그 사람의 앞 말투·입장을 이어서)
   const who = t ? `@${t.handle}(${t.name})` : `${args.target.name ? `일반 유저 "${args.target.name}"` : '그 일반 유저'}(h "-")`;
+  const N = tuneOf(ctx).thread;
   return join(
     castBlock(pick, { descMax: 140 }),
     memoryBlock(ctx, 4),
@@ -218,13 +231,15 @@ export function threadPrompt(
     registerMap(pick),
     [
       '[할 일] JSON',
-      `- replies: 전체 5~8개(각 ${LIMITS.reply}자 이내) = ${who} 1개 + 다른 사람 4~7개. 4개 미만이면 실패다`,
+      N <= 1 ? `- replies: ${who}의 답글 1개만(${LIMITS.reply}자 이내)` : `- replies: 전체 ${N}개(각 ${LIMITS.reply}자 이내) = ${who} 1개 + 다른 사람 ${N - 1}개. 개수를 채운다`,
       `- 1번째 줄은 반드시 ${who}: 플레이어가 자기에게 한 말에 바로 대꾸(스레드에서 자기가 한 말과 이어지게). 이 줄을 빠뜨리지 않는다`,
-      '- 2번째 줄부터는 이 스레드를 보던 다른 인물·일반인(h "-")이 끼어든 것(최소 4개). 서로 다른 지점을 집고 길이·시작 단어·관점이 겹치지 않게',
+      N <= 1 ? '' : '- 2번째 줄부터는 이 스레드를 보던 다른 인물·일반인(h "-")이 끼어든 것. 서로 다른 지점을 집고 길이·시작 단어·관점이 겹치지 않게',
       `- aff: 답글을 단 인물들의 호감 변화. ${AFF_SCALE}`,
       `- rom: 연애 감정이 걸린 인물이면 설렘 변화 ${R.thread}, 아니면 [] · dev: 정복 변화 0~+21, 보통 []`,
       '- rep: -8~+12',
-    ].join('\n'),
+    ]
+      .filter(Boolean)
+      .join('\n'),
   );
 }
 
@@ -257,6 +272,7 @@ export function dmPrompt(
   const off = noRomance(c);
   const romantic = romanticWith(c);
   const hot = explicitWith(ctx, c);
+  const bubbles = tuneOf(ctx).dmBubbles;
   return join(
     `[쪽지 상대]\n${partner}`,
     rest.length ? `[언급된 인물]\n${rest.join('\n')}` : '',
@@ -271,7 +287,7 @@ export function dmPrompt(
     `[플레이어의 새 쪽지] "${clip(args.message, 300)}"`,
     [
       `[할 일] @${c.handle}(${c.name})의 답장 JSON`,
-      `- messages: 1~3개(각 ${LIMITS.dm}자 이내). 앞 대화·요약의 사실을 이어받는다. 플레이어에게 ${registerText(c)}만(${REG_HINT[c.register] ?? REG_HINT.haeyo})`,
+      `- messages: ${bubbles <= 1 ? '1개' : `1~${bubbles}개`}(각 ${LIMITS.dm}자 이내). 앞 대화·요약의 사실을 이어받는다. 플레이어에게 ${registerText(c)}만(${REG_HINT[c.register] ?? REG_HINT.haeyo})`,
       off ? '' : `- 확인: 수위 ${ROMANCE_NAME[ctx.romanceLevel] ?? '보통'} · 설렘 ${c.romance}(${stageOf(c.romance)}) · 플러팅·칭찬은 받는 쪽에서 시작 · ${hot ? '이 상대와는 에로틱 쪽지 규칙 적용 가능' : '신체 묘사 없이'}`,
       '- affinityDelta: 사무적 0 · 다정 +4 · 반갑거나 설레는 쪽지 +8 · 무례 -6',
       off ? '- romanceDelta 0' : `- romanceDelta ${romantic ? R.dmRomantic : R.dmPlain}(플러팅·애정 표현이 있을 때만, 아니면 0)`,
@@ -312,12 +328,21 @@ export function ambientPrompt(ctx: AIContext, count: number): string {
 // ───────────────────────── 하루 정산
 
 export function tickPrompt(ctx: AIContext, day: number, returned: ID[] = []): string {
+  const t = tuneOf(ctx);
   const pick = pickCast(ctx, { must: returned, full: 5, brief: 5, crowd: 5, seed: `tick${day}` });
   const back = returned.map((id) => ctx.cast.find((c) => c.id === id)).filter((c): c is CastInfo => !!c);
   const dmLine = back.length
     ? `- dm: ${back.map((c) => `@${c.handle}`).join(', ')}이(가) 서운해서 쪽지방을 나갔다가 오늘 돌아옴 → 돌아오며 보내는 첫 쪽지 1개씩(어색함이 남은 채로, 관계·등급대로). 그 밖에 먼저 쪽지 보내는 인물은 없음`
-    : '- dm: 플레이어에게 먼저 쪽지 보내는 인물 0~1명 {h,t}. 최근 일과 이어지는 용건이 있을 때만, 없으면 []';
-  const pending = ctx.pendingEvents?.length ? ` 진행 중인 이벤트와 겹치지 않게(${ctx.pendingEvents.map((t) => clip(t, 20)).join(', ')}).` : '';
+    : t.dayDMs > 0
+      ? `- dm: 플레이어에게 먼저 쪽지 보내는 인물 0~${t.dayDMs}명 {h,t}. 최근 일과 이어지는 용건이 있을 때만, 없으면 []`
+      : '';
+  const pending = ctx.pendingEvents?.length ? ` 진행 중인 이벤트와 겹치지 않게(${ctx.pendingEvents.map((x) => clip(x, 20)).join(', ')}).` : '';
+  // 조절값에서 끈 항목은 아예 묻지 않는다(출력 토큰 절약)
+  const must = [t.dayPosts > 0 ? 'posts' : '', t.dayNews ? 'news' : '', t.dayTrends ? 'trends' : '', t.dayMission ? 'mission' : ''].filter(Boolean);
+  const optional = !!t.dayEvent || !!dmLine;
+  const rule = must.length
+    ? `${must.join('·')}은 필수${optional ? ', 나머지는 최근 일에서 이유가 있을 때만 채우고 아니면 null·[]' : ''}`
+    : '최근 일에서 이유가 있을 때만 채우고 아니면 null·[]';
   return join(
     castBlock(pick, { descMax: 120 }),
     recentBlock(ctx, 5, 50),
@@ -325,13 +350,13 @@ export function tickPrompt(ctx: AIContext, day: number, returned: ID[] = []): st
     hooksBlock(ctx),
     nowLine(ctx),
     [
-      `[할 일] ${day}일차 시작. 세계를 한 걸음 움직이는 JSON. posts·news·trends·mission은 필수, 나머지는 최근 일에서 이유가 있을 때만 채우고 아니면 null·[]`,
-      `- posts: 오늘 글 3~5개(핵심 인물 + 일반 유저, 최근 사건과 이어지는 사소한 장면으로, 각 ${LIMITS.post}자 이내)`,
-      scenesLine(ctx),
-      '- news: 뉴스 기사 제목 1개',
-      '- trends: 오늘의 트렌드 6개 {tag:"#…", n:1000~100000}',
-      '- mission: 오늘의 미션 {title, desc, kw:[글에 들어갈 단어 1~2개]}',
-      `- event: 플레이어에게 닥친 사건 1개 또는 null(이틀에 한 번꼴). body 2문장 이내, inv=관련 인물 h 0~2, choices 3개(id a·b·c, label 짧게, hint 예: "평판↑").${pending}`,
+      `[할 일] ${day}일차 시작. 세계를 한 걸음 움직이는 JSON. ${rule}`,
+      t.dayPosts > 0 ? `- posts: 오늘 글 ${t.dayPosts}개(핵심 인물 + 일반 유저, 최근 사건과 이어지는 사소한 장면으로, 각 ${LIMITS.post}자 이내)` : '',
+      t.dayPosts > 0 ? scenesLine(ctx) : '',
+      t.dayNews ? '- news: 뉴스 기사 제목 1개' : '',
+      t.dayTrends ? '- trends: 오늘의 트렌드 6개 {tag:"#…", n:1000~100000}' : '',
+      t.dayMission ? '- mission: 오늘의 미션 {title, desc, kw:[글에 들어갈 단어 1~2개]}' : '',
+      t.dayEvent ? `- event: 플레이어에게 닥친 사건 1개 또는 null(이틀에 한 번꼴). body 2문장 이내(플레이어가 어떻게 할지 고민할 상황), inv=관련 인물 h 0~2.${pending}` : '',
       dmLine,
     ]
       .filter(Boolean)
@@ -350,7 +375,6 @@ function eventBlock(ctx: AIContext, event: Pick<GameEvent, 'emoji' | 'title' | '
     `[이벤트] ${event.emoji} ${event.title}`,
     clip(event.body, 300),
     `관련 인물: ${inv.filter(Boolean).join(', ') || '없음'}`,
-    `선택지: ${event.choices.map((c) => `${c.id}) ${c.label}`).join(' / ')}`,
   ].join('\n');
 }
 
@@ -359,6 +383,7 @@ export function outcomePrompt(ctx: AIContext, event: GameEvent, choiceId?: strin
   const pick = pickCast(ctx, { must: event.involved, full: 5, brief: 5, crowd: 4, seed: event.id });
   const romanticIds = pick.full.filter(romanticWith);
   const choice = event.choices.find((c) => c.id === choiceId);
+  const posts = tuneOf(ctx).eventPosts;
   const answer = customText ? `[플레이어가 직접 쓴 답] "${clip(customText, 300)}"` : `[플레이어의 선택] ${choice ? `${choice.id}) ${choice.label}` : (choiceId ?? '')}`;
   return join(
     castBlock(pick, { descMax: 140 }),
@@ -369,13 +394,15 @@ export function outcomePrompt(ctx: AIContext, event: GameEvent, choiceId?: strin
     [
       '[할 일] 결과 JSON',
       '- text: 결과 2문장 이내(이벤트 화면에 보이는 요약, 생생하게)',
-      `- posts: 플레이어의 답을 보고 실제로 올라올 글 2~4개 {h,t,c}. 관련 인물·이 일을 알게 된 사람·일반인(h "-")이 각자 시선으로, 플레이어가 한 말·행동을 구체적으로 짚어서, 각 ${LIMITS.post}자 이내. c = 그 글에 달린 댓글 1~3개 {h,t}(글쓴이 본인 제외, 서로 다른 사람)`,
+      posts <= 0 ? '' : `- posts: 플레이어의 답을 보고 실제로 올라올 글 ${posts <= 1 ? '1' : `${posts - 1}~${posts}`}개 {h,t,c}. 관련 인물·이 일을 알게 된 사람·일반인(h "-")이 각자 시선으로, 플레이어가 한 말·행동을 구체적으로 짚어서, 각 ${LIMITS.post}자 이내. c = 그 글에 달린 댓글 1~3개 {h,t}(글쓴이 본인 제외, 서로 다른 사람)`,
       `- grade: 답의 질. -2 최악 · -1 어긋남 · 0 무난 · +1 좋음 · +2 최고${customText ? '(직접 쓴 답은 상황에 맞는지·진정성·센스로)' : ''}. 난이도 ${DIFFICULTY_LABEL[ctx.difficulty]}: ${GRADE_TONE[ctx.difficulty]}`,
       '- followers -300~+500, aura·humor -5~+10, rep -15~+12, xp 0~20',
       '- aff: 이 일로 마음이 움직인 인물 3~8명의 호감 변화(관련 인물만이 아니라 소식을 들은 사람까지). 실망 -25 · 서운 -8 · 작은 호감 +5 · 감동 +25. 끝값도 실제로 쓴다',
       romanticIds.length ? `- rom: 연애 감정이 걸린 인물(${romanticIds.map((c) => c.handle).join(', ')})의 설렘 변화 ${R.outcome}, 해당 없으면 []` : '- rom: []',
       '- dev: 이 일로 플레이어에게 더 빠져든 인물의 정복 변화 0~+10, 없으면 []',
-    ].join('\n'),
+    ]
+      .filter(Boolean)
+      .join('\n'),
   );
 }
 
@@ -391,7 +418,6 @@ export function newEventPrompt(ctx: AIContext, avoidTitles: string[]): string {
       '[할 일] 지금 상황에 맞는 새 이벤트 1개 JSON',
       `- 이미 나온 이벤트와 겹치지 않게: ${avoid.map((t) => clip(t, 24)).join(', ') || '(없음)'}`,
       '- emoji 1개, title 짧게, body 2문장 이내(플레이어가 고민할 상황), inv=관련 인물 h 0~2',
-      '- choices 3개(id a·b·c, label 짧게, hint 예: "평판↑ 팔로워↓")',
     ].join('\n'),
   );
 }
@@ -494,11 +520,28 @@ export const SHAPES = {
   thread: '{"replies":[{"h":"말을 건 상대 아이디(1번째 줄 필수)","t":"답글"},{"h":"아이디","t":"끼어든 답글"},{"h":"-","t":"일반인 답글"}],"aff":[{"h":"아이디","d":<-6~18>}],"rom":[],"dev":[],"rep":<-8~4>}',
   dm: '{"mood":"positive|negative|funny|apology|question|brag|neutral 중 하나","messages":["답장1","답장2"],"affinityDelta":<-6~12>,"romanceDelta":<범위는 할 일>,"devotionDelta":<0~8>,"leave":false,"sum":""}',
   ambient: '{"posts":[{"h":"아이디","t":"글","m":null}]}',
-  tick: '{"posts":[{"h":"아이디","t":"글","m":null}],"news":["기사 제목"],"trends":[{"tag":"#태그","n":<1000~100000>}],"mission":{"title":"제목","desc":"설명","kw":["단어"]},"event":{"emoji":"⚡","title":"제목","body":"상황 1~2문장","inv":["아이디"],"choices":[{"id":"a","label":"선택지","hint":"평판↑"},{"id":"b","label":"선택지","hint":"팔로워↑"},{"id":"c","label":"선택지","hint":"유머↑"}]},"dm":[{"h":"아이디","t":"쪽지"}]}',
-  outcome: '{"text":"결과","posts":[{"h":"아이디","t":"글","c":[{"h":"-","t":"댓글"},{"h":"아이디","t":"댓글"}]}],"grade":<-2~2>,"followers":<-300~500>,"aura":<-5~10>,"humor":<-5~10>,"rep":<-15~12>,"xp":<0~20>,"aff":[{"h":"아이디","d":<-25~25>}],"rom":[],"dev":[]}',
-  event: '{"emoji":"⚡","title":"제목","body":"상황 1~2문장","inv":["아이디"],"choices":[{"id":"a","label":"선택지","hint":"평판↑"},{"id":"b","label":"선택지","hint":"팔로워↑"},{"id":"c","label":"선택지","hint":"유머↑"}]}',
+  event: '{"emoji":"⚡","title":"제목","body":"상황 1~2문장","inv":["아이디"]}',
   comments: '{"comments":[{"h":"아이디","t":"댓글"},{"h":"-","t":"일반인 댓글"},{"h":"-","t":"인플루언서 댓글에 다는 대댓글","re":"인플루언서아이디"}]}',
   firstDM: '{"messages":["쪽지1","쪽지2"]}',
   draft: '{"name":"이름","handle":"handle_01","bio":"자기소개","emoji":"🙂","post":"첫 글"}',
   cast: '{"cast":[{"name":"이름","handle":"handle","emoji":"🙂","archetype":"bestie","bio":"소개","description":"정체와 플레이어와의 사이 한 문장","g":"m|f","age":<20~59>,"followers":<300~2000000>,"isNews":false,"verified":false}]}',
 } as const;
+
+/** 하루 정산 응답 모양 — 조절값에서 끈 항목은 뺀다(안 쓸 글자를 받지 않게) */
+export function tickShape(t: AITune = DEFAULT_TUNE, returned = 0): string {
+  const parts = [
+    t.dayPosts > 0 ? '"posts":[{"h":"아이디","t":"글","m":null}]' : '',
+    t.dayNews ? '"news":["기사 제목"]' : '',
+    t.dayTrends ? '"trends":[{"tag":"#태그","n":<1000~100000>}]' : '',
+    t.dayMission ? '"mission":{"title":"제목","desc":"설명","kw":["단어"]}' : '',
+    t.dayEvent ? '"event":{"emoji":"⚡","title":"제목","body":"상황 1~2문장","inv":["아이디"]}' : '',
+    t.dayDMs > 0 || returned > 0 ? '"dm":[{"h":"아이디","t":"쪽지"}]' : '',
+  ].filter(Boolean);
+  return `{${parts.join(',')}}`;
+}
+
+/** 이벤트 결과 응답 모양 — 결과 글을 0으로 두면 posts를 뺀다 */
+export function outcomeShape(t: AITune = DEFAULT_TUNE): string {
+  const posts = t.eventPosts > 0 ? '"posts":[{"h":"아이디","t":"글","c":[{"h":"-","t":"댓글"},{"h":"아이디","t":"댓글"}]}],' : '';
+  return `{"text":"결과",${posts}"grade":<-2~2>,"followers":<-300~500>,"aura":<-5~10>,"humor":<-5~10>,"rep":<-15~12>,"xp":<0~20>,"aff":[{"h":"아이디","d":<-25~25>}],"rom":[],"dev":[]}`;
+}

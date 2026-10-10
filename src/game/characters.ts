@@ -9,11 +9,11 @@
 import { peerRegisterHint } from '../ai/local/register';
 import type { CharacterDraft, CharacterDraftArgs } from '../ai/types';
 import { AVATAR_COLORS, AVATAR_EMOJIS } from '../data/avatars';
-import { pickFace } from '../data/facePool';
+import { pickFace, usedFaceKeys } from '../data/facePool';
 import { getActive } from '../store/game';
 import type { AgeGroup, Archetype, BadgeKind, Character, CharacterType, Gender, ID, PhotoRef, Scenario, SpeechRegister } from '../types';
 import { cutText, fill, pick, rand, sanitizeHandle, uid } from '../utils';
-import { alive, backgroundAI, beginFlow, charType, ctxOf, editIf, engine, ensureConversation, fail, G, OK, trimMessages, type ActionResult } from './core';
+import { alive, beginFlow, charType, ctxOf, editIf, engine, ensureConversation, fail, G, OK, trimMessages, tune, type ActionResult } from './core';
 import { npcEngagement } from './engagement';
 import { koreanDisplayName, localBio, orgDisplayName } from './names';
 import { addMemory, addPost, logActivity, noteRelationChange, pushNoti } from './progress';
@@ -274,7 +274,7 @@ export async function createQuickCharacter(input: QuickCharacterInput): Promise<
     G().edit(sid, (d) => {
       if (d.cast.length >= CHARACTER_CAP) return;
       const org = ORG_TYPES.includes(type);
-      const used = new Set(Object.values(d.characters).map((c) => c.avatar.photo).filter((x): x is string => !!x));
+      const used = usedFaceKeys(Object.values(d.characters));
       const face = input.photo || org ? undefined : pickFace(input.gender, ageGroup, used, id);
       const avatar: Character['avatar'] = {
         emoji: draft?.emoji?.trim() || (org ? '📰' : pick(AVATAR_EMOJIS)),
@@ -396,10 +396,9 @@ export function onScenarioCreated(sid: ID): void {
   if (!sc) return;
   if (sc.roster && sc.roster.mode !== 'off' && rosterNeedsUpdate(sc)) G().edit(sid, (d) => void injectRoster(d));
   const first = sc.firstFollowerId ? sc.characters[sc.firstFollowerId] : undefined;
-  // 절약(뒤에서 도는 AI가 전부가 아닐 때): 시키지 않은 첫 쪽지·자기소개 다듬기는 부르지 않는다
-  const auto = backgroundAI() === 'full';
-  if (auto && first && !first.inactive && !sc.dms[first.id]?.messages.length) void firstFollowerDM(sid, first.id);
-  if (auto && first?.id.startsWith('cf_')) void regenerateBioIn(sid, first.id);
+  // 첫 쪽지는 AI 조절(새 이야기의 첫 쪽지)을 켰을 때만
+  if (tune().firstDM && first && !first.inactive && !sc.dms[first.id]?.messages.length) void firstFollowerDM(sid, first.id);
+  if (first?.id.startsWith('cf_')) void regenerateBioIn(sid, first.id);
   // 직접 만든 세계관의 첫 하루 정산은 타임라인을 채우는 일이라 설정과 상관없이 한다
   if (tickDue(sc)) void runDayTick(sid, { force: true });
 }

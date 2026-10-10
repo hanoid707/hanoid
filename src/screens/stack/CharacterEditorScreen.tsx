@@ -1,6 +1,7 @@
 /**
  * 캐릭터 만들기·고치기
- *   만들기: 유형 · 팔로워(누르거나 직접 입력) · 성별 · 나이대 · 상세 특징만 쓰면 끝 → 이름·아이디·자기소개는 AI가 짓는다(작은 호출 1번)
+ *   만들기: 사진 프리셋(맨 위) · 유형 · 팔로워(누르거나 직접 입력) · 나이대 · 상세 특징만 쓰면 끝 → 이름·아이디·자기소개는 AI가 짓는다(작은 호출 1번)
+ *           성별 칸은 없다 — 고른 사진의 성별을 따른다(직접 올린 사진일 때만 성별 칸이 나온다). 나이대 기본은 20대
  *           성격 유형(16)·말투는 드롭다운에서 고르고 싶을 때만. 나머지(이름·사진·배지·관계 메모·말투/관계 고정)는 "더 설정하기" 안에
  *   고치기: 같은 칸 + 이름·아이디·자기소개("AI로 다시 쓰기") · 지금 관계·말투 · 삭제
  * 위치 칸은 없앴다. 관계·말투는 호감도·설렘으로 자동으로 바뀌고, 원하면 고정할 수 있다.
@@ -20,6 +21,7 @@ import { StatSlider } from '../../components/StatSlider';
 import { Screen, TopBar } from '../../components/Screen';
 import { Button, Chip, Field, FormLabel, MeterBar } from '../../components/ui';
 import { AVATAR_COLORS, AVATAR_EMOJIS } from '../../data/avatars';
+import { faceAgeGroup, faceGender, usedFaceKeys } from '../../data/facePool';
 import { createQuickCharacter, deleteCharacter, regenerateBio, saveCharacter } from '../../game/actions';
 import {
   AGE_GROUPS,
@@ -81,8 +83,9 @@ export function CharacterEditorScreen() {
 
   const [type, setType] = useState<CharacterType>(initType);
   const [followers, setFollowers] = useState(String(editing?.followers ?? 1000));
-  const [gender, setGender] = useState<Gender | undefined>(editing ? editing.gender : 'f');
-  const [ageGroup, setAgeGroup] = useState<AgeGroup | undefined>(editing ? editing.ageGroup : 20);
+  // 성별은 사진을 따른다(사진 프리셋을 고르면 그 얼굴의 성별). 나이대는 기본 20대(고치는 중이면 저장된 값 → 사진 나이대 → 20대)
+  const [gender, setGender] = useState<Gender | undefined>(editing ? (editing.gender ?? faceGender(editing.avatar.photo)) : undefined);
+  const [ageGroup, setAgeGroup] = useState<AgeGroup>(editing ? (editing.ageGroup ?? faceAgeGroup(editing.avatar.photo) ?? 20) : 20);
   const [traits, setTraits] = useState(editing?.description ?? '');
   const [personality, setPersonality] = useState<string | undefined>(editing?.personality);
   const [speechStyle, setSpeechStyle] = useState<string | undefined>(editing?.speechStyle);
@@ -107,11 +110,7 @@ export function CharacterEditorScreen() {
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   // 이 세계에서 다른 인물이 이미 쓰는 기본 사진(프리셋에서 뺀다)
-  const usedFaces = useMemo(() => {
-    const out = new Set<string>();
-    for (const ch of Object.values(sc?.characters ?? {})) if (ch.id !== editing?.id && ch.avatar.photo) out.add(ch.avatar.photo);
-    return out;
-  }, [sc?.characters, editing?.id]);
+  const usedFaces = useMemo(() => usedFaceKeys(Object.values(sc?.characters ?? {}).filter((ch) => ch.id !== editing?.id)), [sc?.characters, editing?.id]);
 
   if (!sc) return null;
 
@@ -140,8 +139,9 @@ export function CharacterEditorScreen() {
     try {
       const id = await createQuickCharacter({
         type,
-        gender: gender ?? 'f',
-        ageGroup: ageGroup ?? 20,
+        // 사진을 안 골랐으면 성별도 자동(그 성별에 맞는 얼굴이 자동으로 붙는다)
+        gender: gender ?? (Math.random() < 0.5 ? 'f' : 'm'),
+        ageGroup,
         followers: followersNum,
         traits: traits.trim(),
         personality,
@@ -272,15 +272,19 @@ export function CharacterEditorScreen() {
     </View>
   );
 
+  // 직접 올린 사진은 성별을 알 수 없어서 그때만 성별 칸을 보여 준다
+  const ownPhoto = !!(photo.mediaId || photo.url);
   const genderAge = (
     <View style={{ gap: 10 }}>
-      <View style={{ gap: 8 }}>
-        <FormLabel>성별</FormLabel>
-        <View style={styles.wrap}>
-          <Chip small label="여" selected={gender === 'f'} onPress={() => setGender('f')} accessibilityLabel="성별 여" />
-          <Chip small label="남" selected={gender === 'm'} onPress={() => setGender('m')} accessibilityLabel="성별 남" />
+      {ownPhoto ? (
+        <View style={{ gap: 8 }}>
+          <FormLabel hint="직접 올린 사진이라 골라 주세요">성별</FormLabel>
+          <View style={styles.wrap}>
+            <Chip small label="여" selected={gender === 'f'} onPress={() => setGender('f')} accessibilityLabel="성별 여" />
+            <Chip small label="남" selected={gender === 'm'} onPress={() => setGender('m')} accessibilityLabel="성별 남" />
+          </View>
         </View>
-      </View>
+      ) : null}
       <View style={{ gap: 8 }}>
         <FormLabel>나이대</FormLabel>
         <View style={styles.wrap}>
@@ -318,7 +322,7 @@ export function CharacterEditorScreen() {
 
   const photoRow = (
     <View style={{ gap: 8 }}>
-      <FormLabel hint={hasPhoto ? undefined : '안 고르면 성별·나이대에 맞는 기본 사진'}>사진</FormLabel>
+      <FormLabel hint="사진을 직접 올리거나 배너를 바꿔요">직접 올린 사진 · 배너</FormLabel>
       <View style={{ flexDirection: 'row', gap: space.md, alignItems: 'center' }}>
         <Pressable onPress={pickAvatar} accessibilityRole="button" accessibilityLabel="프로필 사진 바꾸기">
           <Avatar avatar={previewAvatar} size={64} square={shownBadge === 'gold'} />
@@ -497,6 +501,15 @@ export function CharacterEditorScreen() {
           )}
 
           <View style={{ padding: space.lg, gap: space.lg }}>
+            <FacePicker
+              value={photo.mediaId || photo.url ? undefined : photo.photo}
+              exclude={usedFaces}
+              onPick={(key) => {
+                setPhoto({ photo: key });
+                setGender(faceGender(key) ?? gender);
+              }}
+              hint={isEdit ? '성별은 고른 사진을 따라가요' : '성별은 사진을 따라가요 · 안 고르면 자동'}
+            />
             {isEdit ? nameHandle : null}
             {isEdit ? (
               <View style={{ gap: 8 }}>
@@ -516,7 +529,6 @@ export function CharacterEditorScreen() {
             {typeChips}
             {followerBox}
             {genderAge}
-            <FacePicker value={photo.photo} gender={gender} exclude={usedFaces} onPick={(key) => setPhoto({ photo: key })} hint={isEdit ? undefined : '안 고르면 성별·나이대에 맞게 자동'} />
             {traitBox}
             {isEdit && editing ? (
               <View style={[styles.statsBox, { borderColor: c.border }]}>

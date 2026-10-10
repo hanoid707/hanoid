@@ -6,7 +6,7 @@
  * - 클로드 엔진(claude): 클로드 아티팩트 페이지 안에서만. 보는 사람의 Claude 사용량으로 부른다.
  * 새 AI(다른 회사 모델 등)를 붙이고 싶으면 이 인터페이스만 구현하면 된다.
  */
-import type { AgeGroup, Archetype, BadgeKind, CharacterType, CrowdRole, Deltas, Difficulty, EventChoice, GameEvent, GameTime, Gender, GhostAuthor, ID, RelationKind, RepStatus, RomanceLevel, SpeechRegister, Trend } from '../types';
+import type { AgeGroup, AITune, Archetype, BadgeKind, CharacterType, CrowdRole, Deltas, Difficulty, EventChoice, GameEvent, GameTime, Gender, GhostAuthor, ID, RelationKind, RepStatus, RomanceLevel, SpeechRegister, Trend } from '../types';
 
 export type Mood = 'positive' | 'negative' | 'funny' | 'apology' | 'question' | 'brag' | 'neutral';
 
@@ -42,6 +42,8 @@ export interface AIContext {
   pendingEvents?: string[];
   /** (v3) 플레이어가 최근에 올린 글(오래된 → 최신) — 제안 글이 말투를 따라가게 */
   myRecent?: string[];
+  /** AI 조절값(답글·쪽지·새 글 수 …). 게임이 호출 직전에 붙인다(core.ctxOf). 없으면 기본값 */
+  tune?: AITune;
 }
 
 export interface CastInfo {

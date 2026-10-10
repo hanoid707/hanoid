@@ -15,9 +15,9 @@ import { getActive } from '../store/game';
 import { ME, type Character, type Deltas, type ID, type PhotoRef, type Post, type Scenario } from '../types';
 import { clamp, cutText, pick, rand, snippet, uid } from '../utils';
 import { tap } from '../utils/haptics';
-import { activeChar, alive, beginFlow, castChars, ctxOf, editIf, engine, fail, G, lineAuthor, OK, revealLater, type ActionResult, type Flow } from './core';
+import { activeChar, alive, beginFlow, castChars, ctxOf, editIf, engine, fail, G, lineAuthor, OK, revealLater, type ActionResult, type Flow, tune } from './core';
 import { diffOf, scaleSocial } from './difficulty';
-import { burstCount, burstDelays, growValue, isInfluencer, LIKES_MAX, postEngagement } from './engagement';
+import { burstDelays, growValue, isInfluencer, LIKES_MAX, postEngagement } from './engagement';
 import { addNewsPost, addPost, addReply, addXp, applyDeltas, consumeBoost, logActivity, markViral, pushNoti, questKeyword, questProgress, recomputeStatus, tickClock } from './progress';
 import { POST_MAX_LEN, TIME_COST, XP } from './rules';
 import { saveIdeas } from './ideas';
@@ -93,7 +93,7 @@ async function reactToMyPost(flow: Flow, postId: ID, text: string, hasMedia: boo
   try {
     const ctx = ctxOf(sid);
     if (!ctx) return;
-    const r = (await engine().reactToPost(ctx, { id: postId, text, hasMedia }, { replies: burstCount() })) ?? silentReaction(text);
+    const r = (await engine().reactToPost(ctx, { id: postId, text, hasMedia }, { replies: tune().replies })) ?? silentReaction(text);
     if (!alive(flow)) return;
 
     // ② 최종 숫자 + 스탯·팔로우·제안
