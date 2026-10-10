@@ -110,7 +110,7 @@ export function buildContext(sc: Scenario): AIContext {
     memory: sc.memory.slice(-12),
     scenes: (t?.scenes ?? []).map((s) => ({ key: s.key, desc: s.prompt.split(',').slice(0, 2).join(',').slice(0, 60) })),
     difficulty: sc.difficulty ?? 'normal',
-    romanceLevel: sc.romanceLevel ?? 'normal',
+    romanceLevel: sc.romanceLevel ?? 'racy',
     trends: (sc.trends ?? []).slice(0, 6).map((x) => x.tag),
     quests: (sc.quests ?? [])
       .filter((q) => !q.done)

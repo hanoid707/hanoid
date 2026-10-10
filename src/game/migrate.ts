@@ -3,6 +3,7 @@
  * - v1: 에너지·커피 제거, 인증 배지 변환
  * - v3: 난이도(보통)·아이템 기록·공통 캐릭터 설정 기본값, 모든 인물에 관계·말투 초기값(initRelation)
  * - v3.1: 기본 세계관 인물의 긴 설명(말투·이모지·말버릇 규칙)을 핵심 특징만 남긴 새 설명으로(사용자가 고친 설명은 그대로)
+ * - v3.3: 연애 수위 값 이름 변경(normal→racy, spicy→erotic)
  * 받은 객체(JSON에서 막 읽은 것)를 직접 고친다.
  */
 import { findSeed } from '../data/worlds';
@@ -40,6 +41,13 @@ export function migrateScenarioData(raw: Scenario): Scenario {
   }
   // v3 기본값
   if (!sc.difficulty) sc.difficulty = 'normal';
+  // v3.3: 연애 수위 이름 변경(normal→racy, spicy→erotic). 모르는 값은 기본(보통)으로
+  {
+    const lv = sc.romanceLevel as string | undefined;
+    if (lv === 'normal') sc.romanceLevel = 'racy';
+    else if (lv === 'spicy') sc.romanceLevel = 'erotic';
+    else if (lv !== undefined && !['mild', 'racy', 'erotic'].includes(lv)) sc.romanceLevel = 'racy';
+  }
   if (sc.boost === undefined) sc.boost = null;
   if (!Array.isArray(sc.itemLog)) sc.itemLog = [];
   else if (sc.itemLog.length > KEEP.itemLog) sc.itemLog.length = KEEP.itemLog;

@@ -32,7 +32,7 @@ AI-SNS 인수인계 문서. 운영·수정 방법은 [README](README.md), 이 �
 |---|---|
 | `src/screens/` | 화면 (tabs 5개 · stack 상세 · onboarding 3단계) |
 | `src/game/` | 게임 규칙 — 행동 처리·관계·난이도·수치·아이템 |
-| `src/ai/` | AI 지시문(`prompts.ts`)·문맥(`context.ts`)·엔진 연결 |
+| `src/ai/` | AI 지시문(`prompts.ts`)·세계관 말투 힌트(`voice.ts`)·문맥(`context.ts`)·엔진 연결 |
 | `src/data/worlds/` | 세계관 6종 (인물·시작 글·이벤트) |
 | `src/store/` · `src/sync/` | 상태·기기 저장 · Supabase 동기화 |
 | `supabase/aisns.sql` | DB 스키마·함수·보기 |
@@ -84,6 +84,6 @@ AI-SNS 인수인계 문서. 운영·수정 방법은 [README](README.md), 이 �
 
 ## 8. 참고
 
-- `src/ai/prompts.ts`에 수위 3단계별 지시문과 함께 두 가지 고정 제약(성·신체 묘사 미사용, 공통 캐릭터·가족 연애 반응 제외)이 들어 있습니다. 수위 단계별 강도·문구 조정은 같은 파일에서 가능합니다.
+- `src/ai/prompts.ts`에 수위 3단계(순한맛·보통·에로틱) 지시문이 있습니다. 공개 타임라인은 어느 단계든 암시까지이고 에로틱 단계의 노골적 묘사는 썸·연인 사이 쪽지에서만 나오며, 공통 캐릭터(실존 인물일 수 있음)·가족·10대 인물은 단계와 무관하게 연애 반응이 없습니다. 세계관별 말투 힌트는 `src/ai/voice.ts`에 있습니다.
 - 기본 세계관 인물·사진은 전부 가상입니다. 실존 인물은 사용자가 공통 캐릭터로 직접 넣는 구조이며, 공개·공유 시 초상권·명예 책임은 넣은 사람에게 있습니다.
 - DB 내용은 Supabase 대시보드 → Table Editor → 스키마 `aisns` → `v_characters`·`v_dms`·`v_posts`·`v_roster`에서 바로 볼 수 있습니다.

@@ -106,7 +106,7 @@ export function MeScreen() {
   const doing = sc.quests.filter((q) => !q.done && !q.claimed).length;
   const armed = sc.boost?.kind === 'viral';
   const difficulty: Difficulty = sc.difficulty ?? 'normal';
-  const romanceLevel: RomanceLevel = sc.romanceLevel ?? 'normal';
+  const romanceLevel: RomanceLevel = sc.romanceLevel ?? 'racy';
   const badge = sc.persona.badge ?? (s.followers >= 10_000 ? 'blue' : null);
   const rate = ai.usdKrw && ai.usdKrw > 0 ? ai.usdKrw : DEFAULT_USD_KRW;
   const need = xpToNext(s.level);
@@ -231,14 +231,14 @@ export function MeScreen() {
           <Segmented<RomanceLevel>
             options={[
               { key: 'mild', label: ROMANCE_LABEL.mild },
-              { key: 'normal', label: ROMANCE_LABEL.normal },
-              { key: 'spicy', label: ROMANCE_LABEL.spicy },
+              { key: 'racy', label: ROMANCE_LABEL.racy },
+              { key: 'erotic', label: ROMANCE_LABEL.erotic },
             ]}
             value={romanceLevel}
             onChange={changeRomanceLevel}
           />
           <Text style={{ color: c.subtext, fontSize: font.tiny, lineHeight: 16, marginTop: 2 }}>
-            어느 단계든 노골적인 성 묘사·신체 묘사는 쓰지 않아요(설렘·밀당·스킨십 암시까지). 공통 캐릭터(실존 인물일 수 있음)와 가족은 이 설정과 무관하게 연애 반응이 없어요.
+            공개 타임라인은 어느 단계든 암시까지이고, 에로틱 단계의 노골적 묘사는 쪽지에서만 나와요. 공통 캐릭터(실존 인물일 수 있음)·가족·10대 인물은 이 설정과 무관하게 연애 반응이 없어요.
           </Text>
         </View>
         <MenuRow
