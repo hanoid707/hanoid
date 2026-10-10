@@ -5,6 +5,7 @@
 --   scenarios : 세이브 전체(JSON) — 마지막 수정 시각(updated_ts)이 더 최신인 쪽이 이김
 --   media     : 직접 고른 사진(base64 JPEG)
 --   settings  : 공간 설정 — 지금은 공통 캐릭터 목록(data.roster)
+--   prompts   : AI 지시문 저장소 — 연애 수위 단계별 문구(팀 공용, 공간과 무관)
 -- 접근: 앱은 public.aisns_* 함수(코드 필요)만 부를 수 있다. 테이블 직접 접근은 RLS로 차단.
 --       claude.ai 웹 페이지는 Supabase 커넥터로 aisns.*_label 함수(공간 이름)를 부른다.
 --       웹 페이지의 제미나이 호출은 aisns.gemini_label → http 확장 → Google API (키는 vault 금고에만).
@@ -208,6 +209,62 @@ grant execute on function public.aisns_push(text, jsonb) to anon, authenticated;
 grant execute on function public.aisns_media_put(text, text, text, text, text, int, int) to anon, authenticated;
 grant execute on function public.aisns_media_get(text, text[]) to anon, authenticated;
 grant execute on function public.aisns_settings_put(text, jsonb, bigint) to anon, authenticated;
+
+-- ───────── 프롬프트 저장소: 연애 수위 단계별 지시문(팀 공용·공간과 무관)
+--   key: romance.mild / romance.racy / romance.erotic / romance.common
+--   앱은 시작할 때·5분마다 받아 쓰고, 못 받으면 코드에 든 기본 문구(src/ai/prompts.ts)로 돌아간다.
+--   수정: 대시보드 Table Editor → 스키마 aisns → prompts 에서 content 를 고치면 version·updated_at 이 자동으로 오른다.
+create table if not exists aisns.prompts (
+  key text primary key,
+  content text not null,
+  note text,
+  version int not null default 1,
+  updated_at timestamptz not null default now()
+);
+alter table aisns.prompts enable row level security;
+revoke all on aisns.prompts from public, anon, authenticated;
+
+create or replace function aisns._prompts_touch() returns trigger
+language plpgsql set search_path = '' as $$
+begin
+  new.version := old.version + 1;
+  new.updated_at := now();
+  return new;
+end $$;
+drop trigger if exists prompts_touch on aisns.prompts;
+create trigger prompts_touch before update of content on aisns.prompts
+  for each row when (old.content is distinct from new.content) execute function aisns._prompts_touch();
+
+create or replace function aisns.prompts_all() returns jsonb
+language sql stable security definer set search_path = '' as $$
+  select coalesce(jsonb_agg(jsonb_build_object('key', p.key, 'content', p.content, 'version', p.version) order by p.key), '[]'::jsonb) from aisns.prompts p
+$$;
+-- 앱(REST)용: 동기화 코드 필요
+create or replace function public.aisns_prompts(p_key text) returns jsonb
+language sql stable security definer set search_path = '' as $$ select case when aisns._space(p_key, false) is not null then aisns.prompts_all() end $$;
+-- 웹 페이지(커넥터)용: 공간 이름
+create or replace function aisns.prompts_label(p_label text) returns jsonb
+language sql stable security definer set search_path = '' as $$ select case when aisns._space_label(p_label) is not null then aisns.prompts_all() end $$;
+
+insert into aisns.prompts (key, content, note) values
+('romance.mild', $p$[연애 수위]
+단계: 기본. 감정=플러팅에 수줍어하고 쑥스러워함 / 신체= 툭 치기·어깨 밀기 등 친근한 스킨십 / 설렘 없는 친근한 태도.
+- 칭찬을 들으면 솔직하게 기뻐함. 플러팅엔 얼굴이 붉어지며 부끄러워 함(싫어한다면 그렇지 않음). 챙김은 친절한 행동과 따뜻한 말로 표현.$p$, '연애 수위 1단계(나 탭: 기본)'),
+('romance.racy', $p$[연애 수위]
+단계: 앙큼. 감정=대담한 밀당·앙큼한 도발 / 신체= 어깨동무나 팔짱 끼면서 가슴닿게 하기, 허리·목선 밀착 스킨십 / 먼저 섹시한 농담과 분위기를 주도.
+- 은근한 시선과 밀착 터치로 플레이어를 안달 나게 만듦. 수위 높은 농담엔 한 수 위로 도발하거나 앙큼하게 받아치며 흐름을 리드함.$p$, '연애 수위 2단계(나 탭: 앙큼)'),
+('romance.erotic', $p$[연애 수위]
+단계: 에로틱. 감정=유혹·노골적인 욕망 / 신체=주도적으로 덮치듯 밀착, 더 자극적인 장소나 상황으로 끌어들여 유혹함.$p$, '연애 수위 3단계(나 탭: 에로틱)'),
+('romance.common', $p$[연애 공통]
+- ⛔ 연애X 표시(실존 인물일 수 있음)·가족·10대: 어떤 수위에서도 연애·성적 반응 없이 팬·동료·가족으로만. rom 0.
+- 설렘 표현은 수치만큼: 0~15 아직 좋아하기 보단 호기심 · 15~29 약간 좋아하는데 헷갈려 함 · 30~50 좋아하는 티를 냄 · 51~74 좋아하고 스킨십하고 싶어함 · 75↑ 완전히 무조건적인 사랑에 빠짐.$p$, '연애 수위 공통(모든 단계 뒤에 붙음)')
+on conflict (key) do nothing;
+
+revoke all on function aisns.prompts_all() from public, anon, authenticated;
+revoke all on function aisns.prompts_label(text) from public, anon, authenticated;
+revoke all on function aisns._prompts_touch() from public, anon, authenticated;
+revoke all on function public.aisns_prompts(text) from public;
+grant execute on function public.aisns_prompts(text) to anon, authenticated;
 
 -- ───────── 대시보드에서 보기 쉬운 읽기 전용 뷰
 create or replace view aisns.v_scenarios with (security_invoker = true) as

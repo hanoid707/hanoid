@@ -38,7 +38,8 @@ AI-SNS 인수인계 문서. 운영·수정 방법은 [README](README.md), 이 �
 | `src/ai/` | AI 지시문(`prompts.ts`)·세계관 말투 힌트(`voice.ts`)·문맥(`context.ts`)·엔진 연결 |
 | `src/data/worlds/` | 세계관 6종 (인물·시작 글·이벤트) |
 | `src/store/` · `src/sync/` | 상태·기기 저장 · Supabase 동기화 |
-| `supabase/aisns.sql` | DB 스키마·함수·보기 |
+| `supabase/aisns.sql` | DB 스키마·함수·보기·프롬프트 시드 |
+| `src/ai/promptStore.ts` | DB에서 받은 지시문 보관(`getPrompt`) |
 | `scripts/index_photos.py` | `assets/photos/` → `src/data/photos.ts` 목록 갱신 |
 
 ## 4. 환경 변수 (`.env.local`)
@@ -88,6 +89,7 @@ AI-SNS 인수인계 문서. 운영·수정 방법은 [README](README.md), 이 �
 
 ## 8. 참고
 
+- **연애 수위 지시문은 Supabase `aisns.prompts`(key `romance.mild·racy·erotic·common`)에서 받아 씁니다.** 사이트(REST `aisns_prompts`)·아티팩트(커넥터 `aisns.prompts_label`) 둘 다 같은 표를 읽고, 시작할 때와 5분마다 받아 기기에 캐시합니다. 못 받으면 `src/ai/prompts.ts`의 기본 문구로 돌아갑니다. 문구 수정은 대시보드 Table Editor에서 `content`만 고치면 됩니다(`version` 자동 증가). 기본 문구를 코드에서 바꾸면 `supabase/aisns.sql` 시드도 같이 맞추세요. 다른 단계형 지시문도 같은 방식(`getPrompt(key, 기본값)`)으로 옮길 수 있습니다.
 - `src/ai/prompts.ts`에 수위 3단계(순한맛·보통·에로틱) 지시문이 있습니다. 공개 타임라인은 어느 단계든 암시까지이고 에로틱 단계의 노골적 묘사는 썸·연인 사이 쪽지에서만 나오며, 공통 캐릭터(실존 인물일 수 있음)·가족·10대 인물은 단계와 무관하게 연애 반응이 없습니다. 세계관별 말투 힌트는 `src/ai/voice.ts`에 있습니다.
 - 기본 세계관 인물·사진은 전부 가상입니다. 실존 인물은 사용자가 공통 캐릭터로 직접 넣는 구조이며, 공개·공유 시 초상권·명예 책임은 넣은 사람에게 있습니다.
 - DB 내용은 Supabase 대시보드 → Table Editor → 스키마 `aisns` → `v_characters`·`v_dms`·`v_posts`·`v_roster`에서 바로 볼 수 있습니다.

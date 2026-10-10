@@ -163,3 +163,24 @@ export async function saveSyncLocal(s: SyncLocal): Promise<void> {
     /* 무시 */
   }
 }
+
+// ───────── 프롬프트 캐시(DB에서 받은 지시문 — 오프라인에서도 마지막 값을 쓰게)
+const PROMPTS_KEY = 'mainchar:prompts:v1';
+
+export async function loadPromptsLocal(): Promise<Record<string, string>> {
+  try {
+    const raw = await kv.getItem(PROMPTS_KEY);
+    if (raw) return JSON.parse(raw) as Record<string, string>;
+  } catch {
+    /* 무시 */
+  }
+  return {};
+}
+
+export async function savePromptsLocal(p: Record<string, string>): Promise<void> {
+  try {
+    await kv.setItem(PROMPTS_KEY, JSON.stringify(p));
+  } catch {
+    /* 무시 */
+  }
+}

@@ -6,6 +6,7 @@
  */
 import { CONFIG, getArtifactCapability } from '../config';
 import type { Scenario } from '../types';
+import type { PromptRow } from '../ai/promptStore';
 import { safeJson } from '../utils';
 
 export interface PullResult {
@@ -51,6 +52,8 @@ export interface SyncBackend {
   mediaGet(ids: string[]): Promise<{ id: string; mime: string; data: string }[]>;
   /** 공간 설정 올리기(공통 캐릭터 목록 등) */
   settingsPut(data: object, updatedTs: number): Promise<void>;
+  /** AI 지시문(연애 수위 단계별 문구 등) — 팀 공용, aisns.prompts */
+  promptsGet(): Promise<PromptRow[]>;
 }
 
 /** 동기화 오류. blocked = 사용자가 직접 풀어야 하는 상태(승인·커넥터 연결 등) */
@@ -100,6 +103,7 @@ export function createRestBackend(url: string, apiKey: string, syncKey: string):
     async settingsPut(data, updatedTs) {
       await rpc('aisns_settings_put', { p_data: data, p_updated_ts: Math.floor(updatedTs) });
     },
+    promptsGet: async () => (await rpc<PromptRow[] | null>('aisns_prompts', {})) ?? [],
   };
 }
 
@@ -194,6 +198,7 @@ export function createMcpBackend(mcp: McpLike, projectId: string, label: string)
     async settingsPut(data, updatedTs) {
       await one(`select aisns.settings_put_label('${lbl}', convert_from(decode('${utf8Hex(safeJson(data))}', 'hex'), 'UTF8')::jsonb, ${Math.floor(updatedTs)}) as r`);
     },
+    promptsGet: async () => (await one<PromptRow[] | null>(`select aisns.prompts_label('${lbl}') as r`)) ?? [],
   };
 }
 
