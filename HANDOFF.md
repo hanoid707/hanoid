@@ -22,7 +22,10 @@ AI-SNS 인수인계 문서. 운영·수정 방법은 [README](README.md), 이 �
 | 기능 | 완성. 온보딩·글·답글·쪽지·이벤트·아이템·공통 캐릭터·세계관 수정 전부 동작 |
 | 타입 검사 | 통과 (`npx tsc --noEmit`) |
 | 세계관 | 6종 · 기본 사진 205장 포함 |
-| **배포** | **안 되어 있음.** 웹 호스팅·APK 빌드 설정 모두 없음 |
+| **배포** | **Cloudflare Worker 로 운영 중** — https://hanoid.hansy-dawn.workers.dev |
+| 배포 방식 | GitHub `main` 에 푸시하면 Cloudflare 가 자동으로 빌드·배포 (2~3분) |
+| 로그인 | 비밀번호는 Cloudflare Secret 에만 있고 번들에 없다 (`/api/login` 이 서버에서 확인) |
+| AI 호출 | 키 없이 `/api/gemini` 로 보내면 서버가 키를 붙여 구글에 대신 요청한다 |
 | **테스트** | **0개** |
 | **CI** | **없음** |
 
@@ -52,15 +55,16 @@ AI-SNS 인수인계 문서. 운영·수정 방법은 [README](README.md), 이 �
 
 ## 5. 다음 할 일
 
-목표는 **PC 없이 폰·웹에서 상시 사용**. 지금은 거기까지 가는 길이 막혀 있습니다.
+폰·웹 상시 사용은 끝났습니다(Cloudflare). 남은 것은 아래입니다.
 
 | 순위 | 할 일 | 왜 | 손대는 곳 |
 |---|---|---|---|
-| **P1** | 웹 배포 파이프라인 | 상시 사용의 주 경로. 지금은 수동 export만 가능 | `package.json`에 `build:web` 추가 → Vercel/Cloudflare Pages 연결 |
-| **P1** | `eas.json` 생성 | **없어서 APK 빌드 자체가 안 됨.** `npx eas build:configure` 먼저 | 루트 |
+| P2 | `gh-pages` 브랜치 삭제 | Cloudflare 로 옮겨 쓸모없어졌다. 프록시가 막아 수동으로 해야 한다 | GitHub 저장소 Branches |
+| P2 | `eas.json` 생성 | 앱(APK)으로도 쓰려면 필요. `npx eas build:configure` | 루트 |
 | P2 | 순수 함수 테스트 | 수치 규칙이 많은데 안전망 0 | `src/game/rules·relationship·difficulty·engagement` 부터 |
 | P2 | CI 추가 | 푸시마다 `tsc --noEmit` + 테스트 | `.github/workflows/` |
 | P3 | 사진 교체 | 기본 사진을 외부 생성 서비스 결과물로 교체 | `assets/photos/` → `python scripts/index_photos.py` |
+| P3 | README 복구 | 현재 한 줄짜리 임의 문자열로 덮여 있다 | `README.md` |
 | P3 | 에러 리포팅 | 폰에서 터지면 원인 추적 수단 없음 | Sentry 등 |
 
 ## 6. 최적화 후보
