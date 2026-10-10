@@ -35,6 +35,9 @@ const pick1 = (r: Raw, ...keys: string[]) => keys.map((k) => r[k]).find((v) => v
 export function cleanText(raw: unknown, max: number): string {
   let t = str(raw)
     .replace(/^@?[a-z0-9_]{2,15}\s*[:：]\s+/i, '')
+    // 롤플레이 지문(*웃으며*)과 줄표는 SNS 화면에 없다 — 프롬프트에 금지어로 적는 대신 여기서 지운다
+    .replace(/\*[^*\n]{1,30}\*/g, ' ')
+    .replace(/\s*[—–]\s*/g, ' ')
     .replace(/[ \t]+/g, ' ')
     .trim();
   // 글 전체를 감싼 따옴표만 벗긴다(글 안의 인용은 그대로)
