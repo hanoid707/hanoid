@@ -39,7 +39,7 @@ export type Difficulty = 'easy' | 'normal' | 'hard';
 export type RelationKind = 'acquaintance' | 'friend' | 'bestie' | 'spicy' | 'lover' | 'rival' | 'enemy' | 'mentor' | 'family';
 
 /** 연애·플러팅 수위(기본 normal) — 공통 캐릭터(실존 인물)·가족은 이 설정과 무관하게 연애 반응 없음 */
-export type RomanceLevel = 'mild' | 'normal' | 'spicy';
+export type RomanceLevel = 'mild' | 'racy' | 'erotic';
 /** 일반 계정(crowd) 분류. 팬 계열은 호감도에 따라 팬 ↔ 열혈 팬 ↔ 안티팬으로 바뀐다 */
 export type CrowdRole = 'public' | 'fan' | 'superfan' | 'antifan' | 'news' | 'magazine' | 'broadcaster' | 'sponsor' | 'celeb';
 /** 캐릭터 만들기에서 고르는 "유형" */
