@@ -21,19 +21,23 @@
 
 ## 1. 실행하기
 
-| 방법 | 필요한 것 | 순서 |
-|---|---|---|
-| **폰 앱** (추천) | PC에 [Node.js LTS](https://nodejs.org), 폰에 **Expo Go** | `START.bat` 더블클릭 → `1` → QR 찍기 |
-| 폰 앱 (와이파이 다를 때) | 위와 같음 | `START.bat` → `2` (터널 모드) |
-| PC 브라우저 | Node.js | `START.bat` → `3` |
-| 맥·리눅스 | Node.js | `npm install` → `npx expo start` |
+쓰는 방식에 따라 세 가지입니다. **폰에서 상시로 쓸 거면 ① 또는 ②**, 개발·수정 중일 땐 ③.
+
+| # | 방식 | 필요한 것 | 방법 |
+|---|---|---|---|
+| ① | **웹 주소로 접속** (가장 간단) | 없음 (정적 호스팅 1회) | `npx expo export -p web` → 생긴 `dist/` 폴더를 호스팅에 올림 → 폰 브라우저로 주소 접속 |
+| ② | **폰에 앱으로 설치** | Expo 계정 | `npx eas build -p android --profile preview` → 나온 `.apk` 를 갤럭시에 설치 |
+| ③ | **개발 중 미리보기** | PC + 폰에 Expo Go | `npm install` → `npx expo start` → QR 찍기 (폰·PC 같은 와이파이) |
+
+- ①은 **홈 화면에 추가**하면 앱처럼 전체화면으로 뜹니다(`app.json` 의 `web` 설정 적용됨).
+- ③은 PC에서 서버가 떠 있어야 폰이 붙습니다. PC 없이 쓰려면 ①이나 ②로 가세요.
+- 와이파이가 다르면 ③은 `npx expo start --tunnel`.
 
 **처음 실행 전 확인**
 
 | 항목 | 내용 |
 |---|---|
 | AI 키 | **없으면 캐릭터가 반응하지 않습니다.** 나 탭 → AI 연결에서 Gemini 키 입력 (또는 `.env.local`) |
-| 와이파이 | `1`번은 폰과 PC가 **같은 와이파이**여야 됩니다. 다르면 `2`번 |
 | 환경 변수 | `.env.local` 에 키·DB 주소가 들어갑니다. 없으면 `.env.example` 복사해서 채우기 |
 | 공유할 때 | 코드를 남에게 줄 땐 **`.env.local` 을 빼고** `.env.example` 만 주세요 |
 
@@ -94,7 +98,6 @@ flowchart LR
 
 | 경로 | 역할 |
 |---|---|
-| `START.bat` | **실행기.** 더블클릭하면 설치 확인 후 Expo 실행 |
 | `.env.local` | **내 키 보관.** Gemini 키·Supabase 주소·동기화 코드 (공유 금지, git 제외됨) |
 | `.env.example` | 위 파일의 빈 양식. 새로 받은 사람이 복사해서 채움 |
 | `App.tsx` | 앱 시작점. 저장 데이터 불러오기 → 동기화 → 화면 |
@@ -122,7 +125,6 @@ flowchart LR
 | `supabase/aisns.sql` | **DB 정의** (스키마·함수·보기). 적용법은 파일 맨 위 참고 |
 | `assets/photos/` | 기본 사진 (가상 인물 얼굴·장면·배너) |
 | `scripts/index_photos.py` | 사진을 바꾼 뒤 실행 → `src/data/photos.ts` 목록 갱신 |
-| `tools/photo_gen/` | **선택.** 사진을 AI로 새로 만드는 도구 (평소엔 필요 없음) |
 | `docs/screens/` | 이 문서의 화면 캡처 |
 
 ---
@@ -161,7 +163,7 @@ flowchart LR
 | **세계관 양식** (항목 추가) | `src/data/worldTypes.ts` |
 | **DB 구조·함수** | `supabase/aisns.sql` |
 
-바꾼 뒤 `START.bat` 재실행하면 반영됩니다.
+바꾼 뒤 앱을 다시 실행하면 반영됩니다(③ 개발 미리보기는 저장만 해도 바로 반영).
 
 ---
 
@@ -200,7 +202,7 @@ flowchart LR
 |---|---|
 | **한 장만 바꾸기** (추천) | 앱에서 캐릭터 설정 → 사진 누르기 → 고르기·자르기 |
 | 여러 장 교체 | `assets/photos/` 에 파일 넣은 뒤 `python scripts/index_photos.py` 실행 |
-| AI로 새로 만들기 | `tools/photo_gen/README.md` 참고 (Stable Diffusion 모델 다운로드 필요, 선택사항) |
+| AI로 새로 만들기 | 외부 생성 서비스로 만든 뒤 위 "여러 장 교체" 절차 |
 
 ---
 
