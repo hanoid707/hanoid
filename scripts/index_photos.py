@@ -21,7 +21,7 @@ def collect(kind):
 parts = [
     '/**',
     ' * 기본 사진 모음(자동 생성 파일 — 직접 고치지 말고 scripts/index_photos.py 실행)',
-    ' * - AVATARS: 캐릭터 프로필 사진(192px), SCENES: 게시물 첨부 사진, BANNERS: 프로필 배너',
+    ' * - AVATARS: 캐릭터 프로필 사진(192~256px), SCENES: 게시물 첨부 사진, BANNERS: 프로필 배너',
     ' * - 사진은 전부 AI로 새로 만든 가상 인물·장면이다(실존 인물 아님).',
     ' * - 키: <세계관ID>__<key>',
     ' */',
