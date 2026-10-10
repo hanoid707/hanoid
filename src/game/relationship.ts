@@ -153,7 +153,7 @@ export function rawRelation(aff: number, romance: number, base: 'mentor' | 'fami
     return base;
   }
   if (romance >= 75 && aff >= 60) return 'lover';
-  if (romance >= 40 && aff >= 20) return 'spicy';
+  if (romance >= 30 && aff >= 20) return 'spicy';
   return BANDS[bandIndex(aff)].rel;
 }
 
