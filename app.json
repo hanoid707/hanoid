@@ -38,9 +38,6 @@
           "microphonePermission": false
         }
       ]
-    ],
-    "experiments": {
-      "baseUrl": "/hanoid"
-    }
+    ]
   }
 }

@@ -11,6 +11,7 @@
  * ⚠️ 공부용 구조: 앱 안에 API 키를 넣으면 앱을 뜯어서 키를 볼 수 있다.
  *    실제 서비스라면 키는 서버(예: 클라우드 함수)에 두고, 앱은 그 서버를 부른다.
  */
+import { Platform } from 'react-native';
 import { isArtifactRuntime } from '../../config';
 import { recordUsage } from '../../store/usage';
 import { geminiViaDb } from '../../sync/backend';
@@ -22,7 +23,7 @@ const BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
 export const DEFAULT_GEMINI_MODEL = 'gemini-3.5-flash-lite';
 const TIMEOUT_MS = { rest: 25_000, db: 45_000 } as const;
 
-export type GeminiVia = 'rest' | 'db';
+export type GeminiVia = 'rest' | 'db' | 'proxy';
 
 export interface GeminiRequest {
   apiKey: string;
@@ -53,9 +54,42 @@ export class GeminiError extends Error {
   }
 }
 
-/** 지금 실행 환경의 기본 길 */
-export function geminiTransport(): GeminiVia {
-  return isArtifactRuntime() ? 'db' : 'rest';
+/** 지금 실행 환경의 기본 길(내 키가 있으면 그걸 먼저 쓴다) */
+export function geminiTransport(hasOwnKey = false): GeminiVia {
+  if (isArtifactRuntime()) return 'db';
+  if (hasOwnKey) return 'rest';
+  // Cloudflare 배포: 내 키가 없어도 서버(/api/gemini)가 대신 불러 준다
+  if (hasServerProxy()) return 'proxy';
+  return 'rest';
+}
+
+/** /api/gemini 를 쓸 수 있는 환경인가(웹 + 로그인으로 받은 동기화 코드 보유) */
+export function hasServerProxy(): boolean {
+  return Platform.OS === 'web' && !!getProxyKey();
+}
+
+/** 로그인(/api/login)이 내려 준 동기화 코드 — 서버 호출의 암호 역할 */
+const PROXY_KEY_STORAGE = 'aisns:proxyKey:v1';
+let proxyKeyMemo: string | null = null;
+
+export function setProxyKey(key: string) {
+  proxyKeyMemo = key || null;
+  try {
+    if (key) globalThis.localStorage?.setItem(PROXY_KEY_STORAGE, key);
+    else globalThis.localStorage?.removeItem(PROXY_KEY_STORAGE);
+  } catch {
+    /* 저장이 막힌 브라우저여도 이번 접속 동안은 메모리로 동작한다 */
+  }
+}
+
+export function getProxyKey(): string {
+  if (proxyKeyMemo) return proxyKeyMemo;
+  try {
+    proxyKeyMemo = globalThis.localStorage?.getItem(PROXY_KEY_STORAGE) ?? null;
+  } catch {
+    proxyKeyMemo = null;
+  }
+  return proxyKeyMemo ?? '';
 }
 
 // ───────────────────────── 생각(thinking) 설정
@@ -102,6 +136,38 @@ function errorFrom(status: number, body: unknown): GeminiError {
 }
 
 // ───────────────────────── 보내기
+
+/** Cloudflare Functions 경유 — 키는 서버에만 있고 이쪽은 동기화 코드만 보낸다 */
+async function sendProxy(model: string, body: object): Promise<{ status: number; body: unknown }> {
+  const key = getProxyKey();
+  if (!key) throw new GeminiError('로그인이 필요해요', 0, true, 'no_key');
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS.rest);
+  try {
+    const res = await fetch('/api/gemini', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-sync-key': key },
+      body: safeJson({ model, body }),
+      signal: controller.signal,
+    });
+    const text = await res.text();
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(text);
+    } catch {
+      return { status: res.status, body: text };
+    }
+    // 서버는 { status, body } 모양으로 돌려준다(구글 응답을 그대로 감싼 것)
+    const wrapped = parsed as { status?: number; body?: unknown };
+    if (typeof wrapped?.status === 'number') return { status: wrapped.status, body: wrapped.body };
+    return { status: res.status, body: parsed };
+  } catch (e) {
+    if ((e as Error).name === 'AbortError') throw new GeminiError('제미나이 응답 시간 초과', 0, false, 'timeout');
+    throw new GeminiError(`네트워크 오류: ${(e as Error).message}`, 0, false, 'network');
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
 async function sendRest(model: string, body: object, apiKey: string): Promise<{ status: number; body: unknown }> {
   if (!apiKey) throw new GeminiError('제미나이 API 키가 없어요(설정 > AI 연결)', 0, true, 'no_key');
@@ -165,7 +231,7 @@ interface GenResponse {
 
 /** 한 번 부르고 JSON으로 받기(사용량 기록 포함) */
 export async function generateJSON<T>(req: GeminiRequest): Promise<T> {
-  const via = req.via ?? geminiTransport();
+  const via = req.via ?? geminiTransport(!!req.apiKey?.trim());
   const kind = req.kind ?? 'other';
   const t0 = Date.now();
   const fail = (e: GeminiError): never => {
@@ -191,7 +257,7 @@ export async function generateJSON<T>(req: GeminiRequest): Promise<T> {
     };
     let res: { status: number; body: unknown };
     try {
-      res = via === 'db' ? await sendDb(req.model, body) : await sendRest(req.model, body, req.apiKey);
+      res = via === 'db' ? await sendDb(req.model, body) : via === 'proxy' ? await sendProxy(req.model, body) : await sendRest(req.model, body, req.apiKey);
     } catch (e) {
       return fail(e instanceof GeminiError ? e : new GeminiError((e as Error).message, 0, false, 'network'));
     }

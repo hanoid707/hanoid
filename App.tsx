@@ -9,6 +9,7 @@ import { ActivityIndicator, Platform, StyleSheet, Text, View } from 'react-nativ
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ToastHost } from './src/components/Toast';
 import { RootNavigator } from './src/navigation/RootNavigator';
+import { LoginGate } from './src/screens/LoginGate';
 import { hydrateStore, useGame } from './src/store/game';
 import { hydrateRoster } from './src/store/roster';
 import { hydrateUsage } from './src/store/usage';
@@ -29,11 +30,11 @@ function Shell() {
   }
 
   const app = (
-    <>
+    <LoginGate>
       <RootNavigator />
       <ToastHost />
       <StatusBar style={dark ? 'light' : 'dark'} />
-    </>
+    </LoginGate>
   );
 
   if (Platform.OS !== 'web') return app;

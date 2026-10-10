@@ -105,6 +105,7 @@ const VIA_LABEL: Record<UsageEvent['via'], string> = {
   rest: 'API 직접',
   db: 'Supabase 경유',
   sample: 'claude.ai 페이지',
+  proxy: '서버 경유(키 미노출)',
 };
 
 /** 토큰 수(1.2천 / 3.4만) */

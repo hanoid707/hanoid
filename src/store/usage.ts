@@ -43,7 +43,7 @@ export interface UsageEvent {
   cachedTok?: number;
   ms: number;
   ok: boolean;
-  via: 'rest' | 'db' | 'sample';
+  via: 'rest' | 'db' | 'sample' | 'proxy';
   /** 토큰 수가 응답에 없어서 글자 수로 추정했는지 */
   estimated?: boolean;
 }

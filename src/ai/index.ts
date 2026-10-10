@@ -14,7 +14,7 @@ import { CONFIG, isArtifactRuntime } from '../config';
 import type { AISettings } from '../types';
 import { hashStr } from '../utils';
 import { createClaudeEngine } from './claude/engine';
-import { DEFAULT_GEMINI_MODEL } from './gemini/client';
+import { DEFAULT_GEMINI_MODEL, hasServerProxy } from './gemini/client';
 import { createGeminiEngine } from './gemini/engine';
 import type { AIEngine } from './types';
 
@@ -85,8 +85,8 @@ function chainFor(settings: AISettings): LinkId[] {
     const db: LinkId[] = CONFIG.supabaseProject ? ['gemini-db'] : [];
     return settings.provider === 'claude' ? ['claude'] : [...db, 'claude'];
   }
-  // 앱·PC 웹: 클로드는 쓸 수 없다. 키가 없으면 AI 없음(반응을 지어내지 않는다)
-  return settings.apiKey.trim() ? ['gemini-rest'] : [];
+  // 앱·PC 웹: 클로드는 쓸 수 없다. 내 키가 있거나 서버 대리 호출(/api/gemini)을 쓸 수 있으면 제미나이
+  return settings.apiKey.trim() || hasServerProxy() ? ['gemini-rest'] : [];
 }
 
 /** AI를 쓸 수 없는 상태 — 어떤 호출이든 "연결 필요" 오류(게임은 반응을 비워 둔다) */
@@ -245,7 +245,7 @@ export function availableProviders(settings: AISettings): ProviderOption[] {
   const gemLink: LinkId = art ? 'gemini-db' : 'gemini-rest';
   const gemOff = disabled.get(sigOf(gemLink, settings))?.message;
   const claudeOff = disabled.get(sigOf('claude', settings))?.message;
-  const gemAvailable = art ? !!CONFIG.supabaseProject : !!settings.apiKey.trim();
+  const gemAvailable = art ? !!CONFIG.supabaseProject : !!settings.apiKey.trim() || hasServerProxy();
   return [
     {
       id: 'gemini',
