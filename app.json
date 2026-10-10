@@ -1,0 +1,43 @@
+{
+  "expo": {
+    "name": "AI-SNS",
+    "slug": "ai-sns",
+    "version": "1.0.0",
+    "scheme": "aisns",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.studyclub.aisns"
+    },
+    "android": {
+      "package": "com.studyclub.aisns",
+      "adaptiveIcon": {
+        "backgroundColor": "#6D4AFF",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "softwareKeyboardLayoutMode": "resize",
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "name": "AI-SNS",
+      "shortName": "AI-SNS",
+      "themeColor": "#6D4AFF",
+      "backgroundColor": "#F6F5FB"
+    },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "프로필 사진을 고르기 위해 사진 보관함에 접근해요.",
+          "cameraPermission": false,
+          "microphonePermission": false
+        }
+      ]
+    ]
+  }
+}

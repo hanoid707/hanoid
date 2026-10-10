@@ -1,0 +1,51 @@
+/**
+ * 예전 버전 세이브 고치기(기기에서 불러올 때 · DB에서 받을 때 공통)
+ * - v1: 에너지·커피 제거, 인증 배지 변환
+ * - v3: 난이도(보통)·아이템 기록·공통 캐릭터 설정 기본값, 모든 인물에 관계·말투 초기값(initRelation)
+ * - v3.1: 기본 세계관 인물의 긴 설명(말투·이모지·말버릇 규칙)을 핵심 특징만 남긴 새 설명으로(사용자가 고친 설명은 그대로)
+ * 받은 객체(JSON에서 막 읽은 것)를 직접 고친다.
+ */
+import { findSeed } from '../data/worlds';
+import { LEGACY_DESC_HASH } from '../data/worlds/legacy';
+import type { Scenario } from '../types';
+import { hashStr } from '../utils';
+import { initRelation } from './relationship';
+import { KEEP } from './rules';
+
+export function migrateScenarioData(raw: Scenario): Scenario {
+  const sc = raw as Scenario & { energy?: unknown; wallet?: unknown };
+  delete sc.energy;
+  delete sc.wallet;
+  for (const q of sc.quests ?? []) {
+    const r = q.reward as { coffee?: number; xp?: number; followers?: number };
+    if (r.coffee) {
+      r.xp = (r.xp ?? 0) + r.coffee * 10;
+      delete r.coffee;
+    }
+  }
+  const day = sc.clock?.day ?? 1;
+  const tid = sc.world?.templateId;
+  for (const c of Object.values(sc.characters ?? {})) {
+    if (c.badge === undefined) c.badge = c.isNews ? 'gold' : c.verified ? 'blue' : null;
+    delete c.postPool;
+    // v3.1: 손대지 않은 세계관 인물 설명 → 새 설명(핵심 특징만)
+    if (tid && !c.custom && !c.rosterId && c.id.startsWith('ch_')) {
+      const legacy = LEGACY_DESC_HASH[`${tid}:${c.id.slice(3)}`];
+      if (legacy !== undefined && hashStr(c.description ?? '') === legacy) {
+        const seed = findSeed(tid, c.id);
+        if (seed) c.description = seed.description;
+      }
+    }
+    initRelation(c, day);
+  }
+  // v3 기본값
+  if (!sc.difficulty) sc.difficulty = 'normal';
+  if (sc.boost === undefined) sc.boost = null;
+  if (!Array.isArray(sc.itemLog)) sc.itemLog = [];
+  else if (sc.itemLog.length > KEEP.itemLog) sc.itemLog.length = KEEP.itemLog;
+  if (!sc.roster || !['on', 'off', 'select'].includes(sc.roster.mode)) sc.roster = { mode: 'off', ids: [] };
+  if (!Array.isArray(sc.roster.ids)) sc.roster.ids = [];
+  // 빠진 공통 캐릭터가 출연진에 남아 있지 않게
+  if (Array.isArray(sc.cast)) sc.cast = sc.cast.filter((id) => sc.characters?.[id] && !sc.characters[id].inactive);
+  return sc;
+}
