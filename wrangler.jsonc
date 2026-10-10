@@ -23,5 +23,7 @@
   },
   "observability": {
     "enabled": true
-  }
+  },
+  // Workers Builds 비프로덕션(브랜치/PR) 빌드는 `npx wrangler preview` 로 배포됨 → 이 블록이 없으면 실패
+  "previews": {}
 }
