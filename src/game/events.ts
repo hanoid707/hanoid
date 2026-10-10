@@ -302,7 +302,7 @@ export function setDifficulty(level: Difficulty): void {
 /** 연애·플러팅 수위 바꾸기 — 공통 캐릭터(실존 인물)·가족에는 영향 없음(항상 연애 반응 0) */
 export function setRomanceLevel(level: RomanceLevel): void {
   const sc = getActive();
-  if (!sc || !ROMANCE_LABEL[level] || (sc.romanceLevel ?? 'normal') === level) return;
+  if (!sc || !ROMANCE_LABEL[level] || (sc.romanceLevel ?? 'racy') === level) return;
   G().edit(sc.id, (d) => {
     d.romanceLevel = level;
     logActivity(d, '🌶️', fill('연애 수위를 {x}(으)로 바꿨어요', { x: ROMANCE_LABEL[level] }));

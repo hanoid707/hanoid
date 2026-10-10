@@ -180,7 +180,8 @@ export async function generateJSON<T>(req: GeminiRequest): Promise<T> {
       systemInstruction: { parts: [{ text: req.system }] },
       contents: [{ role: 'user', parts: [{ text: req.prompt }] }],
       generationConfig: {
-        temperature: req.temperature ?? 0.95,
+        // 3.x부터는 온도 조절을 권하지 않는다(1.0 미만에서 반복·품질 저하 보고, 공식 문서). 2.x에만 적용
+        ...(/^gemini-2\./.test(req.model) ? { temperature: req.temperature ?? 0.95 } : {}),
         responseMimeType: 'application/json',
         responseSchema: req.schema,
         // 생각 토큰도 출력 상한에 포함된다 → 생각을 쓰는 모델이면 여유를 더 준다

@@ -9,7 +9,7 @@
  */
 import { getWorldTemplate } from '../data/worlds';
 import { CROWD_LABEL, PERSONALITY_PRESETS, REGISTER_LABEL, RELATION_LABEL, SPEECH_PRESETS, registerOf } from '../game/relationship';
-import { GHOST, ME, SYSTEM, type Character, type Difficulty, type ID, type Post, type RepStatus, type Scenario } from '../types';
+import { GHOST, ME, SYSTEM, type Character, type Difficulty, type ID, type Post, type RepStatus, type Scenario, type SpeechRegister } from '../types';
 import { cutText, formatCount, hashStr } from '../utils';
 import type { AIContext, CastInfo } from './types';
 
@@ -110,7 +110,7 @@ export function buildContext(sc: Scenario): AIContext {
     memory: sc.memory.slice(-12),
     scenes: (t?.scenes ?? []).map((s) => ({ key: s.key, desc: s.prompt.split(',').slice(0, 2).join(',').slice(0, 60) })),
     difficulty: sc.difficulty ?? 'normal',
-    romanceLevel: sc.romanceLevel ?? 'normal',
+    romanceLevel: sc.romanceLevel ?? 'racy',
     trends: (sc.trends ?? []).slice(0, 6).map((x) => x.tag),
     quests: (sc.quests ?? [])
       .filter((q) => !q.done)
@@ -210,13 +210,13 @@ function presetLabel(id: string | undefined, list: { id: string; label: string; 
   return p ? `${p.label}(${p.desc})` : id;
 }
 
-/** 자세한 인물 항목(이번 일의 중심 인물) */
-export function fullEntry(c: CastInfo, descMax = 160): string {
+/** 자세한 인물 항목(이번 일의 중심 인물). said=false면 최근 글(말투 표본) 줄을 뺀다(따로 보여 줄 때) */
+export function fullEntry(c: CastInfo, descMax = 160, opts: { said?: boolean } = {}): string {
   const head = [
     `@${c.handle} ${c.name}`,
     `${kindLabel(c)} | 플레이어에게 ${registerText(c)}`,
     `호감${c.affinity}${c.romance > 0 && !c.realPerson ? ` 설렘${c.romance}` : ''}${c.devotion > 0 ? ` 정복${c.devotion}` : ''}`,
-    c.realPerson ? '실존 인물일 수 있음(연애·성적 반응 금지)' : '',
+    c.realPerson ? '연애X(실존 인물일 수 있음)' : c.ageGroup === 10 ? '연애X(10대)' : '',
     [c.tier !== 'crowd' && c.crowdRole && c.crowdRole !== 'public' ? CROWD_LABEL[c.crowdRole] : '', c.badge ? BADGE_SHORT[c.badge] : '', `팔로워${formatCount(c.followers)}`]
       .filter(Boolean)
       .join('·'),
@@ -228,8 +228,10 @@ export function fullEntry(c: CastInfo, descMax = 160): string {
   const desc = digest(alignRegister(c.description ?? '', c.register), descMax);
   if (desc) lines.push(`  특성: ${desc}`);
   if (c.bio && (c.description ?? '').length < 60) lines.push(`  소개: ${clip(c.bio, 50)}`);
-  if (c.relations) lines.push(`  관계: ${clip(c.relations, 75)}`);
-  if (c.recentDM.length) lines.push(`  최근쪽지: ${c.recentDM.slice(-2).map((m) => clip(m, 45)).join(' / ')}`);
+  if (c.relations) lines.push(`  관계: ${clip(c.relations, 60)}`);
+  if (c.recentDM.length) lines.push(`  둘만의 쪽지: ${c.recentDM.slice(-2).map((m) => clip(m, 45)).join(' / ')}`);
+  // 본인이 실제로 쓴 최신 글 한 줄 = 그 인물 말투의 표본(지어낸 예시보다 낫다)
+  if (opts.said !== false && c.recentSaid?.length) lines.push(`  최근 글: ${clip(c.recentSaid[c.recentSaid.length - 1], 50)}`);
   return lines.join('\n');
 }
 
@@ -237,7 +239,7 @@ export function fullEntry(c: CastInfo, descMax = 160): string {
 export function briefEntry(c: CastInfo): string {
   const first = sentences(alignRegister((c.description || c.bio || '').replace(/\s+/g, ' ').trim(), c.register))[0] ?? '';
   const trait = clip(first, 40);
-  return `- @${c.handle} ${c.name} | ${kindLabel(c)}·${registerText(c)} | 호감${c.affinity}${c.devotion >= 30 ? ` 정복${c.devotion}` : ''}${c.realPerson ? ' | 연애 금지' : ''}${trait ? ` | ${trait}` : ''}`;
+  return `- @${c.handle} ${c.name} | ${kindLabel(c)}·${registerText(c)} | 호감${c.affinity}${c.devotion >= 30 ? ` 정복${c.devotion}` : ''}${c.realPerson || c.ageGroup === 10 ? ' | 연애X' : ''}${trait ? ` | ${trait}` : ''}`;
 }
 
 // ───────────────────────── 이번 일에 넣을 인물 고르기
@@ -341,16 +343,18 @@ export function castBlock(p: CastPick, opts: { descMax?: number; firstDescMax?: 
   return out.join('\n');
 }
 
-/** 말투 등급 요약 한 줄(할 일 바로 위에 다시 알려 주면 AI가 더 잘 지킨다) */
+/** 말투 등급 요약 한 줄(할 일 바로 위에 다시 알려 주면 AI가 더 잘 지킨다). 제일 큰 무리는 "나머지"로 줄여 글자를 아낀다 */
 export function registerMap(p: CastPick): string {
-  const groups: Record<string, string[]> = { banmal: [], haeyo: [], formal: [] };
+  const groups: Record<SpeechRegister, string[]> = { banmal: [], haeyo: [], formal: [] };
   for (const c of [...p.full, ...p.brief, ...p.crowd]) groups[c.register]?.push(`@${c.handle}`);
-  const parts = [
-    groups.banmal.length ? `반말(~요 금지): ${groups.banmal.join(' ')}` : '',
-    groups.haeyo.length ? `해요체(플레이어에게 ~요, 반말 금지): ${groups.haeyo.join(' ')}` : '',
-    groups.formal.length ? `존댓말(격식): ${groups.formal.join(' ')}` : '',
-  ].filter(Boolean);
-  return parts.length ? `[말투 확인 — 플레이어에게] ${parts.join(' / ')}` : '';
+  const label: Record<SpeechRegister, string> = { banmal: '반말(~요 금지)', haeyo: '해요체(야·너 금지)', formal: '존댓말(~습니다)' };
+  const order: SpeechRegister[] = ['banmal', 'haeyo', 'formal'];
+  const total = order.reduce((n, k) => n + groups[k].length, 0);
+  if (!total) return '';
+  const biggest = order.reduce((a, b) => (groups[b].length > groups[a].length ? b : a));
+  const parts = order.filter((k) => k !== biggest && groups[k].length).map((k) => `${label[k]}: ${groups[k].join(' ')}`);
+  parts.push(`나머지 ${label[biggest]}`);
+  return `[말투 확인: 플레이어에게] ${parts.join(' / ')}`;
 }
 
 // ───────────────────────── 타임라인·기억·지금 상태
@@ -367,7 +371,7 @@ export function recentBlock(ctx: AIContext, n = 6, len = 60): string {
   return ['[최근 타임라인]', ...list.map((r) => `- ${speaker(r)}: ${clip(r.text, len)}`)].join('\n');
 }
 
-export function memoryBlock(ctx: AIContext, n = 8, len = 80): string {
+export function memoryBlock(ctx: AIContext, n = 8, len = 70): string {
   const list = ctx.memory.slice(-n);
   if (!list.length) return '';
   return ['[주요 사건]', ...list.map((m) => `- ${clip(m, len)}`)].join('\n');

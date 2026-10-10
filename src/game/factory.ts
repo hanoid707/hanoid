@@ -304,7 +304,7 @@ export function createScenario(input: NewScenarioInput): Scenario {
     ...(t ? {} : { tickAIDay: 0 }),
     ...(first ? { firstFollowerId: first.id } : {}),
     difficulty: input.difficulty ?? 'normal',
-    romanceLevel: 'normal',
+    romanceLevel: 'racy',
     boost: null,
     itemLog: [],
     roster: { mode: useRoster.getState().defaultMode, ids: [] },

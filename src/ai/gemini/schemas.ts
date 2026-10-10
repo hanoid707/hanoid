@@ -78,13 +78,14 @@ const EVENT_PROPS = {
 
 export const EVENT_SCHEMA = obj(EVENT_PROPS);
 
+/** 필수(posts·news·trends·mission)를 먼저, 이유가 있을 때만 채우는 것(event·dm·ideas·bios)은 뒤에 — 빠뜨림을 줄인다 */
 export const TICK_SCHEMA = obj({
   posts: arr(LINE_M, 5),
   news: arr(STR, 1),
   trends: arr(obj({ tag: STR, n: INT }), 6),
+  mission: obj({ title: STR, desc: STR, kw: arr(STR, 2) }),
   event: { ...obj(EVENT_PROPS), nullable: true },
   dm: arr(LINE, 2),
-  mission: obj({ title: STR, desc: STR, kw: arr(STR, 2) }),
   ideas: arr(STR, 2),
   bios: arr(obj({ h: STR, bio: STR }), 1),
 });

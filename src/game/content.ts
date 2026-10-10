@@ -1,5 +1,5 @@
 /**
- * 연애·플러팅 수위(romanceLevel) — 순한맛·보통·매콤함 3단계
+ * 연애·플러팅 수위(romanceLevel) — 순한맛·보통·에로틱 3단계
  * 사용자가 나 탭에서 직접 조절하는 "다이얼". AI 지시문·설렘 변화 폭이 단계별로 달라진다.
  */
 import type { RomanceLevel } from '../types';

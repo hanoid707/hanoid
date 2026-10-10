@@ -249,8 +249,8 @@ export function changeAffinity(d: Scenario, id: ID, delta: number, romanceDelta 
   const c = d.characters[id];
   if (!c) return null;
   if (delta) c.affinity = clamp(Math.round(c.affinity + delta), -100, 100);
-  // 공통 캐릭터(사용자가 넣은 계정 — 실존 인물일 수 있음)는 설렘을 올리지 않는다
-  if (romanceDelta && c.relationBase !== 'family' && !c.rosterId) c.romance = clamp(Math.round((c.romance ?? 0) + romanceDelta), 0, 100);
+  // 공통 캐릭터(사용자가 넣은 계정 — 실존 인물일 수 있음)·가족·10대는 설렘을 올리지 않는다(프롬프트의 [연애 공통]과 같은 선)
+  if (romanceDelta && c.relationBase !== 'family' && !c.rosterId && c.ageGroup !== 10) c.romance = clamp(Math.round((c.romance ?? 0) + romanceDelta), 0, 100);
   if (devotionDelta) c.devotion = clamp(Math.round((c.devotion ?? 0) + devotionDelta), 0, 100);
   return updateRelation(d, id);
 }
@@ -260,7 +260,7 @@ export function setCharacterStats(d: Scenario, id: ID, s: { affinity?: number; r
   const c = d.characters[id];
   if (!c) return null;
   if (s.affinity !== undefined) c.affinity = clamp(Math.round(s.affinity), -100, 100);
-  if (s.romance !== undefined && c.relationBase !== 'family' && !c.rosterId) c.romance = clamp(Math.round(s.romance), 0, 100);
+  if (s.romance !== undefined && c.relationBase !== 'family' && !c.rosterId && c.ageGroup !== 10) c.romance = clamp(Math.round(s.romance), 0, 100);
   if (s.devotion !== undefined) c.devotion = clamp(Math.round(s.devotion), 0, 100);
   return updateRelation(d, id, { force: true });
 }

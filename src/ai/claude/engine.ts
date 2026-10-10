@@ -4,7 +4,7 @@
  * - 첫 호출 때 허용 창이 한 번 뜬다. 거절하면 이번 접속 동안은 클로드를 건너뛴다(다른 AI가 없으면 그 반응은 비워 둠).
  * - 프롬프트·응답 정리는 제미나이 엔진과 같다(src/ai/prompts.ts, normalize.ts).
  * - 모델 등급: 짧은 반응(답글·쪽지·댓글·제안·캐릭터)은 quick, 세계를 움직이는 일(하루 정산·이벤트)은 default(균형 모드 기준).
- * - 사용량: 토큰 수를 알려 주지 않아서 글자 수로 추정(한국어 ≈ 2.2자/토큰), 요금은 0(Claude 요금제 사용량에서 차감).
+ * - 사용량: 토큰 수를 알려 주지 않아서 글자 수로 추정(한국어 ≈ 1.25자/토큰), 요금은 0(Claude 요금제 사용량에서 차감).
  */
 import { getArtifactCapability } from '../../config';
 import { recordUsage } from '../../store/usage';
@@ -57,8 +57,8 @@ const HINT: Record<string, [string, boolean]> = {
 
 /** 짧은 반응 = quick, 세계를 움직이는 일 = default */
 const WORLD_KINDS = new Set(['tick', 'event', 'newEvent', 'cast']);
-/** 글자 수 → 토큰 추정(한국어) */
-const estTokens = (chars: number) => Math.round(chars / 2.2);
+/** 글자 수 → 토큰 추정(한국어). 클로드 토크나이저 실측 0.75~0.86 토큰/자 → 약 1.25자/토큰 */
+const estTokens = (chars: number) => Math.round(chars / 1.25);
 
 export function createClaudeEngine(settings: AISettings): AIEngine {
   const mode = settings.claudeMode ?? 'balanced';
@@ -68,7 +68,7 @@ export function createClaudeEngine(settings: AISettings): AIEngine {
     const sample = await getSample();
     if (!sample) throw new ClaudeError('이 화면에서는 클로드를 쓸 수 없어요', 'unavailable', true);
     const tier = tierFor(kind);
-    const input = wellFormed(`${ctx || kind === 'cast' ? P.systemFor(ctx) : P.LITE_SYSTEM}\n\n${prompt}\n\n## 응답 형식\n아래 모양의 JSON 값 하나만 출력한다(설명·코드펜스 없이). 값은 예시일 뿐이니 상황에 맞게 새로 정한다.\n${shape}`);
+    const input = wellFormed(`${ctx ? P.systemFor(ctx) : P.LITE_SYSTEM}\n\n${prompt}\n\n[응답 형식]\n아래 모양의 JSON 값 하나만 출력한다(설명·코드펜스 없이). 글자 값은 자리일 뿐이니 새로 쓰고, <…> 자리는 [할 일]의 범위 안 정수로 바꿔 쓴다.\n${shape}`);
     const t0 = Date.now();
     const usage = (ok: boolean, out: number) =>
       recordUsage({ provider: 'claude', model: `claude-${tier}`, kind, inTok: estTokens(input.length), outTok: out, ms: Date.now() - t0, ok, via: 'sample', estimated: true });
