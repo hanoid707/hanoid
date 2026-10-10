@@ -129,7 +129,7 @@ const nameOf = (ctx: AIContext, id: ID) => (id === 'me' ? '플레이어' : (ctx.
 const GRADE_TONE = { easy: '후하게', normal: '공정하게', hard: '깐깐하게' } as const;
 
 /** 호감 변화 4단계(양 끝에 계기를 붙여야 가운데로 몰리지 않는다) */
-const AFF_SCALE = '무시·비꼼 -6 · 가벼운 반응 +2 · 반갑거나 직접 언급 +8 · 큰 소식·감동 +15';
+const AFF_SCALE = '무시·비꼼 -6 · 가벼운 반응 +2 · 반갑거나 직접 언급 +9 · 큰 소식·감동 +18';
 
 /** 연애·성적 반응이 없는 인물(수위와 무관): 연애 금지 표시(실존 인물일 수 있음)·가족·10대 */
 const noRomance = (c: CastInfo) => !!c.realPerson || c.relation === 'family' || c.ageGroup === 10;
