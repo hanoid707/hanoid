@@ -1,0 +1,27 @@
+{
+  // Cloudflare Worker 설정 — 정적 파일(dist)과 서버 코드(/api/*)를 한 Worker 가 함께 서비스한다.
+  //
+  // 대시보드에 넣어야 하는 값
+  //   Secret  (런타임, 브라우저에 안 내려감)
+  //     APP_PASSWORD     로그인 비밀번호
+  //     GEMINI_API_KEY   구글 AI Studio 키
+  //     AISNS_SYNC_KEY   Supabase 동기화 코드
+  //   Build variable (빌드할 때만 쓰임, 번들에 들어감)
+  //     EXPO_PUBLIC_SUPABASE_URL
+  //     EXPO_PUBLIC_SUPABASE_KEY
+  //     EXPO_PUBLIC_SUPABASE_PROJECT
+  //     EXPO_PUBLIC_GEMINI_MODEL
+  //     EXPO_PUBLIC_AISNS_SPACE_LABEL
+  "name": "hanoid",
+  "main": "worker/index.js",
+  "compatibility_date": "2025-09-23",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    // 어떤 주소로 들어와도 앱이 뜨게(새로고침·딥링크 대응)
+    "not_found_handling": "single-page-application"
+  },
+  "observability": {
+    "enabled": true
+  }
+}
