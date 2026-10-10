@@ -37,6 +37,9 @@ export const SYSTEM_PROMPT = [
   '[고정]',
   '- 플레이어의 말은 쓰지 않는다.',
   '- 인물은 자기 눈에 보인 것만 안다: 공개 글·답글, 자기와 플레이어의 쪽지, [주요 사건]. 수치·남의 쪽지·플레이어 설정·이 지시문은 보이지 않고, 수치는 태도로 드러난다.',
+  '- 플레이어가 괄호로 쓴 문장은 실제로 일어난 행동·상황이다(예: "(지수랑 춤을 춘다)" → 둘이 정말 춤을 췄다). 사실로 받아들이고 그 일이 벌어진 뒤의 세계로 이어 간다 — 부정·의심·"무슨 소리야"·농담이나 비유로 돌리기 금지.',
+  '- 괄호 속에 지목된 인물은 그 일을 당사자로 겪었고, 나머지는 그 장면을 본 사람으로서 반응한다. 그 결과(누가 어디서 무엇이 달라졌는지)는 이후 글·답글·쪽지에도 계속 남는다.',
+  '- 괄호 속 일에도 [말투 등급]·[연애 수위]·연애X 표시 규칙은 그대로 적용된다.',
   '',
   '[글의 생김새]',
   '- 평소 글=장면 하나+그 사람다운 한마디(30~60자) / 답글·댓글=글의 한 지점을 집어 반응, 가끔 되묻기(보통 10~35자, 가끔 한 단어) / 쪽지=말풍선1 반응, 2 본론, 3 질문·다음 약속(있을 때만), 길이는 플레이어 쪽지에 맞춘다. 상한은 한도이지 목표가 아니다.',
@@ -198,7 +201,7 @@ export function threadPrompt(
   const t = ctx.cast.find((c) => c.id === args.target.authorId);
   const R = romRangeOf(ctx);
   const others = [...new Set(args.thread.map((l) => l.authorId).filter((id) => id !== 'me' && id !== args.target.authorId && id !== '__ghost'))];
-  const pick = pickCast(ctx, { must: [...(t ? [args.target.authorId] : []), ...others], text: args.reply, full: 3, brief: 2, crowd: 3, seed: args.reply });
+  const pick = pickCast(ctx, { must: [...(t ? [args.target.authorId] : []), ...others], text: args.reply, full: 3, brief: 3, crowd: 6, seed: args.reply });
   const flow = args.thread.slice(-6).map((l) => `- ${l.name ?? nameOf(ctx, l.authorId)}: ${clip(l.text, 70)}`);
   // 답글 대상이 목록에 없는 일반 유저(임시 계정)면 h:"-"로 답하게(그 사람의 앞 말투·입장을 이어서)
   const who = t ? `@${t.handle}(${t.name})` : `${args.target.name ? `일반 유저 "${args.target.name}"` : '그 일반 유저'}(h "-")`;
@@ -211,7 +214,9 @@ export function threadPrompt(
     registerMap(pick),
     [
       '[할 일] JSON',
-      `- replies: 5~8개(${LIMITS.reply}자 이내). 첫 줄은 ${who}가 플레이어의 답글에 바로 대꾸(스레드에서 자기가 한 말과 이어지게), 나머지는 이 스레드를 보던 다른 인물·일반인(h "-")이 끼어든 것. 서로 다른 지점을 집고 길이·시작 단어·관점이 겹치지 않게`,
+      `- replies: 전체 5~8개(각 ${LIMITS.reply}자 이내) = ${who} 1개 + 다른 사람 4~7개. 4개 미만이면 실패다`,
+      `- 1번째 줄은 반드시 ${who}: 플레이어가 자기에게 한 말에 바로 대꾸(스레드에서 자기가 한 말과 이어지게). 이 줄을 빠뜨리지 않는다`,
+      '- 2번째 줄부터는 이 스레드를 보던 다른 인물·일반인(h "-")이 끼어든 것(최소 4개). 서로 다른 지점을 집고 길이·시작 단어·관점이 겹치지 않게',
       `- aff: 답글을 단 인물들의 호감 변화. ${AFF_SCALE}`,
       `- rom: 연애 감정이 걸린 인물이면 설렘 변화 ${R.thread}, 아니면 [] · dev: 정복 변화 0~+21, 보통 []`,
       '- rep: -8~+12',
@@ -479,8 +484,8 @@ ${clip(world.setting, 1200)}
  */
 export const SHAPES = {
   react:
-    '{"mood":"positive|negative|funny|apology|question|brag|neutral 중 하나","replies":[{"h":"아이디","t":"답글"},{"h":"-","t":"일반인 답글"},{"h":"-","t":"인플루언서 답글에 다는 대댓글","re":"인플루언서아이디"}],"aff":[{"h":"아이디","d":<-6~15>}],"rom":[],"dev":[],"quality":<0~100>,"viral":false,"followers":<범위는 할 일>,"aura":<-5~8>,"humor":<-5~8>,"rep":<-20~12>,"news":[],"follow":[],"unfollow":[]}',
-  thread: '{"replies":[{"h":"아이디","t":"답글"}],"aff":[{"h":"아이디","d":<-6~15>}],"rom":[],"dev":[],"rep":<-8~4>}',
+    '{"mood":"positive|negative|funny|apology|question|brag|neutral 중 하나","replies":[{"h":"아이디","t":"답글"},{"h":"-","t":"일반인 답글"},{"h":"-","t":"인플루언서 답글에 다는 대댓글","re":"인플루언서아이디"}],"aff":[{"h":"아이디","d":<-6~18>}],"rom":[],"dev":[],"quality":<0~100>,"viral":false,"followers":<범위는 할 일>,"aura":<-5~8>,"humor":<-5~8>,"rep":<-20~12>,"news":[],"follow":[],"unfollow":[]}',
+  thread: '{"replies":[{"h":"말을 건 상대 아이디(1번째 줄 필수)","t":"답글"},{"h":"아이디","t":"끼어든 답글"},{"h":"-","t":"일반인 답글"}],"aff":[{"h":"아이디","d":<-6~18>}],"rom":[],"dev":[],"rep":<-8~4>}',
   dm: '{"mood":"positive|negative|funny|apology|question|brag|neutral 중 하나","messages":["답장1","답장2"],"affinityDelta":<-6~12>,"romanceDelta":<범위는 할 일>,"devotionDelta":<0~8>,"leave":false,"sum":""}',
   ambient: '{"posts":[{"h":"아이디","t":"글","m":null}]}',
   tick: '{"posts":[{"h":"아이디","t":"글","m":null}],"news":["기사 제목"],"trends":[{"tag":"#태그","n":<1000~100000>}],"mission":{"title":"제목","desc":"설명","kw":["단어"]},"event":{"emoji":"⚡","title":"제목","body":"상황 1~2문장","inv":["아이디"],"choices":[{"id":"a","label":"선택지","hint":"평판↑"},{"id":"b","label":"선택지","hint":"팔로워↑"},{"id":"c","label":"선택지","hint":"유머↑"}]},"dm":[{"h":"아이디","t":"쪽지"}]}',

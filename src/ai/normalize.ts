@@ -202,7 +202,7 @@ export function normReact(ctx: AIContext, r: Raw, o: { n?: number; seed?: string
 
 export function normThread(ctx: AIContext, r: Raw, seed?: string): ThreadReaction {
   return {
-    replies: lines(ctx, r.replies, { ghost: true, seed, max: 2, maxLen: LIMITS.reply + 50, noNews: true, toPlayer: true }),
+    replies: lines(ctx, r.replies, { ghost: true, seed, max: 8, maxLen: LIMITS.reply + 50, noNews: true, toPlayer: true }),
     deltas: {
       affinity: affinityMap(ctx, pick1(r, 'aff', 'affinity')),
       romance: affinityMap(ctx, pick1(r, 'rom', 'romance')),

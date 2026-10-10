@@ -54,9 +54,9 @@ export function postEngagement(i: EngagementInput): Engagement {
  * 한 번에 달리는 답글·댓글 수(v3.1): 보통 5~6개. 그중 인플루언서(팔로워 10만↑·셀럽)가 답글을 달면
  * 그 답글 아래로 2~3개가 더 달린다(대댓글). 한 번에 최대 8개. 전부 AI가 글 내용에 맞춰 쓴다.
  */
-export const BURST = { min: 5, max: 6, cascadeMax: 3, total: 8 } as const;
+export const BURST = { min: 6, max: 7, cascadeMax: 3, total: 10 } as const;
 
-/** 이번에 달릴 기본 답글 수(5~6) */
+/** 이번에 달릴 기본 답글 수(6~7) */
 export function burstCount(): number {
   return rand(BURST.min, BURST.max);
 }

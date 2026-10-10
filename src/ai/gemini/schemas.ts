@@ -103,7 +103,7 @@ export const OUTCOME_SCHEMA = obj({
 });
 
 export function commentsSchema(count: number) {
-  return obj({ comments: arr(LINE_RE, Math.min(8, Math.max(1, count) + 3)) });
+  return obj({ comments: arr(LINE_RE, Math.min(10, Math.max(1, count) + 3)) });
 }
 
 export const FIRST_DM_SCHEMA = obj({ messages: arr(STR, 2) });

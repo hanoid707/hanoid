@@ -19,7 +19,7 @@ type Raw = Record<string, unknown>;
 /** 호출 종류별 출력 토큰 상한 */
 const MAX_OUT = {
   react: (n: number) => 380 + (n + 3) * 80,
-  thread: 400,
+  thread: 1200,
   dm: 460,
   ambient: (n: number) => 120 + n * 90,
   tick: 1500,
@@ -78,7 +78,7 @@ export function createGeminiEngine(settings: AISettings, opts: { via?: GeminiVia
     },
 
     async threadComments(ctx, { post, count, existing }) {
-      const n = clamp(Math.round(count), 1, 6);
+      const n = clamp(Math.round(count), 1, 7);
       const r = await call(ctx, P.commentsPrompt(ctx, post, n, existing), S.commentsSchema(n), 'threadComments', MAX_OUT.comments(n), 1);
       return N.normComments(ctx, r, { count: n, seed: `c${hashStr(post.text)}`, authorId: post.authorId });
     },

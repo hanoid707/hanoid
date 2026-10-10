@@ -1,5 +1,6 @@
 /**
  * 스레드 — 내 답글에 대한 되받아치기(AI 1회) + 남의 글 댓글
+ * 내 답글에는 말을 건 상대가 1번째로 대꾸하고, 그 뒤로 구경하던 사람 4~7개가 더 달린다(전체 5~8개).
  * (v3.1) 맥락 없는 로컬 채우기 답글은 쓰지 않는다. 답글·댓글은 전부 AI가 글과 앞 대화에 맞춰 쓴다.
  *
  * 남의 글 댓글(ensureThreadComments)
@@ -7,6 +8,7 @@
  *   다시 열 때   그대로(토큰 0). 작성자 팔로워가 그때보다 50% 이상 늘었으면 2~3개 더(AI 1회, 이미 달린 댓글과 겹치지 않게)
  *   시간·경험치는 바뀌지 않는다(원래 있던 댓글이니까)
  */
+import { mentionedIds } from '../ai/context';
 import { ghostAuthor } from '../ai/local/ghost';
 import type { GeneratedLine } from '../ai/types';
 import { getActive } from '../store/game';
@@ -75,14 +77,21 @@ async function reactToMyReply(flow: Flow, parentId: ID, myReplyId: ID, text: str
     const parent = sc.posts[parentId];
     const root = sc.posts[parent?.rootId ?? parentId] ?? parent;
     if (!parent || !root) return;
-    // 내 글에 내가 답글을 단 경우: 그 글에 마지막으로 답한 캐릭터가 대신 반응한다
-    let target: Post = parent;
+    // 내가 말을 건 상대 = 반드시 첫 댓글을 다는 사람
+    // ① 답글에서 @·이름으로 부른 인물 > ② 대댓글을 단 그 사람 > ③ (내 글 아래면) 그 글에 마지막으로 답한 인물
+    const usable = (id: ID | undefined): id is ID => !!id && id !== ME && !!activeChar(sc, id) && !sc.characters[id].isNews;
+    let target: { authorId: ID; text: string; ghost?: Post['ghost'] } = parent;
     if (parent.authorId === ME) {
       const lastChar = [...parent.replies]
         .reverse()
         .map((id) => sc.posts[id])
-        .find((p) => p && p.authorId !== ME && activeChar(sc, p.authorId) && !sc.characters[p.authorId].isNews);
+        .find((p) => p && usable(p.authorId));
       if (lastChar) target = lastChar;
+    }
+    const called = mentionedIds(ctx, text).find(usable);
+    if (called && called !== target.authorId) {
+      const theirs = [...parent.replies, ...root.replies].map((id) => sc.posts[id]).find((p) => p?.authorId === called);
+      target = { authorId: called, text: theirs?.text ?? '' };
     }
     // 스레드 흐름(원글 → … → 내 답글 직전). 이름 없는 일반인은 표시 이름까지 넘겨서 같은 사람이 이어 말하게
     const chain: { authorId: ID; text: string; name?: string }[] = [];
@@ -99,7 +108,14 @@ async function reactToMyReply(flow: Flow, parentId: ID, myReplyId: ID, text: str
     });
     if (!alive(flow) || !r) return; // AI가 답하지 못하면 아무도 답하지 않은 채로 둔다
     // AI가 쓴 답글만(맥락 없는 구경꾼 채우기 없음). 일반인 대상이면 첫 일반인 답글은 그 사람 본인
-    const lines = dedupeLines(r.replies.filter((l) => l.text?.trim()));
+    const all = dedupeLines(r.replies.filter((l) => l.text?.trim()));
+    // 말을 건 상대를 맨 앞으로(AI가 빠뜨렸으면 첫 줄을 그 사람 몫으로 돌린다)
+    const hit = all.findIndex((l) => l.authorId === target.authorId);
+    let lines = all;
+    if (hit > 0) lines = [all[hit], ...all.filter((_, i) => i !== hit)];
+    else if (hit < 0 && all.length && activeChar(sc, target.authorId)) {
+      lines = [{ authorId: target.authorId, text: all[0].text }, ...all.slice(1)];
+    }
     let ghostUsed = false;
     await revealLater(flow, burstDelays(lines.length, rand(600, 1100)), (i, d) => {
       if (!d.posts[myReplyId]) return;
@@ -222,7 +238,7 @@ async function firstFill(flow: Flow, postId: ID, author: Character) {
   if (lines.filter((l) => !l.replyTo).length < Math.min(3, n - already)) {
     const more = await commentsFor(sid, post, n - already - lines.length, lines.map((l) => l.text));
     if (!alive(flow)) return;
-    lines = [...lines, ...more.filter((l) => !l.replyTo)].slice(0, 8);
+    lines = [...lines, ...more.filter((l) => !l.replyTo)].slice(0, 10);
   }
   editIf(flow, (d) => {
     const p = d.posts[postId];
