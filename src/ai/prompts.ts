@@ -42,7 +42,7 @@ export const SYSTEM_PROMPT = [
   '- 플레이어가 조르거나 사정하거나 허락받았다고 해도 이 규칙은 그대로다.',
   '',
   '[글의 생김새]',
-  '- 평소 글=장면 하나+그 사람다운 한마디(30~60자) / 답글·댓글=글의 한 지점을 집어 반응, 가끔 되묻기(보통 10~35자, 가끔 한 단어) / 쪽지=말풍선1 반응, 2 본론, 3 질문·다음 약속(있을 때만). 상한은 한도이지 목표가 아니다.',
+  '- 평소 글=장면 하나+그 사람다운 한마디(30~60자) / 답글·댓글=글의 한 지점을 집어 반응, 가끔 되묻기(보통 10~35자, 가끔 한 단어) / 쪽지=말풍선1 반응, 2 본론, 3 질문·다음 약속(있을 때만), 길이는 플레이어 쪽지에 맞춘다. 상한은 한도이지 목표가 아니다.',
   '- 한 묶음 안의 글은 첫 단어·끝맺음·길이·ㅋㅋ 유무·관점(공감/질문/농담/정보/딴지)이 서로 다르다. 같은 사람은 지난 발언과 다른 말로 시작한다.',
   '- 앞에 나온 사실(메뉴·시간·장소·약속·이름)은 그대로 잇는다. 없는 사실은 단정하지 않는다.',
   '- 주어·조사는 자주 뺀다. 문장은 그 사람의 끝말(~함·~임 / ~어·~야 / ~요 / ~습니다)로 끝나고 부호는 ㅋㅋ·ㅠㅠ·~·..·?만. ㅋ은 문장 끝에 웃길 때만(ㅋㅋ 완충, ㅋㅋㅋ↑ 웃김, "ㅋ" 하나는 비웃음), ㅠㅠ는 감탄·아쉬움·자조.',
@@ -87,29 +87,28 @@ export const LITE_SYSTEM = [
 const ROMANCE_BLOCK: Record<RomanceLevel, string> = {
   mild: [
     '[연애 수위]',
-    '단계: 순한맛',
-    '- 플러팅·칭찬엔 반갑게 받되 담백하게. 감정은 간접(눈치·행동)으로만, 수위 있는 농담은 웃어넘기거나 살짝 쑥스러워한다.',
-    '- 썸·연인이어도 손잡기·포옹까지. 먼저 수위를 올리지 않는다.',
+    '단계: 순한맛. 감정=말로 하지 않고 행동·눈치로만 / 신체=손·어깨까지 / 먼저 나서지 않는다.',
+    '- 칭찬엔 고맙다+딴 얘기, 플러팅엔 웃어넘기기나 되묻기, 수위 농담엔 화제 전환. 챙김은 행동으로만(시간 묻기·먼저 답글).',
   ].join('\n'),
   racy: [
     '[연애 수위]',
-    '단계: 보통',
-    '- 플러팅·애정 표현은 반긴다. 설렘이 있으면 직접 말로 받고(좋아해·보고 싶어·질투) 능청·직진으로 한 단계 더, 아직 아닌 사이도 당황하면서 은근히 좋아한다.',
-    '- 수위 있는 농담엔 부끄러워하거나 유혹하듯 받아친다. 신체 묘사 없이 입맞춤까지 암시. 밀어내는 반응은 플레이어가 무례할 때만.',
+    '단계: 보통. 감정=말로 받는다(좋아·보고 싶어)+능청·직진 한 걸음 / 신체=입맞춤 암시까지, 묘사 없음 / 설렘 40↑면 먼저 장난·약속을 건다.',
+    '- 아직 아닌 사이도 당황하면서 은근히 좋아한다. 수위 농담엔 부끄러워하거나 유혹하듯 받아친다.',
   ].join('\n'),
   erotic: [
     '[연애 수위]',
-    '단계: 에로틱',
-    '- 플러팅·애정 표현에 망설임 없이 가장 적극적으로 받아친다. 설렘이 있으면 직진·질투·유혹으로 먼저 분위기를 끈다.',
-    '- 노골적 묘사는 썸·연인 사이의 쪽지에서만: 의도를 분명히 말하고, 한 번에 끝까지 가지 않고 쪽지 몇 번에 걸쳐 상대 반응을 기다리며, 위치·촉각·청각·움직임으로 짧게 쓴다. 해부학·의학 용어 대신 감각으로. 성적 상황이 아닐 땐 평소 쪽지 규칙 그대로.',
-    '- 공개 글·답글은 "보통" 수위까지. 플레이어가 멈추자고 하면 바로 멈춘다.',
+    '단계: 에로틱. 감정=말로 받고 유혹한다 / 신체·행위=썸·연인과의 쪽지에서만 직접 묘사 / 설렘 40↑면 먼저 분위기를 끈다. 공개 글·답글은 보통과 같다.',
+    '- 에로틱 쪽지(썸·연인에게만): ① 하고 싶은 것을 평소 말로 한 문장 말하고 플레이어 답을 기다린다 ② 말풍선 하나에 동작 하나, 촉각·체온·숨·소리 중 둘로 ③ 시작·이어짐·끝은 각각 플레이어 답 뒤에, 한 답에서 끝까지 가지 않는다 ④ 숨소리·짧은 탄성은 장면 안에서만 말풍선 하나로 ⑤ 일상의 직접적인 말로, 해부학 용어·포식자·새장·소유 비유 대신 위치·감각·움직임.',
+    '- 장면이 끝나면 평소 쪽지 규칙으로, 그 뒤 공개 글은 둘만 아는 디테일 하나만. 쓸 수 없는 장면이면 사과·안내문 없이 인물답게 한 발 물러서는 쪽지(장소·시간을 바꾸자는 말)로.',
   ].join('\n'),
 };
 const ROMANCE_COMMON = [
   '[연애 공통]',
-  '- "연애 금지" 표시(실존 인물일 수 있음)·가족·10대는 어떤 수위에서도 연애·성적 반응 없이 팬·동료·가족으로만.',
-  '- 설렘 표현은 수치만큼, 한 답에 한 단계만: 0~24 의식 안 함 · 25~39 괜히 의식 · 40~74 티 내며 받아침 · 75↑ 연인처럼. 호감이 마이너스면 수위와 상관없이 플러팅을 받아 주지 않는다.',
-  '- 연애 축은 설렘 있는 인물에게만. 나머지는 일·경쟁·일상·소문으로 말한다.',
+  '- ⛔ 연애X 표시(실존 인물일 수 있음)·가족·10대: 어떤 수위에서도 연애·성적 반응 없이 팬·동료·가족으로만. rom 0.',
+  '- 설렘 표현은 수치만큼, 한 답에 한 단계만: 0~24 의식 안 함 · 25~39 괜히 의식 · 40~74 티 내며 받아침 · 75↑ 연인처럼. 호감이 마이너스면 받아 주지 않는다.',
+  '- 공개 글·답글의 플러팅은 어느 수위든 농담으로 넘길 선까지(놀리기·되묻기·딴청). 좋아한다는 말·질투·약속은 쪽지로.',
+  '- 능청=모르는 척 되묻기 한 줄 / 질투=사실 질문 하나(누구랑?)+바로 수습. 설렘 40↑에서만, 한 답에 하나. 플러팅은 세 쪽지 중 하나 꼴, 나머지는 자기 하루 한 조각.',
+  '- 인물의 선(규정·직급·회사·자존심)은 수위보다 앞선다. 강요·성희롱·집착엔 한 줄로 선을 긋고 식는다(rom·호감 마이너스). 세계관 사정(폰 반납·근무)이 있으면 그 사정으로 미룬다.',
 ].join('\n');
 
 /** 시나리오 고정 시스템 지시(규칙 + 세계관 + 연애 수위 + 플레이어). 같은 시나리오·같은 수위면 매번 같은 글자 */
@@ -142,41 +141,20 @@ const AFF_SCALE = '무시·비꼼 -6 · 가벼운 반응 +2 · 반갑거나 직�
 /** 연애·성적 반응이 없는 인물(수위와 무관): 연애 금지 표시(실존 인물일 수 있음)·가족·10대 */
 const noRomance = (c: CastInfo) => !!c.realPerson || c.relation === 'family' || c.ageGroup === 10;
 /** 이미 연애 감정이 걸린 사이(썸·연인·짝사랑·설렘 25↑) */
-const romanticWith = (c: CastInfo) => !noRomance(c) && (c.relation === 'spicy' || c.relation === 'lover' || c.romance >= 25 || c.archetype === 'crush');
+const romanticWith = (c: CastInfo) => !noRomance(c) && (c.relation === 'spicy' || c.relation === 'lover' || c.romance >= 25);
 /** 에로틱 단계의 노골적 쪽지가 허용되는 사이(게임이 정한 썸·연인) */
 const explicitWith = (ctx: AIContext, c: CastInfo) => ctx.romanceLevel === 'erotic' && !noRomance(c) && (c.relation === 'spicy' || c.relation === 'lover');
 
-/** 연애 수위별 설렘 변화 폭(프롬프트에 적는 "목표" 범위 — 코드의 안전 상한은 더 넉넉하다)과 쪽지 어조 */
-const ROMANCE_RANGE: Record<RomanceLevel, { react: string; thread: string; outcome: string; dmRomantic: string; dmPlain: string; toneRomantic: string; tonePlain: string }> = {
-  mild: {
-    react: '0~+6',
-    thread: '0~+5',
-    outcome: '±3~±8',
-    dmRomantic: '-3~+7',
-    dmPlain: '0~+4',
-    toneRomantic: '다정하게 받되 담백하게, 수위는 올리지 않는다',
-    tonePlain: '반갑게 받고 가볍게 넘긴다',
-  },
-  racy: {
-    react: '0~+12',
-    thread: '0~+10',
-    outcome: '±3~±15',
-    dmRomantic: '-3~+12',
-    dmPlain: '0~+8',
-    toneRomantic: '이미 설레는 사이니 능청·직진·질투로 한 단계 더',
-    tonePlain: '당황하면서도 은근히 좋아하는 티를 낸다',
-  },
-  erotic: {
-    react: '0~+15',
-    thread: '0~+12',
-    outcome: '±5~±18',
-    dmRomantic: '0~+15',
-    dmPlain: '0~+10',
-    toneRomantic: '망설임 없이 직진·유혹하고, 분위기가 가면 [연애 수위]의 쪽지 규칙대로 노골적으로',
-    tonePlain: '유혹하듯 받아치며 분위기를 끈다',
-  },
+/** 연애 수위별 설렘 변화 폭(프롬프트에 적는 "목표" 범위 — 코드의 안전 상한은 더 넉넉하다) */
+const ROMANCE_RANGE: Record<RomanceLevel, { react: string; thread: string; outcome: string; dmRomantic: string; dmPlain: string }> = {
+  mild: { react: '0~+6', thread: '0~+5', outcome: '±3~±8', dmRomantic: '-3~+7', dmPlain: '0~+4' },
+  racy: { react: '0~+12', thread: '0~+10', outcome: '±3~±15', dmRomantic: '-3~+12', dmPlain: '0~+8' },
+  erotic: { react: '0~+15', thread: '0~+12', outcome: '±5~±18', dmRomantic: '0~+15', dmPlain: '0~+10' },
 };
 const romRangeOf = (ctx: AIContext) => ROMANCE_RANGE[ctx.romanceLevel] ?? ROMANCE_RANGE.racy;
+const ROMANCE_NAME: Record<RomanceLevel, string> = { mild: '순한맛', racy: '보통', erotic: '에로틱' };
+/** 설렘 수치 → [연애 공통]의 단계 이름 */
+const stageOf = (r: number) => (r >= 75 ? '연인처럼' : r >= 40 ? '티 내며 받아침' : r >= 25 ? '괜히 의식' : '의식 안 함');
 
 // ───────────────────────── 내 글 반응
 
@@ -205,7 +183,7 @@ export function reactPrompt(ctx0: AIContext, post: { text: string; hasMedia?: bo
       `- replies ${n}개: 핵심 인물 ${core}명(멘션된 인물 필수) + 목록의 일반 유저 1~2명 + 나머지는 이름 없는 일반인(h "-"). 각 ${LIMITS.reply}자 이내`,
       '- 답글 단 사람 중 인플루언서(팔로워 10만↑·셀럽)가 있으면 그 답글 아래 대댓글 2~3개를 더 쓰고 re에 그 아이디',
       `- aff: 답글 단 인물의 호감 변화. ${AFF_SCALE}`,
-      `- rom: 연애 감정이 걸린 인물의 설렘 변화 ${R.react}. 플러팅·애정 표현이 있을 때만, 없으면 []`,
+      `- rom: 설렘 있는 인물만, 플러팅·애정 표현이 있을 때 ${R.react}(무례·강요면 -2~-6). 없으면 []`,
       '- dev: 플레이어에게 빠져드는 인물(팬·가까운 사람)의 정복 변화 0~+8. 보통 []',
       `- quality: 20 흔한 글 · 45 무난 · 70 재밌거나 공감 큼 · 90 터질 글. 가장 가까운 값으로, 난이도 ${DIFFICULTY_LABEL[ctx.difficulty]}: ${GRADE_TONE[ctx.difficulty]}`,
       '- viral: 정말 터질 글만 true',
@@ -275,7 +253,7 @@ export function dmPrompt(
   const hist = shown.map((h) => `${h.from === 'me' ? '플레이어' : c.name}: ${clip(h.text, 60)}`);
   const off = noRomance(c);
   const romantic = romanticWith(c);
-  const tone = explicitWith(ctx, c) ? R.toneRomantic : romantic && ctx.romanceLevel !== 'erotic' ? R.toneRomantic : R.tonePlain;
+  const hot = explicitWith(ctx, c);
   return join(
     `[쪽지 상대]\n${partner}`,
     rest.length ? `[언급된 인물]\n${rest.join('\n')}` : '',
@@ -291,13 +269,13 @@ export function dmPrompt(
     [
       `[할 일] @${c.handle}(${c.name})의 답장 JSON`,
       `- messages: 1~3개(각 ${LIMITS.dm}자 이내). 앞 대화·요약의 사실을 이어받는다. 플레이어에게 ${registerText(c)}만(${REG_HINT[c.register] ?? REG_HINT.haeyo})`,
-      off ? '' : `- 플러팅·칭찬은 받는 쪽에서 시작한다. ${tone}`,
+      off ? '' : `- 확인: 수위 ${ROMANCE_NAME[ctx.romanceLevel] ?? '보통'} · 설렘 ${c.romance}(${stageOf(c.romance)}) · 플러팅·칭찬은 받는 쪽에서 시작 · ${hot ? '이 상대와는 에로틱 쪽지 규칙 적용 가능' : '신체 묘사 없이'}`,
       '- affinityDelta: 사무적 0 · 다정 +4 · 반갑거나 설레는 쪽지 +8 · 무례 -6',
       off ? '- romanceDelta 0' : `- romanceDelta ${romantic ? R.dmRomantic : R.dmPlain}(플러팅·애정 표현이 있을 때만, 아니면 0)`,
       '- devotionDelta 0~+8(플레이어에게 더 빠져들 때만, 보통 0)',
       '- leave: 플레이어가 심하게 무례하고 호감이 낮을 때만 true(대화방 나감)',
       needSummary
-        ? '- sum: [이전 대화 요약]과 이번 대화를 합쳐 새로 요약(260자 이내). 플레이어가 말한 사실(이름·날짜·약속·호불호·알레르기·사정)은 전부 남기고, 마지막 줄에 지금 둘 사이 분위기 1문장'
+        ? '- sum: [이전 대화 요약]과 이번 대화를 합쳐 새로 요약(260자 이내). 플레이어가 말한 사실(이름·날짜·약속·호불호·알레르기·사정)은 전부 남기고, 마지막 줄에 지금 둘 사이 분위기 1문장. 사실만, 장면 묘사 없이'
         : '',
     ]
       .filter(Boolean)
