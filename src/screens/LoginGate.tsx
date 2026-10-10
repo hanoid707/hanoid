@@ -11,6 +11,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { getProxyKey, setProxyKey } from '../ai/gemini/client';
+import { isArtifactRuntime } from '../config';
 import { useGame } from '../store/game';
 import { restartSync } from '../sync';
 import { useTheme } from '../theme';
@@ -50,6 +51,8 @@ export function LoginGate({ children }: { children: React.ReactNode }) {
     if (Platform.OS !== 'web') return setPhase('open');
     if (readNum(LOCK_KEY) === 1) return setPhase('locked');
     if (getProxyKey()) return setPhase('open');
+    // 클로드 아티팩트에는 /api/login 이 없다 → 확인 요청(404 콘솔 에러)을 보내지 않고 바로 통과
+    if (isArtifactRuntime()) return setPhase('open');
     let alive = true;
     void (async () => {
       try {
