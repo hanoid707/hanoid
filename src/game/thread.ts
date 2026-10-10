@@ -16,7 +16,7 @@ import { GHOST, ME, SYSTEM, type Character, type GameTime, type ID, type Post, t
 import { cutText, rand, uid, viewsOf } from '../utils';
 import { tap } from '../utils/haptics';
 import { advanceClock, minutesBetween } from './clock';
-import { activeChar, alive, beginFlow, ctxOf, editIf, engine, fail, G, lineAuthor, OK, revealLater, type ActionResult, type Flow } from './core';
+import { activeChar, alive, backgroundAI, beginFlow, ctxOf, editIf, engine, fail, G, lineAuthor, OK, revealLater, type ActionResult, type Flow } from './core';
 import { diffOf, scaleSocial } from './difficulty';
 import { burstCount, burstDelays, isInfluencer, npcEngagement } from './engagement';
 import { dedupeLines, replyLikes } from './post';
@@ -203,6 +203,7 @@ export async function ensureThreadComments(postId: ID): Promise<void> {
   if (G().busy[key]) return;
   const gen = post.threadGen;
   if (gen && author.followers < gen.followers * 1.5) return; // 이미 만든 스레드: 그대로
+  if (gen && backgroundAI() !== 'full') return; // 절약: 이미 댓글이 있는 글에 더 붙이지 않는다
   const flow = beginFlow(sc.id);
   G().setBusy(key, true);
   try {
@@ -235,7 +236,8 @@ async function firstFill(flow: Flow, postId: ID, author: Character) {
   // ② AI 댓글(1회) — 글 내용에 맞춘 것만. 너무 적게 오면(3개 미만) 한 번 더
   let lines = await commentsFor(sid, post, n - already, []);
   if (!alive(flow)) return;
-  if (lines.filter((l) => !l.replyTo).length < Math.min(3, n - already)) {
+  // 절약(뒤에서 도는 AI가 전부가 아닐 때)이면 보충 호출 없이 온 만큼만 쓴다
+  if (backgroundAI() === 'full' && lines.filter((l) => !l.replyTo).length < Math.min(3, n - already)) {
     const more = await commentsFor(sid, post, n - already - lines.length, lines.map((l) => l.text));
     if (!alive(flow)) return;
     lines = [...lines, ...more.filter((l) => !l.replyTo)].slice(0, 10);

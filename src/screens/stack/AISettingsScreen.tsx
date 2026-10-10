@@ -1,5 +1,5 @@
 /**
- * AI 연결 — 쓸 수 있는 AI 고르기 · 제미나이 모델(가격 · 한 판 예상 요금) · 키 · 연결 테스트 · 클로드 모드
+ * AI 연결 — 쓸 수 있는 AI 고르기 · AI를 쓰는 범위(절약) · 제미나이 모델(가격 · 한 판 예상 요금) · 키 · 연결 테스트 · 클로드 모드
  *   + 사용량: 오늘 / 이번 달 / 전체(호출·토큰·예상 요금·원화) · 기능별 · 마지막 호출 · 충전 금액 대비 남은 예상 금액
  * 사용량은 이 기기에서 센 추정치다(응답에 적힌 토큰 × 가격표). 정확한 청구·한도는 Google AI Studio에서 본다.
  */
@@ -15,8 +15,15 @@ import { isArtifactRuntime } from '../../config';
 import { useGame } from '../../store/game';
 import { emptyBucket, PLAY_PROFILE, playCostUsd, PRICES, resetUsage, useUsage, type UsageBucket, type UsageEvent } from '../../store/usage';
 import { font, radius, space, useTheme } from '../../theme';
-import type { AISettings } from '../../types';
+import type { AISettings, BackgroundAI } from '../../types';
 import { formatCount } from '../../utils';
+
+/** 'AI를 쓰는 범위' 단계별 설명 */
+const BACKGROUND_DESC: Record<BackgroundAI, string> = {
+  off: '쪽지·내 글·답글·댓글·이벤트 선택처럼 내가 한 행동에만 AI를 써요. 날이 바뀌어도 남의 새 글·뉴스·트렌드·오늘의 미션·먼저 오는 쪽지는 생기지 않고, 이벤트는 내장된 것만 나와요.',
+  lite: '내 행동 + 날이 바뀔 때 남의 새 글 3개만 받아요(빠른 호출 1번). 뉴스·트렌드·오늘의 미션·먼저 오는 쪽지는 없어요.',
+  full: '하루 정산(새 글·뉴스·트렌드·이벤트·오늘의 미션·먼저 오는 쪽지), 새 이야기의 첫 쪽지, 댓글 보충까지 전부 써요.',
+};
 
 // ───────────────────────── 사용량 표시 도우미(나 탭에서도 쓴다)
 
@@ -240,6 +247,7 @@ export function AISettingsScreen() {
   if (total.errors > 0) tableRows.push({ label: '실패', val: (b) => `${b.errors}회` });
 
   const last = usage.last;
+  const background: BackgroundAI = ai.background ?? 'off';
   const head = (t: string, sub?: string) => (
     <View style={{ gap: 2 }}>
       <Text style={{ color: c.text, fontSize: font.h2, fontWeight: '800' }} accessibilityRole="header">
@@ -304,6 +312,21 @@ export function AISettingsScreen() {
           {current && !current.available ? (
             <Text style={{ color: c.warning, fontSize: font.small, lineHeight: 19 }}>고른 AI를 지금 쓸 수 없어서 캐릭터들이 반응하지 않아요. 키·연결을 확인해 주세요.</Text>
           ) : null}
+        </View>
+
+        {/* AI를 쓰는 범위(토큰 절약) */}
+        <View style={{ gap: space.sm }}>
+          {head('AI를 쓰는 범위', '내가 시키지 않아도 뒤에서 도는 AI를 얼마나 쓸지 골라요.')}
+          <Segmented<BackgroundAI>
+            options={[
+              { key: 'off', label: '내 행동만' },
+              { key: 'lite', label: '+ 새 글' },
+              { key: 'full', label: '전부' },
+            ]}
+            value={background}
+            onChange={(next) => setAI({ background: next })}
+          />
+          <Text style={{ color: c.subtext, fontSize: font.small, lineHeight: 19 }}>{BACKGROUND_DESC[background]}</Text>
         </View>
 
         {/* AI별 설정 */}

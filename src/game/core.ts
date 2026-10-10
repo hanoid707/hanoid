@@ -7,7 +7,7 @@ import { ghostAuthor } from '../ai/local/ghost';
 import type { AIEngine, GeneratedLine } from '../ai/types';
 import { sceneKey } from '../data/worlds';
 import { useGame } from '../store/game';
-import { GHOST, type Character, type Conversation, type GhostAuthor, type ID, type PhotoRef, type Scenario } from '../types';
+import { GHOST, type BackgroundAI, type Character, type Conversation, type GhostAuthor, type ID, type PhotoRef, type Scenario } from '../types';
 import { npcEngagement } from './engagement';
 import { addPost, addReply } from './progress';
 import { KEEP } from './rules';
@@ -71,6 +71,11 @@ export function engine(): GameAI {
     draftCharacter: soft('draftCharacter'),
     generateCast: soft('generateCast'),
   };
+}
+
+/** 뒤에서 도는 AI를 얼마나 쓸지(설정 없으면 'off' = 내 행동에만 AI) */
+export function backgroundAI(): BackgroundAI {
+  return G().settings.ai.background ?? 'off';
 }
 
 export function ctxOf(sid: ID) {

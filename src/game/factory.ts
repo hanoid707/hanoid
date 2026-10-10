@@ -14,7 +14,7 @@ import { useRoster } from '../store/roster';
 import { SYSTEM, type AgeGroup, type BadgeKind, type Character, type CharacterType, type Difficulty, type GameTime, type Gender, type Persona, type Quest, type Scenario, type World } from '../types';
 import { cutText, fill, hashStr, pick, rand, sanitizeHandle, uid } from '../utils';
 import { minutesBetween } from './clock';
-import { localVariant } from './events';
+import { localVariant } from './localEvents';
 import { koreanDisplayName, localBio, orgDisplayName, romanizeName } from './names';
 import { addPost, logActivity, pushNoti } from './progress';
 import { initRelation, typeDefaults } from './relationship';

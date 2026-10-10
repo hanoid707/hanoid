@@ -13,7 +13,7 @@ import { pickFace } from '../data/facePool';
 import { getActive } from '../store/game';
 import type { AgeGroup, Archetype, BadgeKind, Character, CharacterType, Gender, ID, PhotoRef, Scenario, SpeechRegister } from '../types';
 import { cutText, fill, pick, rand, sanitizeHandle, uid } from '../utils';
-import { alive, beginFlow, charType, ctxOf, editIf, engine, ensureConversation, fail, G, OK, trimMessages, type ActionResult } from './core';
+import { alive, backgroundAI, beginFlow, charType, ctxOf, editIf, engine, ensureConversation, fail, G, OK, trimMessages, type ActionResult } from './core';
 import { npcEngagement } from './engagement';
 import { koreanDisplayName, localBio, orgDisplayName } from './names';
 import { addMemory, addPost, logActivity, noteRelationChange, pushNoti } from './progress';
@@ -396,9 +396,12 @@ export function onScenarioCreated(sid: ID): void {
   if (!sc) return;
   if (sc.roster && sc.roster.mode !== 'off' && rosterNeedsUpdate(sc)) G().edit(sid, (d) => void injectRoster(d));
   const first = sc.firstFollowerId ? sc.characters[sc.firstFollowerId] : undefined;
-  if (first && !first.inactive && !sc.dms[first.id]?.messages.length) void firstFollowerDM(sid, first.id);
-  if (first?.id.startsWith('cf_')) void regenerateBioIn(sid, first.id);
-  if (tickDue(sc)) void runDayTick(sid);
+  // 절약(뒤에서 도는 AI가 전부가 아닐 때): 시키지 않은 첫 쪽지·자기소개 다듬기는 부르지 않는다
+  const auto = backgroundAI() === 'full';
+  if (auto && first && !first.inactive && !sc.dms[first.id]?.messages.length) void firstFollowerDM(sid, first.id);
+  if (auto && first?.id.startsWith('cf_')) void regenerateBioIn(sid, first.id);
+  // 직접 만든 세계관의 첫 하루 정산은 타임라인을 채우는 일이라 설정과 상관없이 한다
+  if (tickDue(sc)) void runDayTick(sid, { force: true });
 }
 
 /** 첫 팔로워의 첫 쪽지(AI 1회) — 입력 중… 표시 뒤 한 줄씩 */

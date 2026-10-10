@@ -5,11 +5,13 @@
  * (v3.1) 시간 건너뛰기는 ①만 기다리고 바로 끝난다 — ②는 뒤에서 돌고 시계 칩에 ⏳로 보인다.
  *        ②가 실패하면 그날 AI 몫을 비워 두지 않고 다음 새로고침·시간 이동 때 다시 시도한다(틀 문장으로 채우지 않음).
  * 이미지·영상 생성은 어디에서도 하지 않는다(글만 AI가 쓴다).
+ * (절약) 설정의 '뒤에서 도는 AI'가 전부가 아니면 ②를 부르지 않는다 — 끔: 내장 이벤트만(토큰 0) · 가볍게: 남의 새 글 3개만(빠른 호출 1회) + 내장 이벤트.
  */
 import { getActive } from '../store/game';
 import type { ID, Scenario } from '../types';
 import { cutText, rand, sleep, uid } from '../utils';
-import { addNpcLines, activeChar, alive, beginFlow, ctxOf, engine, ensureConversation, G } from './core';
+import { addNpcLines, activeChar, alive, backgroundAI, beginFlow, ctxOf, engine, ensureConversation, G } from './core';
+import { pickLocalEvent } from './localEvents';
 import { saveIdeas } from './ideas';
 import { addNewsPost, dailyHousekeeping, logActivity, pushItemLog, pushNoti, tickClock } from './progress';
 import { snapshot } from './undo';
@@ -47,7 +49,20 @@ function returnedToday(sc: Scenario, day: number): ID[] {
     .map((cv) => cv.characterId);
 }
 
-export async function runDayTick(sid: ID) {
+/** 내장 이벤트 하나 붙이기(토큰 0): 기다리는 이벤트가 없고 마지막 이벤트가 이틀 넘게 지났을 때만 */
+function addLocalEvent(d: Scenario) {
+  if (d.events.some((e) => e.status === 'pending')) return;
+  const last = d.events.reduce((m, e) => Math.max(m, e.at?.day ?? 0), 0);
+  if (d.clock.day - last < 2) return;
+  const v = pickLocalEvent(d, usedEventKeys(d));
+  if (!v) return;
+  const id = uid('ev');
+  d.events.push({ id, ...v, at: { ...d.clock }, status: 'pending' });
+  pushNoti(d, { type: 'event', eventId: id, text: `새 이벤트: ${v.title}` });
+}
+
+/** force: 설정과 상관없이 AI 하루 정산까지(직접 만든 세계관의 첫날 — 타임라인이 비어 있어서) */
+export async function runDayTick(sid: ID, opts: { force?: boolean } = {}) {
   const sc = G().scenarios[sid];
   if (!tickDue(sc)) return;
   const key = `tick:${sid}`;
@@ -69,6 +84,19 @@ export async function runDayTick(sid: ID) {
     const ctx = ctxOf(sid);
     const cur = G().scenarios[sid];
     if (!ctx || !cur) return;
+    const mode = opts.force ? 'full' : backgroundAI();
+    if (mode !== 'full') {
+      // 절약: 하루 정산 AI를 부르지 않는다. '가볍게'면 남의 새 글 3개만(실패하면 다음에 다시)
+      const lines = mode === 'lite' ? await engine().ambientPosts(ctx, 3) : [];
+      if (!alive(flow) || !lines) return;
+      G().edit(sid, (d) => {
+        d.tickAIDay = day;
+        addNpcLines(d, lines);
+        addLocalEvent(d);
+        d.events = d.events.slice(-30);
+      });
+      return;
+    }
     const returned = returnedToday(cur, day);
     const r = await engine().worldTick(ctx, { day, usedEventKeys: usedEventKeys(cur), returned });
     if (!alive(flow) || !r) return;

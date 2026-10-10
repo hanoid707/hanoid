@@ -6,13 +6,14 @@
  *   (v3.1) 세계관과 상관없는 공용 이벤트 틀은 없앴다 — 직접 만든 세계관은 처음부터 AI가 그 세계에 맞게 만든다
  *   고치기: 지금 보이는 후보에 저장(답하기 전까지만)
  */
-import { getWorldTemplate, type EventTemplate } from '../data/worlds';
+import { getWorldTemplate } from '../data/worlds';
 import { getActive } from '../store/game';
 import { type Difficulty, type EventChoice, type EventVariant, type GameEvent, type ID, type RomanceLevel, type Scenario } from '../types';
 import { clamp, cutText, fill, snippet } from '../utils';
 import { tap } from '../utils/haptics';
 import { ROMANCE_LABEL } from './content';
-import { addThreadedPosts, alive, beginFlow, castChars, ctxOf, engine, fail, G, OK, type ActionResult, type Flow } from './core';
+import { addThreadedPosts, alive, beginFlow, ctxOf, engine, fail, G, OK, type ActionResult, type Flow } from './core';
+import { localVariant } from './localEvents';
 import { DIFFICULTY_LABEL, EVENT_AFFINITY_CAP, EVENT_ROMANCE_CAP, diffOf, scaleEventDeltas } from './difficulty';
 import { addMemory, addXp, applyDeltas, consumeBoost, logActivity, pushNoti, questProgress, recomputeStatus, tickClock } from './progress';
 import { TIME_COST, XP } from './rules';
@@ -199,38 +200,6 @@ export function setEventVariant(eventId: ID, index: number): void {
     e.vIndex = i;
     showVariant(e, list[i]);
   });
-}
-
-/** 템플릿 → 후보(관련 인물은 지금 시나리오의 활동 중인 인물로) */
-export function localVariant(sc: Scenario, t: EventTemplate): EventVariant | null {
-  const cast = castChars(sc).filter((c) => !c.isNews);
-  const out: ID[] = [];
-  for (const key of t.involved ?? []) {
-    const c = cast.find((x) => x.id === `ch_${key}`);
-    if (c && !out.includes(c.id)) out.push(c.id);
-  }
-  for (const a of t.involvedArchetypes ?? []) {
-    const c = cast.find((x) => x.archetype === a && x.tier !== 'crowd' && !out.includes(x.id)) ?? cast.find((x) => x.tier !== 'crowd' && !out.includes(x.id));
-    if (c) out.push(c.id);
-  }
-  const need = (t.involved?.length ?? 0) + (t.involvedArchetypes?.length ?? 0);
-  while (out.length < need) {
-    const c = cast.find((x) => !out.includes(x.id));
-    if (!c) break;
-    out.push(c.id);
-  }
-  // 세계관 전용 인물이 하나도 없으면(직접 만든 세계관 등) 이 템플릿은 어색하다
-  if (need > 0 && !out.length) return null;
-  const name = (id?: ID) => (id ? sc.characters[id]?.name : undefined) ?? '누군가';
-  const vars = { me: sc.persona.name, a: name(out[0]), b: name(out[1]) };
-  return {
-    emoji: t.emoji,
-    title: fill(t.title, vars),
-    body: fill(t.body, vars),
-    choices: t.choices.map((c) => ({ id: c.id, label: fill(c.label, vars), ...(c.hint ? { hint: c.hint } : {}) })),
-    involved: out,
-    templateKey: t.key,
-  };
 }
 
 /** "다른 이벤트": 새 후보를 만들어 그 후보로 이동(로컬 후보 우선, 바닥나면 AI). 실패하면 false */

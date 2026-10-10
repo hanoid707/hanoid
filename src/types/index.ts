@@ -479,12 +479,19 @@ export interface Scenario {
 /** 쓸 AI(예전 세이브의 'mock'은 불러올 때 'gemini'로 바뀐다) */
 export type AIProvider = 'gemini' | 'claude';
 
+export type BackgroundAI = 'off' | 'lite' | 'full';
+
 export interface AISettings {
   provider: AIProvider;
   apiKey: string;
   model: string;
   /** 클로드(웹 아티팩트 전용) 속도/품질: 빠름 · 균형 · 고품질 */
   claudeMode?: 'fast' | 'balanced' | 'quality';
+  /**
+   * 내가 시키지 않아도 뒤에서 도는 AI(하루 정산·첫 쪽지·댓글 보충)를 얼마나 쓸지. 없으면 'off'.
+   *  off  = 안 쓴다(쪽지·내 글·댓글·이벤트 선택처럼 내 행동에만 AI) · lite = 날이 바뀔 때 남의 새 글 3개만(빠른 호출 1회) · full = 전부
+   */
+  background?: BackgroundAI;
   /** 사용자가 AI 연결 화면에서 직접 고른 적이 있는지(없으면 실행 환경에 맞게 자동 선택) */
   chosen?: boolean;
   /** 사용량 화면: 남은 예산 계산용(충전한 금액, 달러) */
