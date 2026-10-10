@@ -12,8 +12,8 @@ export interface PullResult {
   now: number;
   scenarios: { id: string; title: string; updatedTs: number; deleted: boolean; serverMs: number }[];
   media: string[];
-  /** 공간 설정(지금은 공통 캐릭터 목록) — 바뀐 게 있을 때만 */
-  settings?: { data: { roster?: unknown } | null; updatedTs: number } | null;
+  /** 공간 설정(공통 캐릭터 목록 + AI 키·모델) — 바뀐 게 있을 때만 */
+  settings?: { data: { roster?: unknown; ai?: unknown } | null; updatedTs: number } | null;
 }
 
 export interface RemoteScenario {

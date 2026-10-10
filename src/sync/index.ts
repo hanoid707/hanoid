@@ -43,6 +43,11 @@ let firstPullDone = false;
 /** 공통 캐릭터 목록: 올릴 게 있는지 / DB에서 받아 적용한 시각(다시 올리지 않게) */
 let rosterDirty = false;
 let applyingRemoteRoster = false;
+/** AI 키·모델: 기기 간 공유용(한 기기에서 넣으면 같은 동기화 코드를 쓰는 다른 기기에도 간다) */
+let unsubAI: (() => void) | null = null;
+let aiDirty = false;
+let applyingRemoteAI = false;
+let aiTs = 0;
 
 async function createBackend(): Promise<SyncBackend | null> {
   const s = useGame.getState().settings.sync;
@@ -88,6 +93,16 @@ export async function startSync() {
   });
   if (useRoster.getState().updatedTs > 0) rosterDirty = true;
 
+  // AI 키·모델 변화 감시 — PC에서 한 번 넣으면 폰에서도 그대로 쓰게 된다
+  unsubAI = useGame.subscribe((g, prevG) => {
+    if (applyingRemoteAI || g.settings.ai === prevG.settings.ai) return;
+    if (g.settings.ai.apiKey === prevG.settings.ai.apiKey && g.settings.ai.model === prevG.settings.ai.model) return;
+    aiTs = Date.now();
+    aiDirty = true;
+    schedulePush();
+  });
+  if (useGame.getState().settings.ai.apiKey) aiDirty = true;
+
   // 처음엔 기기에만 있던 세이브도 전부 올릴 후보
   for (const id of Object.keys(useGame.getState().scenarios)) dirty.add(id);
   await syncNow();
@@ -109,9 +124,11 @@ export async function restartSync() {
   if (pollTimer) clearInterval(pollTimer);
   unsubStore?.();
   unsubRoster?.();
+  unsubAI?.();
   pollTimer = null;
   unsubStore = null;
   unsubRoster = null;
+  unsubAI = null;
   started = false;
   firstPullDone = false;
   local = { cursor: 0, pendingMedia: local.pendingMedia };
@@ -162,21 +179,27 @@ export function retrySync() {
   void syncNow();
 }
 
-async function pushRoster() {
-  if (!backend || !rosterDirty) return;
+async function pushSettings() {
+  if (!backend || (!rosterDirty && !aiDirty)) return;
   const snap = rosterSnapshot();
+  const ai = useGame.getState().settings.ai;
+  const hadRoster = rosterDirty;
+  const hadAI = aiDirty;
   rosterDirty = false;
+  aiDirty = false;
   try {
-    await backend.settingsPut({ roster: snap }, Math.max(1, snap.ts));
+    // settingsPut 은 blob 을 통째로 덮어쓰므로 roster 와 ai 를 항상 같이 보낸다
+    await backend.settingsPut({ roster: snap, ai: { apiKey: ai.apiKey, model: ai.model, ts: aiTs } }, Math.max(1, snap.ts, aiTs));
   } catch (e) {
-    rosterDirty = true;
+    rosterDirty = hadRoster;
+    aiDirty = hadAI;
     throw e;
   }
 }
 
 async function pushDirty() {
   if (!backend) return;
-  await pushRoster();
+  await pushSettings();
   const st = useGame.getState();
   const items: PushItem[] = [];
   const ids = [...dirty];
@@ -221,6 +244,28 @@ async function pull() {
     }
     // 내 기기에만 있던 변경이 남아 있으면(내 목록이 받은 것보다 새로우면) 다시 올린다
     if (before > ts) rosterDirty = true;
+  }
+  // AI 키·모델(다른 기기에서 넣은 것) — 더 최신인 쪽이 이긴다
+  const rai = r.settings?.data?.ai as { apiKey?: string; model?: string; ts?: number } | undefined;
+  if (rai) {
+    const ts = rai.ts ?? r.settings?.updatedTs ?? 0;
+    if (ts > aiTs) {
+      const cur = useGame.getState().settings.ai;
+      const patch: { apiKey?: string; model?: string } = {};
+      if (rai.apiKey && rai.apiKey !== cur.apiKey) patch.apiKey = rai.apiKey;
+      if (rai.model && rai.model !== cur.model) patch.model = rai.model;
+      if (patch.apiKey || patch.model) {
+        applyingRemoteAI = true;
+        try {
+          useGame.getState().setAI(patch);
+        } finally {
+          applyingRemoteAI = false;
+        }
+      }
+      aiTs = ts;
+    } else if (aiTs > ts) {
+      aiDirty = true; // 이 기기 쪽이 더 최신 → 다시 올린다
+    }
   }
   const st = useGame.getState();
   const toFetch: string[] = [];
