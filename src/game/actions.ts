@@ -172,7 +172,7 @@ export function saveWorld(patch: Partial<Pick<World, 'name' | 'emoji' | 'tagline
 // 캐릭터: createQuickCharacter · regenerateBio(characters.ts)
 // 내 스탯: setMyStats · 공통 캐릭터: setRosterUse · applyRosterToActive(아래)
 
-/** 바이럴 모먼트 켜기/끄기(다음 행동 1번 강화: 글·답글·이벤트·선물) */
+/** 바이럴 모먼트 켜기/끄기(다음 행동 1번 강화: 글·답글·이벤트) */
 export function armViralMoment(on: boolean): void {
   const sc = getActive();
   if (!sc || !!sc.boost === on) return;

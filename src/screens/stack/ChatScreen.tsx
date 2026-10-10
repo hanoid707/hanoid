@@ -1,7 +1,7 @@
 /**
  * 쪽지 대화(X DM 스타일) — 메신저처럼: 같은 사람이 연달아 보낸 줄은 한 묶음, 묶음 끝에 프사·시각, 내 마지막 쪽지에 읽음 표시
  * 상대 답장은 한 줄씩 도착하고(게임이 시차를 둠) 그 사이에 "입력 중…" 말풍선이 보인다.
- * 머리말: 관계 칩 + 지금 쓰는 말투(예: 친구 · 반말) · 🎁 선물(아이템 화면으로)
+ * 머리말: 관계 칩 + 지금 쓰는 말투(예: 친구 · 반말) · 🎁 선물(누르면 선물 3종 창)
  */
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import { useEffect, useRef, useState } from 'react';
@@ -9,6 +9,7 @@ import { FlatList, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, 
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Avatar } from '../../components/Avatar';
 import { VerifiedBadge } from '../../components/Badge';
+import { GiftSheet } from '../../components/GiftSheet';
 import { IconGift, IconSend } from '../../components/icons';
 import { MentionInput } from '../../components/MentionInput';
 import { RelationChip } from '../../components/RelationChip';
@@ -43,6 +44,7 @@ export function ChatScreen() {
   const showToast = useGame((s) => s.showToast);
   const busy = useGame((s) => !!s.busy[`dm:${params.characterId}`]);
   const [text, setText] = useState('');
+  const [giftOpen, setGiftOpen] = useState(false);
   const listRef = useRef<FlatList<DMMessage>>(null);
 
   const ch = sc?.characters[params.characterId];
@@ -101,7 +103,7 @@ export function ChatScreen() {
         }
         right={
           <Pressable
-            onPress={() => nav.navigate('Items', { giftTo: ch.id })}
+            onPress={() => setGiftOpen(true)}
             accessibilityRole="button"
             accessibilityLabel="선물하기"
             hitSlop={8}
@@ -225,6 +227,7 @@ export function ChatScreen() {
           </View>
         )}
       </KeyboardAvoidingView>
+      <GiftSheet ch={ch} open={giftOpen} onClose={() => setGiftOpen(false)} />
     </Screen>
   );
 }

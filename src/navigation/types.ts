@@ -32,8 +32,8 @@ export type RootStackParamList = {
   AISettings: undefined;
   SyncSettings: undefined;
   CharacterEditor: { characterId?: string } | undefined;
-  /** (v3) 아이템(선물·바이럴 모먼트·되돌리기·시간 건너뛰기) — 상단 날짜를 누르면 */
-  Items: { giftTo?: string } | undefined;
+  /** (v3) 아이템(바이럴 모먼트·되돌리기·시간 건너뛰기) — 상단 날짜를 누르면. 선물은 쪽지 대화·프로필에서 */
+  Items: undefined;
   /** (v3) 내 팔로워·스탯 직접 조정 */
   StatsEditor: undefined;
   WorldEdit: undefined;

@@ -8,8 +8,8 @@ import { clamp, fill, rand, sleep, uid } from '../utils';
 import { tap } from '../utils/haptics';
 import { activeChar, alive, beginFlow, ctxOf, editIf, engine, ensureConversation, fail, G, OK, trimMessages, type ActionResult, type Flow } from './core';
 import { diffOf, scaleSocial } from './difficulty';
-import { GIFTS, giftEffect } from './items';
-import { addMemory, addXp, applyAffinity, consumeBoost, logActivity, pushItemLog, questProgress, tickClock } from './progress';
+import { giftBlocked, giftEffect, GIFTS } from './items';
+import { addMemory, addXp, applyAffinity, logActivity, pushItemLog, questProgress, tickClock } from './progress';
 import { DM_MAX_LEN, TIME_COST, XP } from './rules';
 import { runDayTick } from './tick';
 import { snapshot } from './undo';
@@ -41,13 +41,13 @@ export function sendDM(characterId: ID, text: string): ActionResult {
   return OK;
 }
 
-/** 선물 보내기: 쪽지로 선물 + 캐릭터가 답장, 호감도·설렘 상승(난이도·관계로 보정) */
+/** 선물 보내기: 쪽지로 선물 + 캐릭터가 답장. 효과는 고른 수치 하나만 고정 +18 — 보내는 즉시 반영(답장 내용·난이도·바이럴 모먼트와 무관) */
 export function sendGift(characterId: ID, giftId: string): ActionResult {
   const sc = getActive();
   if (!sc) return fail('none');
   const c = activeChar(sc, characterId);
   const gift = GIFTS.find((g) => g.id === giftId);
-  if (!c || !gift) return fail('none');
+  if (!c || !gift || giftBlocked(c, gift)) return fail('none');
   const conv = sc.dms[characterId];
   if (conv?.leftUntilDay != null && conv.leftUntilDay > sc.clock.day) return fail('left');
   if (G().busy[`dm:${characterId}`]) return fail('busy');
@@ -55,27 +55,27 @@ export function sendGift(characterId: ID, giftId: string): ActionResult {
 
   const sid = sc.id;
   let days = 0;
-  let base = { affinity: 0, romance: 0 };
+  const base = giftEffect(gift);
   G().edit(sid, (d) => {
     days = tickClock(d, TIME_COST.dm);
-    const boosted = consumeBoost(d, `${c.name}님에게 보낸 ${gift.name}`);
     const cv = ensureConversation(d, characterId);
     cv.messages.push({ id: uid('m'), from: 'me', text: gift.message, ts: Date.now(), at: { ...d.clock } });
     trimMessages(cv);
     cv.updatedTs = Date.now();
-    const sameDay = (d.itemLog ?? []).filter((x) => x.item === 'gift' && x.target === characterId && x.at.day === d.clock.day).length;
-    base = giftEffect(d.characters[characterId], gift, diffOf(d), boosted, sameDay);
     pushItemLog(d, 'gift', `${gift.emoji} ${c.name}님에게 ${gift.name}`, characterId);
     addXp(d, XP.dm);
     questProgress(d, 'dm', 1);
     logActivity(d, gift.emoji, fill('{c}님에게 {g}을(를) 선물했어요', { c: c.name, g: gift.name }));
+    applyAffinity(d, characterId, base.affinity, base.romance, base.devotion);
+    addMemory(d, fill('플레이어가 {c}에게 {g}을(를) 선물함', { c: c.name, g: gift.name }));
   });
   tap('success');
-  void dmConversation(beginFlow(sid), characterId, gift.message, days, { ...base, name: gift.name });
+  void dmConversation(beginFlow(sid), characterId, gift.message, days, true);
   return OK;
 }
 
-async function dmConversation(flow: Flow, characterId: ID, message: string, days: number, gift?: { affinity: number; romance: number; name: string }) {
+/** gift = 선물 쪽지(효과는 보낼 때 이미 반영 — 답장의 수치 변화는 더하지 않는다) */
+async function dmConversation(flow: Flow, characterId: ID, message: string, days: number, gift = false) {
   const sid = flow.sid;
   const key = `dm:${characterId}`;
   G().setBusy(key, true);
@@ -97,14 +97,9 @@ async function dmConversation(flow: Flow, characterId: ID, message: string, days
     });
     const r = await engine().dmReply(ctx, { characterId, history, message, priorSummary });
     if (!r) {
-      // AI가 끝내 답하지 못함 → 답장은 비워 둔다(틀 문장으로 채우지 않음). 선물 효과만 반영
+      // AI가 끝내 답하지 못함 → 답장은 비워 둔다(틀 문장으로 채우지 않음)
       editIf(flow, (d) => {
-        const cv = ensureConversation(d, characterId);
-        cv.typing = false;
-        const c = d.characters[characterId];
-        if (!c || !gift) return;
-        applyAffinity(d, characterId, gift.affinity, gift.romance);
-        addMemory(d, fill('플레이어가 {c}에게 {g}을(를) 선물함', { c: c.name, g: gift.name }));
+        ensureConversation(d, characterId).typing = false;
       });
       return;
     }
@@ -126,13 +121,14 @@ async function dmConversation(flow: Flow, characterId: ID, message: string, days
       const c = d.characters[characterId];
       if (!c) return;
       const diff = diffOf(d);
-      const aff = scaleSocial(clamp(r.affinityDelta ?? 0, -10, 15), diff) + (gift?.affinity ?? 0);
-      const rom = scaleSocial(clamp(r.romanceDelta ?? 0, -6, 15), diff) + (gift?.romance ?? 0);
-      // 선물은 정복도도 조금 올린다(받은 만큼 마음이 기운다)
-      const dev = scaleSocial(clamp(r.devotionDelta ?? 0, 0, 10), diff) + (gift ? Math.max(1, Math.round(gift.affinity / 4)) : 0);
-      applyAffinity(d, characterId, aff, rom, dev);
+      // 선물 쪽지는 보낼 때 이미 고정 효과를 반영했다 → 답장의 변화량은 더하지 않는다
+      if (!gift) {
+        const aff = scaleSocial(clamp(r.affinityDelta ?? 0, -10, 15), diff);
+        const rom = scaleSocial(clamp(r.romanceDelta ?? 0, -6, 15), diff);
+        const dev = scaleSocial(clamp(r.devotionDelta ?? 0, 0, 10), diff);
+        applyAffinity(d, characterId, aff, rom, dev);
+      }
       if (r.historySummary) cv.summary = r.historySummary;
-      if (gift) addMemory(d, fill('플레이어가 {c}에게 {g}을(를) 선물함', { c: c.name, g: gift.name }));
       if (r.leave) {
         cv.messages.push({ id: uid('m'), from: 'system', text: `${c.name}님이 대화방을 나갔습니다.`, ts: Date.now(), at: { ...d.clock } });
         cv.leftUntilDay = d.clock.day + 1;

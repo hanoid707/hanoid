@@ -9,7 +9,7 @@ import type { GameEvent, Scenario } from '../types';
 import { Button } from './ui';
 
 /**
- * 상단 날짜·시각 칩 — 누르면 아이템 화면(선물·바이럴 모먼트·되돌리기·시간 건너뛰기)
+ * 상단 날짜·시각 칩 — 누르면 아이템 화면(바이럴 모먼트·되돌리기·시간 건너뛰기)
  * 바이럴 모먼트가 켜져 있으면 🚀, 하루 정산 중이면 ⏳ 로 바로 보인다.
  */
 export function ClockChip({ sc, onPress }: { sc: Scenario; onPress?: () => void }) {
@@ -22,7 +22,7 @@ export function ClockChip({ sc, onPress }: { sc: Scenario; onPress?: () => void 
       onPress={onPress ?? (() => nav.navigate('Items'))}
       accessibilityRole="button"
       accessibilityLabel="아이템 열기"
-      accessibilityHint="선물·바이럴 모먼트·되돌리기·시간 건너뛰기"
+      accessibilityHint="바이럴 모먼트·되돌리기·시간 건너뛰기"
       hitSlop={6}
       style={({ pressed }) => [
         styles.clock,

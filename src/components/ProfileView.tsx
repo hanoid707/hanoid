@@ -1,6 +1,6 @@
 /**
  * 프로필 화면 공용(X 스타일): 배너 · 겹친 프로필 사진 · 이름 ✓ · @아이디 · 소개 · 위치/가입일 · 팔로우 수 · 탭(게시물/답글/미디어/마음에 들어요)
- * 내 프로필과 캐릭터 프로필이 같은 틀을 쓴다.
+ * 내 프로필과 캐릭터 프로필이 같은 틀을 쓴다. 내 프로필은 미디어 탭이 없다(hideMedia).
  */
 import { useNavigation } from '@react-navigation/native';
 import { useMemo, useState, type ReactNode } from 'react';
@@ -37,7 +37,7 @@ export interface ProfileInfo {
   isOrg?: boolean;
 }
 
-export function ProfileView({ sc, info, actions, extra, showLikes }: { sc: Scenario; info: ProfileInfo; actions: ReactNode; extra?: ReactNode; showLikes?: boolean }) {
+export function ProfileView({ sc, info, actions, extra, showLikes, hideMedia }: { sc: Scenario; info: ProfileInfo; actions: ReactNode; extra?: ReactNode; showLikes?: boolean; hideMedia?: boolean }) {
   const { c } = useTheme();
   const nav = useNavigation<RootNav>();
   const insets = useSafeAreaInsets();
@@ -57,8 +57,8 @@ export function ProfileView({ sc, info, actions, extra, showLikes }: { sc: Scena
   const tabs: { key: PTab; label: string }[] = [
     { key: 'posts', label: '게시물' },
     { key: 'replies', label: '답글' },
-    { key: 'media', label: '미디어' },
   ];
+  if (!hideMedia) tabs.push({ key: 'media', label: '미디어' });
   if (showLikes) tabs.push({ key: 'likes', label: '마음에 들어요' });
 
   const header = (

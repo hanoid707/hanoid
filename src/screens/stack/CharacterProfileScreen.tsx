@@ -1,11 +1,12 @@
 /**
  * 캐릭터 프로필(X 스타일) — 관계 칩 · 지금 쓰는 말투 · 호감도(-100~100)·설렘 막대 · 성별·나이·성격 · 그 사람의 글
- * 버튼: 캐릭터 설정 · 선물(아이템 화면) · 쪽지 · 팔로우
+ * 버튼: 캐릭터 설정 · 선물(선물 3종 창 → 보내면 쪽지 대화로) · 쪽지 · 팔로우
  */
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { authorOf } from '../../components/author';
+import { GiftSheet } from '../../components/GiftSheet';
 import { IconGift, IconMail, IconUserPen } from '../../components/icons';
 import { ProfileView } from '../../components/ProfileView';
 import { RelationChip } from '../../components/RelationChip';
@@ -32,6 +33,7 @@ export function CharacterProfileScreen() {
   const sc = useActive();
   const ch = sc?.characters[params.characterId];
   const [descOpen, setDescOpen] = useState(false);
+  const [giftOpen, setGiftOpen] = useState(false);
   if (!sc || !ch) {
     return (
       <Screen>
@@ -81,7 +83,7 @@ export function CharacterProfileScreen() {
         actions={
           <>
             {circle('캐릭터 설정', <IconUserPen size={18} color={c.text} />, () => nav.navigate('CharacterEditor', { characterId: ch.id }), 'profile-settings')}
-            {circle('선물', <IconGift size={18} color={c.text} />, () => nav.navigate('Items', { giftTo: ch.id }), 'profile-gift')}
+            {circle('선물', <IconGift size={18} color={c.text} />, () => setGiftOpen(true), 'profile-gift')}
             {circle('쪽지', <IconMail size={18} color={c.text} />, () => nav.navigate('Chat', { characterId: ch.id }), 'profile-dm')}
             <FollowButton c={ch} />
           </>
@@ -149,6 +151,7 @@ export function CharacterProfileScreen() {
           </View>
         }
       />
+      <GiftSheet ch={ch} open={giftOpen} onClose={() => setGiftOpen(false)} onSent={() => nav.navigate('Chat', { characterId: ch.id })} />
     </Screen>
   );
 }

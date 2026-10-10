@@ -241,6 +241,11 @@ export function registerOf(c: Character): SpeechRegister {
 
 // ───────────────────────── 적용
 
+/** 설렘이 오를 수 있는 상대인지 — 가족·공통 캐릭터(실존 인물일 수 있음)·10대·군중/단체 계정은 제외 */
+export function canRomance(c: Character): boolean {
+  return c.tier !== 'crowd' && !c.isNews && c.relationBase !== 'family' && !c.rosterId && c.ageGroup !== 10;
+}
+
 /**
  * 호감도·설렘을 바꾸고 관계·말투를 다시 계산한다(범위 제한 포함).
  * 관계 변화는 하루 한 번만: 오늘 이미 바뀌었으면 수치만 바꾸고 관계는 다음 날 반영.
@@ -249,6 +254,7 @@ export function changeAffinity(d: Scenario, id: ID, delta: number, romanceDelta 
   const c = d.characters[id];
   if (!c) return null;
   if (delta) c.affinity = clamp(Math.round(c.affinity + delta), -100, 100);
+  if (romanceDelta && canRomance(c)) c.romance = clamp(Math.round((c.romance ?? 0) + romanceDelta), 0, 100);
   if (devotionDelta) c.devotion = clamp(Math.round((c.devotion ?? 0) + devotionDelta), 0, 100);
   return updateRelation(d, id);
 }

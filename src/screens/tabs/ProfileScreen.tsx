@@ -26,6 +26,7 @@ export function ProfileScreen() {
       <ProfileView
         sc={sc}
         showLikes
+        hideMedia
         info={{
           authorId: ME,
           name: sc.persona.name,

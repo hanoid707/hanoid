@@ -1,20 +1,19 @@
-/** 홈 타임라인(X 스타일) — 왼쪽 위 세계관 · 오른쪽 위 날짜(누르면 아이템) · 추천/팔로잉 탭 · 오른쪽 아래 글쓰기 버튼 */
+/** 홈 타임라인(X 스타일) — 왼쪽 위 세계관(누르면 세계관·세이브 창) · 오른쪽 위 날짜(누르면 아이템) · 오른쪽 아래 글쓰기 버튼 */
 import { useNavigation, useScrollToTop } from '@react-navigation/native';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ClockChip, EventCard, StatusBanner } from '../../components/Hud';
-import { IconPlus } from '../../components/icons';
+import { IconChevronRight, IconPlus } from '../../components/icons';
 import { PostCard } from '../../components/PostCard';
+import { SaveSwitcher } from '../../components/SaveList';
 import { Screen } from '../../components/Screen';
-import { EmptyState, Tabs } from '../../components/ui';
+import { EmptyState } from '../../components/ui';
 import { refreshFeed } from '../../game/actions';
 import type { RootNav } from '../../navigation/types';
 import { useActive } from '../../store/game';
 import { font, space, useTheme } from '../../theme';
-import { ME, SYSTEM, type Post } from '../../types';
-
-type FeedTab = 'forYou' | 'following';
+import type { Post } from '../../types';
 
 export function HomeScreen() {
   const { c } = useTheme();
@@ -22,7 +21,7 @@ export function HomeScreen() {
   const sc = useActive();
   const insets = useSafeAreaInsets();
   const [refreshing, setRefreshing] = useState(false);
-  const [tab, setTab] = useState<FeedTab>('forYou');
+  const [savesOpen, setSavesOpen] = useState(false);
   const listRef = useRef<FlatList<Post>>(null);
   // 홈 탭을 한 번 더 누르면 맨 위로(X와 같음)
   useScrollToTop(listRef);
@@ -36,37 +35,34 @@ export function HomeScreen() {
     }
   }, []);
 
-  const posts = useMemo(() => {
-    if (!sc) return [];
-    const all = sc.feed.map((id) => sc.posts[id]).filter(Boolean);
-    if (tab === 'forYou') return all;
-    return all.filter((p) => p.authorId === ME || p.authorId === SYSTEM || sc.characters[p.authorId]?.iFollow);
-  }, [sc, tab]);
+  const posts = useMemo(() => (sc ? sc.feed.map((id) => sc.posts[id]).filter(Boolean) : []), [sc]);
 
   if (!sc) return null;
   const pending = sc.events.filter((e) => e.status === 'pending');
-  const toTop = () => listRef.current?.scrollToOffset({ offset: 0, animated: true });
 
   return (
     <Screen>
-      <View style={[styles.header, { paddingTop: insets.top, backgroundColor: c.bg }]}>
+      <View style={[styles.header, { paddingTop: insets.top, backgroundColor: c.bg, borderBottomColor: c.border }]}>
         <View style={styles.headRow}>
-          <Pressable onPress={toTop} accessibilityRole="button" accessibilityLabel="맨 위로" style={styles.world} hitSlop={6}>
-            <Text style={{ fontSize: 22 }}>{sc.world.emoji}</Text>
-            <Text style={{ color: c.text, fontSize: font.title, fontWeight: '900', flexShrink: 1 }} numberOfLines={1}>
-              {sc.world.name}
-            </Text>
-          </Pressable>
+          <View style={styles.worldWrap}>
+            <Pressable
+              onPress={() => setSavesOpen(true)}
+              accessibilityRole="button"
+              accessibilityLabel={`${sc.world.name} — 세계관·세이브 바꾸기`}
+              style={({ pressed }) => [styles.world, pressed && { opacity: 0.6 }]}
+              hitSlop={6}
+            >
+              <Text style={{ fontSize: 22 }}>{sc.world.emoji}</Text>
+              <Text style={{ color: c.text, fontSize: font.title, fontWeight: '900', flexShrink: 1 }} numberOfLines={1}>
+                {sc.world.name}
+              </Text>
+              <View style={{ transform: [{ rotate: '90deg' }] }}>
+                <IconChevronRight size={16} color={c.subtext} />
+              </View>
+            </Pressable>
+          </View>
           <ClockChip sc={sc} />
         </View>
-        <Tabs<FeedTab>
-          tabs={[
-            { key: 'forYou', label: '추천' },
-            { key: 'following', label: '팔로잉' },
-          ]}
-          value={tab}
-          onChange={setTab}
-        />
       </View>
       <FlatList
         ref={listRef}
@@ -81,13 +77,7 @@ export function HomeScreen() {
             ))}
           </View>
         }
-        ListEmptyComponent={
-          tab === 'following' ? (
-            <EmptyState title="아직 팔로우한 계정의 글이 없어요" desc="검색 탭에서 마음에 드는 계정을 팔로우해 보세요." />
-          ) : (
-            <EmptyState title="아직 조용하네요" desc="첫 글을 올려서 세계를 깨워보세요." />
-          )
-        }
+        ListEmptyComponent={<EmptyState title="아직 조용하네요" desc="첫 글을 올려서 세계를 깨워보세요." />}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={c.primary} colors={[c.primary]} />}
         contentContainerStyle={{ paddingBottom: 120 }}
         initialNumToRender={8}
@@ -101,14 +91,16 @@ export function HomeScreen() {
       >
         <IconPlus size={28} color="#fff" strokeWidth={2.4} />
       </Pressable>
+      <SaveSwitcher open={savesOpen} onClose={() => setSavesOpen(false)} />
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  header: { zIndex: 2 },
+  header: { zIndex: 2, borderBottomWidth: StyleSheet.hairlineWidth },
   headRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: space.lg, height: 52 },
-  world: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 6, minWidth: 0 },
+  worldWrap: { flex: 1, minWidth: 0, flexDirection: 'row' },
+  world: { flexDirection: 'row', alignItems: 'center', gap: 6, minWidth: 0, flexShrink: 1 },
   fab: {
     position: 'absolute',
     right: 18,
