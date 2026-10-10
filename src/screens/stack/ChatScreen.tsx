@@ -205,6 +205,15 @@ export function ChatScreen() {
               maxLength={DM_MAX_LEN}
               multiline
               placement="above"
+              // 웹: 엔터로 전송, 줄바꿈은 Shift+엔터. 한글 조합 중 엔터는 글자 확정이므로 보내지 않는다
+              onKeyPress={(e) => {
+                if (Platform.OS !== 'web') return;
+                const ne = e.nativeEvent as { key?: string; shiftKey?: boolean; isComposing?: boolean; keyCode?: number };
+                if (ne.key !== 'Enter' || ne.shiftKey) return;
+                if (ne.isComposing || ne.keyCode === 229) return;
+                (e as unknown as { preventDefault?: () => void }).preventDefault?.();
+                if (canSend) send();
+              }}
               rowStyle={[styles.inputWrap, { backgroundColor: c.surfaceAlt }]}
               style={[styles.input, noOutline, { color: c.text }]}
               right={

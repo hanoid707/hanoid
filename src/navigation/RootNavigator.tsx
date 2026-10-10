@@ -10,7 +10,6 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { View } from 'react-native';
 import { Avatar } from '../components/Avatar';
 import { IconBell, IconHome, IconMail, IconSearch, IconUser } from '../components/icons';
-import { WelcomeScreen } from '../screens/onboarding/WelcomeScreen';
 import { WorldSelectScreen } from '../screens/onboarding/WorldSelectScreen';
 import { WorldCustomScreen } from '../screens/onboarding/WorldCustomScreen';
 import { PersonaCreateScreen } from '../screens/onboarding/PersonaCreateScreen';
@@ -108,7 +107,6 @@ function MainTabs() {
 
 export function RootNavigator() {
   const { c, dark } = useTheme();
-  const hasActive = useGame((s) => !!s.activeId && !!s.scenarios[s.activeId]);
   const base = dark ? DarkTheme : DefaultTheme;
   const navTheme = { ...base, colors: { ...base.colors, background: c.bg, card: c.bg, text: c.text, border: c.border, primary: c.primary } };
   // iOS 기본 모달(시트)은 상단 여백 계산이 달라서, 모든 기기에서 '아래에서 올라오는 카드'로 통일
@@ -117,8 +115,8 @@ export function RootNavigator() {
   return (
     // 웹에서도 주소(URL)를 바꾸지 않는다 → 어떤 주소에 올려도 동작
     <NavigationContainer theme={navTheme} documentTitle={{ enabled: false }}>
-      <Stack.Navigator initialRouteName={hasActive ? 'Main' : 'Welcome'} screenOptions={{ headerShown: false, contentStyle: { backgroundColor: c.bg }, animation: 'slide_from_right' }}>
-        <Stack.Screen name="Welcome" component={WelcomeScreen} />
+      {/* 들어오면 늘 세계관 목록부터 — 위에 이어할 것, 아래에 새 세계관 */}
+      <Stack.Navigator initialRouteName="WorldSelect" screenOptions={{ headerShown: false, contentStyle: { backgroundColor: c.bg }, animation: 'slide_from_right' }}>
         <Stack.Screen name="WorldSelect" component={WorldSelectScreen} />
         <Stack.Screen name="WorldCustom" component={WorldCustomScreen} />
         <Stack.Screen name="PersonaCreate" component={PersonaCreateScreen} />

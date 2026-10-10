@@ -33,7 +33,7 @@ export function SettingsScreen() {
     removeScenario(id);
     setConfirmId(null);
     const left = Object.keys(useGame.getState().scenarios).length;
-    if (!left) nav.reset({ index: 0, routes: [{ name: 'Welcome' }] });
+    if (!left) nav.reset({ index: 0, routes: [{ name: 'WorldSelect' }] });
     showToast('세이브를 삭제했어요');
   };
 
@@ -142,7 +142,7 @@ export function SettingsScreen() {
         )}
 
         <Text style={{ color: c.subtext, fontSize: font.small, textAlign: 'center', lineHeight: 18, marginTop: 32 }}>
-          AI-SNS 3.1 · 앱공부 동아리용 클론{'\n'}React Native + Expo · 기기 저장 + Supabase 동기화
+          Xsta 3.1 · 앱공부 동아리용 클론{'\n'}React Native + Expo · 기기 저장 + Supabase 동기화
         </Text>
       </ScrollView>
     </Screen>

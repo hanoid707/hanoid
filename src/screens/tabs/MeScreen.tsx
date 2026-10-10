@@ -260,7 +260,7 @@ export function MeScreen() {
           </Pressable>
         ) : null}
 
-        <Text style={{ color: c.faint, fontSize: font.small, textAlign: 'center', lineHeight: 18, marginTop: 28 }}>AI-SNS · 앱공부 동아리용 클론</Text>
+        <Text style={{ color: c.faint, fontSize: font.small, textAlign: 'center', lineHeight: 18, marginTop: 28 }}>Xsta · 앱공부 동아리용 클론</Text>
       </ScrollView>
     </Screen>
   );

@@ -23,7 +23,7 @@ function Shell() {
   if (!hydrated) {
     return (
       <View style={[styles.center, { backgroundColor: c.bg }]}>
-        <Text style={{ fontSize: 28, fontWeight: '900', color: c.text, letterSpacing: -1 }}>AI-SNS</Text>
+        <Text style={{ fontSize: 28, fontWeight: '900', color: c.text, letterSpacing: -1 }}>Xsta</Text>
         <ActivityIndicator color={c.primary} />
       </View>
     );

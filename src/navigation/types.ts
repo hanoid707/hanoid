@@ -12,7 +12,6 @@ export type TabParamList = {
 };
 
 export type RootStackParamList = {
-  Welcome: undefined;
   WorldSelect: undefined;
   WorldCustom: undefined;
   PersonaCreate: undefined;

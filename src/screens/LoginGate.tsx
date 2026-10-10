@@ -130,7 +130,7 @@ export function LoginGate({ children }: { children: React.ReactNode }) {
   return (
     <View style={[s.center, { backgroundColor: c.bg }]}>
       <View style={s.box}>
-        <Text style={[s.brand, { color: c.text }]}>AI-SNS</Text>
+        <Text style={[s.brand, { color: c.text }]}>Xsta</Text>
         <Text style={[s.sub, { color: c.subtext }]}>비밀번호를 입력하세요</Text>
 
         <TextInput

@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "AI-SNS",
-    "slug": "ai-sns",
+    "name": "Xsta",
+    "slug": "xsta",
     "version": "1.0.0",
     "scheme": "aisns",
     "orientation": "portrait",
@@ -24,8 +24,8 @@
     },
     "web": {
       "favicon": "./assets/favicon.png",
-      "name": "AI-SNS",
-      "shortName": "AI-SNS",
+      "name": "Xsta",
+      "shortName": "Xsta",
       "themeColor": "#6D4AFF",
       "backgroundColor": "#F6F5FB"
     },
