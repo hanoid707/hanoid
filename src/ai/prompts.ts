@@ -17,6 +17,7 @@
 import { CROWD_LABEL, PERSONALITY_PRESETS, RELATION_LABEL, SPEECH_PRESETS, isRelationKind } from '../game/relationship';
 import type { CrowdRole, GameEvent, ID, RomanceLevel } from '../types';
 import { castBlock, clip, DIFFICULTY_LABEL, fullEntry, hooksBlock, memoryBlock, mentionedIds, nowLine, pickCast, recentBlock, registerMap, registerText } from './context';
+import { getPrompt } from './promptStore';
 import type { AIContext, CastInfo, CharacterDraftArgs } from './types';
 import { WORLD_VOICE } from './voice';
 
@@ -84,6 +85,9 @@ export const LITE_SYSTEM = [
  * 두 축으로 나눈다 — 감정을 간접/직접으로 말하는가, 신체·행위를 얼마나 구체적으로 쓰는가.
  * 공개 글·답글은 어느 단계든 "보통"을 넘지 않고, 에로틱의 노골적 묘사는 썸·연인 사이의 쪽지에서만 나온다.
  * ROMANCE_COMMON의 제외 인물(연애 금지 표시·가족·10대)은 단계와 무관하게 연애·성적 반응이 없다.
+ *
+ * 실제 문구는 Supabase aisns.prompts(key: romance.mild·racy·erotic·common)에서 받아 쓴다(팀이 DB에서 고침).
+ * 아래 값은 DB에 못 닿을 때(미연결·오프라인·행 없음)의 기본값이다. 기본 문구를 바꾸면 supabase/aisns.sql 의 시드도 같이 맞춘다.
  */
 const ROMANCE_BLOCK: Record<RomanceLevel, string> = {
   mild: [
@@ -120,7 +124,8 @@ export function systemFor(ctx: AIContext | null): string {
     voice ? `말투: ${voice}` : '',
     `대표 해시태그: ${w.tag} / 자주 쓰는 말: ${w.vocab.slice(0, 12).join(', ')}`,
   ].filter(Boolean);
-  const romance = [ROMANCE_BLOCK[ctx.romanceLevel] ?? ROMANCE_BLOCK.racy, ROMANCE_COMMON].join('\n');
+  const level: RomanceLevel = ctx.romanceLevel in ROMANCE_BLOCK ? ctx.romanceLevel : 'racy';
+  const romance = [getPrompt(`romance.${level}`, ROMANCE_BLOCK[level]), getPrompt('romance.common', ROMANCE_COMMON)].join('\n');
   const me = [`[플레이어] ${p.name}(@${p.handle})${p.role ? ` / ${p.role}` : ''}`];
   if (p.bio) me.push(`소개: ${clip(p.bio, 120)}`);
   if (p.description) me.push(`설정: ${clip(p.description, 400)}`);

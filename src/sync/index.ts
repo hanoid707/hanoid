@@ -9,6 +9,7 @@
 import { AppState, Platform } from 'react-native';
 import { create } from 'zustand';
 import { CONFIG, getArtifactCapability, isArtifactRuntime } from '../config';
+import { applyRemotePrompts, hydratePrompts } from '../ai/promptStore';
 import { migrateScenario, useGame } from '../store/game';
 import { cacheMedia, connectMediaSync, getMediaNow } from '../store/media';
 import { loadMediaLocal, loadSyncLocal, saveSyncLocal, type PendingMedia, type SyncLocal } from '../store/persistence';
@@ -48,6 +49,9 @@ let unsubAI: (() => void) | null = null;
 let aiDirty = false;
 let applyingRemoteAI = false;
 let aiTs = 0;
+/** AI 지시문(aisns.prompts)을 마지막으로 받은 시각 — 5분마다 다시 받는다 */
+let promptsAt = 0;
+const PROMPTS_EVERY = 5 * 60_000;
 
 async function createBackend(): Promise<SyncBackend | null> {
   const s = useGame.getState().settings.sync;
@@ -65,6 +69,7 @@ async function createBackend(): Promise<SyncBackend | null> {
 export async function startSync() {
   if (started) return;
   started = true;
+  await hydratePrompts(); // 동기화를 안 쓰더라도 마지막으로 받아 둔 지시문은 쓴다
   backend = await createBackend();
   if (!backend) {
     useSync.setState({ status: 'off', via: null, message: null });
@@ -131,6 +136,7 @@ export async function restartSync() {
   unsubAI = null;
   started = false;
   firstPullDone = false;
+  promptsAt = 0;
   local = { cursor: 0, pendingMedia: local.pendingMedia };
   await saveSyncLocal(local);
   await startSync();
@@ -160,6 +166,7 @@ export async function syncNow(): Promise<void> {
       await pushDirty();
     }
     await uploadMedia();
+    await pullPrompts();
     useSync.setState({ status: 'idle', lastSync: Date.now(), message: null });
   } catch (e) {
     const err = e as SyncError;
@@ -225,6 +232,17 @@ async function pushDirty() {
         remoteTs.set(it.id, it.updatedTs);
       }
     }
+  }
+}
+
+/** AI 지시문 받기. 실패해도 동기화 상태를 망치지 않는다(기존 값·코드 기본 문구로 계속 동작) */
+async function pullPrompts() {
+  if (!backend || Date.now() - promptsAt < PROMPTS_EVERY) return;
+  try {
+    applyRemotePrompts(await backend.promptsGet());
+    promptsAt = Date.now();
+  } catch {
+    promptsAt = Date.now() - PROMPTS_EVERY + 30_000; // 30초 뒤 다시 시도
   }
 }
 
