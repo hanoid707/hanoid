@@ -1,5 +1,5 @@
 """사람이 나오는 장면 몇 장을 majicMIX(한국인 얼굴)로 다시 생성
-사용: python3 -I gen_fix.py <models_dir> <out_dir>
+사용: python3 -I step3_fix_people.py <models_dir> <out_dir>
 """
 import hashlib, sys, time
 import torch

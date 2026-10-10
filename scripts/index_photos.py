@@ -1,5 +1,5 @@
 """assets/photos/{avatars,scenes,banners}/*.jpg → src/data/photos.ts (data URI 모음)
-사진을 바꾸거나 추가한 뒤 실행: python scripts/build_photos.py
+사진을 바꾸거나 추가한 뒤 실행: python scripts/index_photos.py
 파일 이름 규칙: <세계관ID>__<캐릭터 key 또는 장면 key>.jpg
 """
 import base64, os, sys
@@ -20,7 +20,7 @@ def collect(kind):
 
 parts = [
     '/**',
-    ' * 기본 사진 모음(자동 생성 파일 — 직접 고치지 말고 scripts/build_photos.py 실행)',
+    ' * 기본 사진 모음(자동 생성 파일 — 직접 고치지 말고 scripts/index_photos.py 실행)',
     ' * - AVATARS: 캐릭터 프로필 사진(192px), SCENES: 게시물 첨부 사진, BANNERS: 프로필 배너',
     ' * - 사진은 전부 AI로 새로 만든 가상 인물·장면이다(실존 인물 아님).',
     ' * - 키: <세계관ID>__<key>',

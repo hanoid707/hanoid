@@ -7,11 +7,11 @@
 
 | 단계 | 명령 | 결과 |
 |---|---|---|
-| ① 사진 설명 뽑기 | `npx tsx tools/photo_gen/extract_specs.ts photo_specs.json` | 세계관 파일의 `photo`·`scenes`·`banners` 설명 → JSON |
-| ② 생성 | `python3 -I tools/photo_gen/gen.py <모델폴더> photo_specs.json out` | `out/avatars·scenes·banners·full` (이미 있는 파일은 건너뜀) |
-| ③ 사람 장면 보정 | `python3 -I tools/photo_gen/gen_fix.py <모델폴더> out` | 사람이 나오는 장면을 한국인 얼굴 모델로 다시 생성 |
+| ① 사진 설명 뽑기 | `npx tsx tools/photo_gen/step1_describe.ts photo_specs.json` | 세계관 파일의 `photo`·`scenes`·`banners` 설명 → JSON |
+| ② 생성 | `python3 -I tools/photo_gen/step2_generate.py <모델폴더> photo_specs.json out` | `out/avatars·scenes·banners·full` (이미 있는 파일은 건너뜀) |
+| ③ 사람 장면 보정 | `python3 -I tools/photo_gen/step3_fix_people.py <모델폴더> out` | 사람이 나오는 장면을 한국인 얼굴 모델로 다시 생성 |
 | ④ 검수 | `out/full` 전부 눈으로 확인 | 노출·로고·글자·이상한 손 → 프롬프트 고쳐 해당 파일만 지우고 ② 재실행 |
-| ⑤ 앱에 넣기 | `out/avatars·scenes·banners` → `assets/photos/` 복사 후 `python scripts/build_photos.py` | `src/data/photos.ts` 갱신 |
+| ⑤ 앱에 넣기 | `out/avatars·scenes·banners` → `assets/photos/` 복사 후 `python scripts/index_photos.py` | `src/data/photos.ts` 갱신 |
 
 ## 모델 폴더 구성 (diffusers 형식, Hugging Face에서 받기)
 

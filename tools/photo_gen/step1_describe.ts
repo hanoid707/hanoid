@@ -1,5 +1,5 @@
 /** 세계관 파일의 사진 설명(photo·scenes·banners) → photo_specs.json
- * 사용: npx tsx tools/photo_gen/extract_specs.ts photo_specs.json
+ * 사용: npx tsx tools/photo_gen/step1_describe.ts photo_specs.json
  */
 import { WORLDS } from '../../src/data/worlds';
 import { writeFileSync } from 'node:fs';
