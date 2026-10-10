@@ -8,13 +8,14 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Avatar } from '../../components/Avatar';
-import { IconCheck, IconClose, IconGlobe, IconImage, IconRefresh, IconSparkles, IconTarget } from '../../components/icons';
+import { IconCheck, IconClose, IconGlobe, IconImage, IconSparkles, IconTarget } from '../../components/icons';
 import { frequentPeople, MentionInput, type MentionInputHandle } from '../../components/MentionInput';
 import { Photo } from '../../components/Photo';
 import { usePhotoPicker } from '../../components/PhotoCropper';
 import { MentionLegend, NameChip } from '../../components/RelationChip';
 import { Button, ProgressBar } from '../../components/ui';
-import { claimQuest, getIdeas, hasMoreIdeas, publishPost, refreshIdeas } from '../../game/actions';
+import { armViralMoment, claimQuest, publishPost } from '../../game/actions';
+import { ITEM_INFO } from '../../game/items';
 import { POST_MAX_LEN } from '../../game/rules';
 import type { RootNav, RootStackParamList } from '../../navigation/types';
 import { useActive, useGame } from '../../store/game';
@@ -63,7 +64,6 @@ function sideQuests(quests: Quest[]): Quest[] {
 }
 
 /** 겹치지 않게 최대 3개 */
-const top3 = (list: string[]) => Array.from(new Set(list.map((x) => x.trim()).filter(Boolean))).slice(0, 3);
 
 /** 이 섹션 제목(작은 회색 굵은 글자) */
 function SectionHead({ icon, title, right }: { icon: React.ReactNode; title: string; right?: React.ReactNode }) {
@@ -88,19 +88,8 @@ export function ComposeScreen() {
   const inputRef = useRef<MentionInputHandle>(null);
   const [text, setText] = useState(route.params?.text ?? '');
   const [media, setMedia] = useState<PhotoRef | undefined>();
-  const [ideas, setIdeas] = useState<string[]>(() => top3(getIdeas()));
-  const [loadingIdeas, setLoadingIdeas] = useState(false);
 
   // 다른 반응에 얹혀 새 제안이 도착하면(받아 둔 제안 갱신) 다시 읽는다 — 처음 한 번은 위에서 읽었으니 건너뜀
-  const ideasTs = sc?.ideas?.ts;
-  const firstIdeas = useRef(true);
-  useEffect(() => {
-    if (firstIdeas.current) {
-      firstIdeas.current = false;
-      return;
-    }
-    setIdeas(top3(getIdeas()));
-  }, [ideasTs]);
 
   const frequent = useMemo(() => (sc ? frequentPeople(sc, 6) : []), [sc]);
   if (!sc) return null;
@@ -114,18 +103,6 @@ export function ComposeScreen() {
   };
 
   // 모아 둔 AI 제안 중 지금 안 보이는 것으로(AI 호출 없음)
-  const more = hasMoreIdeas(ideas);
-  const moreIdeas = async () => {
-    if (loadingIdeas) return;
-    setLoadingIdeas(true);
-    try {
-      const fresh = await refreshIdeas(ideas);
-      if (fresh.length) setIdeas(top3(fresh));
-      else showToast('새 제안은 글을 올리거나 하루가 지나면 AI가 보내 줘요', 'info');
-    } finally {
-      setLoadingIdeas(false);
-    }
-  };
 
   const addPhoto = async () => {
     const id = await picker.pick('post');
@@ -255,44 +232,36 @@ export function ComposeScreen() {
             </View>
           )}
 
+          {/* 글 쓰면서 바로 켤 수 있는 아이템 */}
           <View style={{ gap: 6 }}>
-            <SectionHead
-              icon={<IconSparkles size={16} color={c.primary} />}
-              title="제안"
-              right={
-                !more ? undefined : (
-                <Pressable
-                  onPress={moreIdeas}
-                  disabled={loadingIdeas}
-                  hitSlop={8}
-                  accessibilityRole="button"
-                  accessibilityLabel="다른 제안"
-                  accessibilityState={{ busy: loadingIdeas }}
-                  style={({ pressed }) => [styles.more, { borderColor: c.borderStrong, opacity: loadingIdeas ? 0.6 : pressed ? 0.7 : 1 }]}
-                >
-                  <IconRefresh size={13} color={c.primary} />
-                  <Text style={{ color: c.primary, fontSize: font.small, fontWeight: '700' }}>{loadingIdeas ? '고르는 중…' : '다른 제안'}</Text>
-                </Pressable>
-                )
-              }
-            />
-            {ideas.length > 0 ? (
-              ideas.map((idea) => (
-                <Pressable
-                  key={idea}
-                  onPress={() => setText(idea.slice(0, POST_MAX_LEN))}
-                  accessibilityRole="button"
-                  accessibilityLabel={`제안 쓰기: ${idea}`}
-                  style={({ pressed }) => [styles.idea, { borderColor: c.border, backgroundColor: pressed ? c.hover : c.surfaceAlt }]}
-                >
-                  <Text style={{ color: c.text, fontSize: font.body, lineHeight: 21 }}>{idea}</Text>
-                </Pressable>
-              ))
-            ) : (
-              <Text style={{ color: c.subtext, fontSize: font.small, lineHeight: 18 }}>
-                아직 제안이 없어요. 글을 올리거나 하루가 지나면 AI가 지금 상황에 맞는 글감을 보내 줘요.
-              </Text>
-            )}
+            <SectionHead icon={<IconSparkles size={16} color={c.primary} />} title="아이템" />
+            <Pressable
+              onPress={() => {
+                armViralMoment(!armed);
+                showToast(armed ? '바이럴 모먼트를 껐어요' : '바이럴 모먼트를 켰어요 · 이번 글의 반응이 크게 터져요', 'success');
+              }}
+              accessibilityRole="button"
+              accessibilityState={{ selected: armed }}
+              accessibilityLabel={ITEM_INFO.viral.name}
+              style={({ pressed }) => [
+                styles.idea,
+                {
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: space.md,
+                  borderColor: armed ? c.primary : c.border,
+                  backgroundColor: armed ? c.primarySoft : pressed ? c.hover : c.surfaceAlt,
+                },
+              ]}
+            >
+              <Text style={{ fontSize: 22 }}>{ITEM_INFO.viral.emoji}</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={{ color: c.text, fontSize: font.body, fontWeight: '800' }}>{ITEM_INFO.viral.name}</Text>
+                <Text style={{ color: c.subtext, fontSize: font.small, marginTop: 2 }}>
+                  {armed ? '켜짐 · 이번 글에 적용돼요' : '이번 글의 반응을 3~6배로 키워요'}
+                </Text>
+              </View>
+            </Pressable>
           </View>
         </ScrollView>
         <View style={[styles.toolbar, { borderTopColor: c.border, paddingBottom: insets.bottom + 8 }]}>

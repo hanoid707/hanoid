@@ -43,10 +43,10 @@ export function reactSchema(n: number) {
 }
 
 export const THREAD_SCHEMA = obj({
-  replies: arr(LINE, 2),
-  aff: arr(DELTA, 2),
-  rom: arr(DELTA, 2),
-  dev: arr(DELTA, 2),
+  replies: arr(LINE, 8),
+  aff: arr(DELTA, 8),
+  rom: arr(DELTA, 4),
+  dev: arr(DELTA, 4),
   rep: INT,
 });
 

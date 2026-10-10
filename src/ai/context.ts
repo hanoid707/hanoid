@@ -239,6 +239,7 @@ export function fullEntry(c: CastInfo, descMax = 160, opts: { said?: boolean } =
 export function briefEntry(c: CastInfo): string {
   const first = sentences(alignRegister((c.description || c.bio || '').replace(/\s+/g, ' ').trim(), c.register))[0] ?? '';
   const trait = clip(first, 40);
+  return `- @${c.handle} ${c.name} | ${kindLabel(c)}·${registerText(c)} | 호감${c.affinity}${c.devotion >= 30 ? ` 정복${c.devotion}` : ''}${c.realPerson || c.ageGroup === 10 ? ' | 연애X' : ''}${trait ? ` | ${trait}` : ''}`;
 }
 
 // ───────────────────────── 이번 일에 넣을 인물 고르기
