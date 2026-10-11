@@ -6,7 +6,7 @@
  * - 클로드 엔진(claude): 클로드 아티팩트 페이지 안에서만. 보는 사람의 Claude 사용량으로 부른다.
  * 새 AI(다른 회사 모델 등)를 붙이고 싶으면 이 인터페이스만 구현하면 된다.
  */
-import type { AgeGroup, AITune, Archetype, BadgeKind, CharacterType, CrowdRole, Deltas, Difficulty, EventChoice, GameEvent, GameTime, Gender, GhostAuthor, ID, RelationKind, RepStatus, RomanceLevel, SpeechRegister, Trend } from '../types';
+import type { AgeGroup, AITune, Archetype, BadgeKind, CharacterType, CrowdRole, Deltas, Difficulty, EventChoice, GameEvent, GameTime, Gender, GhostAuthor, ID, LoveDelta, RelationKind, RepStatus, RomanceLevel, SpeechRegister, Trend } from '../types';
 
 export type Mood = 'positive' | 'negative' | 'funny' | 'apology' | 'question' | 'brag' | 'neutral';
 
@@ -46,6 +46,10 @@ export interface AIContext {
   avoid?: string[];
   /** AI 조절값(답글·쪽지·새 글 수 …). 게임이 호출 직전에 붙인다(core.ctxOf). 없으면 기본값 */
   tune?: AITune;
+  /** (v3.5) 오늘 속마음을 새로 받을 인물(여성 + 호감도 기준 이상) */
+  heartAsk?: ID[];
+  /** (v3.5) 오늘 "플레이어와 또 그만큼의 스킨십을 했다"는 새 글을 쓸 수 있는 인물 */
+  touchAsk?: { id: ID; act: string }[];
 }
 
 export interface CastInfo {
@@ -92,6 +96,23 @@ export interface CastInfo {
   dmTs?: number;
   /** (v3) 이 인물이 최근 공개적으로 한 말(글·답글, 최신 3개) — 쪽지에서 앞뒤가 맞게 */
   recentSaid?: string[];
+  // ── v3.5: 인물끼리의 마음
+  /** 이 인물이 사랑하는 다른 인물(수치 높은 순) */
+  loves?: { name: string; v: number }[];
+  /** 지금 가장 사랑하는 대상(플레이어면 '플레이어') — 여러 명을 좋아하면 이쪽을 따라간다 */
+  loveTop?: string;
+  /** 이 인물을 사랑하는 다른 인물 */
+  lovedBy?: { name: string; v: number }[];
+  /** 사랑에 관심 없음(일·자기 생활이 먼저) */
+  loveOff?: boolean;
+  /** 질투: 좋아하는 이 사람들이 플레이어에게 마음이 있다 */
+  jealous?: string[];
+  /** 지금 속마음(본인만 안다) */
+  heart?: string;
+  /** 속마음을 쓸 수 있는 인물인지(여성 + 호감도 기준 이상) */
+  heartOk?: boolean;
+  /** 플레이어와 실제로 한 스킨십(오래된 → 최신) */
+  touch?: string[];
 }
 
 export interface GeneratedLine {
@@ -129,6 +150,8 @@ export interface PostReaction {
   echoPosts?: GeneratedLine[];
   /** 내 글을 보고 따로 보내는 쪽지 */
   openers?: GeneratedLine[];
+  /** 이 일로 바뀐 인물끼리의 사랑 */
+  love?: LoveDelta[];
 }
 
 /** 답글 스레드에서 캐릭터가 되받아치는 반응 */
@@ -152,6 +175,10 @@ export interface DMReaction {
   historySummary?: string;
   /** 이 대화 뒤에 그 인물이 자기 계정에 올리는 공개 글(가끔) */
   post?: string;
+  /** 이 대화 직후 그 인물의 속마음(여성 + 호감도 기준 이상일 때만 받는다) */
+  heart?: string;
+  /** 이 대화에서 플레이어와 실제로 한 스킨십(없으면 빈 값) */
+  touch?: string;
 }
 
 export interface EventDraft {
@@ -172,6 +199,8 @@ export interface EventOutcome {
   posts: GeneratedLine[];
   /** 답의 질 -2(최악) ~ +2(최고) — 난이도 보정에 쓰인다 */
   grade: number;
+  /** 이 일로 바뀐 인물끼리의 사랑 */
+  love?: LoveDelta[];
 }
 
 /** 하루가 지날 때 세계가 움직이는 결과 */
@@ -184,8 +213,16 @@ export interface TickResult {
   mission: { title: string; desc: string; keyword: string[] } | null;
   /** 다음 글 제안(0~2개) */
   ideas: string[];
-  /** 최근 일로 자기소개가 바뀐 인물(0~1명, 플레이어와 가까운 인물만) */
-  bios: { id: ID; bio: string }[];
+  /** 오늘의 속마음(여성 + 호감도 기준 이상인 인물) */
+  hearts: { id: ID; text: string }[];
+  /** 오늘 글에서 드러난 인물끼리의 사랑 변화 */
+  love: LoveDelta[];
+}
+
+/** 인물 정보 채우기: 인물 설정을 읽고 직함·나이·인물끼리의 마음을 정한다(세이브마다 한 번) */
+export interface CastBonds {
+  info: { id: ID; title?: string; age?: number; off?: boolean; loves: { to: ID; v: number }[] }[];
+  hearts: { id: ID; text: string }[];
 }
 
 /** 캐릭터 만들기: 유형·특징 → 이름·아이디·자기소개 */
@@ -273,4 +310,6 @@ export interface AIEngine {
   draftCharacter(ctx: AIContext | null, args: CharacterDraftArgs): Promise<CharacterDraft>;
   /** 직접 만든 세계관의 등장인물 생성 */
   generateCast(world: { name: string; setting: string; tone: string }): Promise<CastDraft[]>;
+  /** (v3.5) 인물 정보 채우기: 직함·나이·인물끼리의 마음(+ 첫 속마음) */
+  castBonds(ctx: AIContext): Promise<CastBonds>;
 }

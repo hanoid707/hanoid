@@ -1,8 +1,8 @@
 /**
  * 세계관 전체 수정(v3.2) — 한 화면에서 세계관·내 계정·모든 인물을 펼쳐 보고 바로 고친다
- *   ① 세계관: 이름·이모지·한 줄 소개·설정·분위기·해시태그·자주 쓰는 말
+ *   ① 세계관: 이름·이모지·한 줄 소개·설정·분위기·해시태그·자주 쓰는 말·빼 둘 화제·속마음이 보이는 호감도
  *   ② 내 계정: 이름·아이디·역할·소개·설정
- *   ③ 인물: 인증 계정 / 핵심 인물 / 전체 — 카드를 누르면 펼쳐져 이름·아이디·성별·나이대·유형·팔로워·배지·소개·특징·관계·호감도·설렘·정복도 수정
+ *   ③ 인물: 인증 계정 / 핵심 인물 / 전체 — 카드를 누르면 펼쳐져 이름·아이디·성별·나이대·유형·팔로워·배지·특징·관계·호감도·설렘·정복도 수정(한줄소개는 입력받지 않는다)
  */
 import { useNavigation } from '@react-navigation/native';
 import { useMemo, useState } from 'react';
@@ -16,6 +16,7 @@ import { StatSlider } from '../../components/StatSlider';
 import { Button, Chip, Field, Segmented } from '../../components/ui';
 import { saveCharacter, savePersona, saveWorld } from '../../game/actions';
 import { setAvoidWords, splitAvoid } from '../../game/avoid';
+import { heartMinOf } from '../../game/love';
 import { AGE_GROUPS, CORE_TYPES, CROWD_TYPES, typeDefaults, typeLabel } from '../../game/relationship';
 import type { RootNav } from '../../navigation/types';
 import { useActive, useGame } from '../../store/game';
@@ -58,6 +59,7 @@ function Section({ title, desc, open, onToggle, children }: { title: string; des
 }
 
 function WorldForm() {
+  const { c } = useTheme();
   const sc = useActive()!;
   const showToast = useGame((s) => s.showToast);
   const w = sc.world;
@@ -69,8 +71,9 @@ function WorldForm() {
   const [tag, setTag] = useState(w.tag);
   const [vocab, setVocab] = useState(w.vocab.join(', '));
   const [avoid, setAvoid] = useState((sc.avoid ?? []).join(', '));
+  const [heartMin, setHeartMin] = useState(heartMinOf(sc));
   const save = () => {
-    saveWorld({ name, emoji, tagline, setting, tone, tag, vocab: vocab.split(/[,\n]/) });
+    saveWorld({ name, emoji, tagline, setting, tone, tag, vocab: vocab.split(/[,\n]/), heartMin });
     setAvoidWords(splitAvoid(avoid));
     showToast('세계관 설정을 저장했어요 — 다음 반응부터 AI가 바로 반영해요', 'success');
   };
@@ -100,6 +103,17 @@ function WorldForm() {
         style={{ minHeight: 60 }}
         maxLength={300}
       />
+      <View testID="heart-min">
+        <StatSlider
+          label="속마음이 보이는 호감도"
+          value={heartMin}
+          min={0}
+          max={100}
+          color={c.like}
+          onChange={setHeartMin}
+          hint="여성 인물의 호감도가 이 값 이상일 때만 프로필에 짧은 속마음이 보여요(두 조건을 다 채워야 해요). 그 밖엔 비어 있어요"
+        />
+      </View>
       <Button title="세계관 저장" variant="ink" onPress={save} disabled={!name.trim() || !setting.trim()} />
     </>
   );
@@ -144,7 +158,6 @@ function CharacterCard({ ch, open, onToggle }: { ch: Character; open: boolean; o
   const [type, setType] = useState<CharacterType>(initType);
   const [followers, setFollowers] = useState(String(ch.followers));
   const [badge, setBadge] = useState<BadgeChoice>(badgeOf(ch) ?? 'none');
-  const [bio, setBio] = useState(ch.bio);
   const [desc, setDesc] = useState(ch.description);
   const [relations, setRelations] = useState(ch.relations ?? '');
   const [avoid, setAvoid] = useState((ch.avoid ?? []).join(', '));
@@ -168,7 +181,7 @@ function CharacterCard({ ch, open, onToggle }: { ch: Character; open: boolean; o
         emoji: ch.avatar.emoji,
         color: ch.avatar.color,
         archetype: typeChanged ? typeDefaults(type).archetype : ch.archetype,
-        bio: bio.trim(),
+        bio: ch.bio,
         description: desc.trim() || ch.description,
         relations: relations.trim(),
         badge: badge === 'none' ? null : badge,
@@ -239,7 +252,6 @@ function CharacterCard({ ch, open, onToggle }: { ch: Character; open: boolean; o
               <Chip key={x.key} small label={x.label} selected={badge === x.key} onPress={() => setBadge(x.key)} />
             ))}
           </View>
-          <Field label="자기소개" value={bio} onChangeText={setBio} multiline maxLength={160} counter />
           <Field label="특징(AI가 가장 먼저 읽는 설정)" value={desc} onChangeText={setDesc} multiline numberOfLines={8} style={{ minHeight: 180 }} maxLength={800} counter />
           <Field label="다른 인물과의 관계" value={relations} onChangeText={setRelations} multiline style={{ minHeight: 80 }} maxLength={400} />
           <Field label="꺼내지 않을 화제(쉼표로 구분)" hint="이 인물은 여기 적은 낱말·소재를 글·답글·쪽지에서 말하지 않아요" value={avoid} onChangeText={setAvoid} placeholder="예) 떡볶이" maxLength={200} />

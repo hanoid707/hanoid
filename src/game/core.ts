@@ -72,6 +72,7 @@ export function engine(): GameAI {
     threadComments: soft('threadComments'),
     draftCharacter: soft('draftCharacter'),
     generateCast: soft('generateCast'),
+    castBonds: soft('castBonds'),
   };
 }
 

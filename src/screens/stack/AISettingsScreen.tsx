@@ -100,6 +100,7 @@ export const KIND_LABEL: Record<string, string> = {
   bio: '자기소개 다시 쓰기',
   ambient: '타임라인 새로고침',
   cast: '세계관 인물 만들기',
+  bonds: '인물 정보·관계 채우기',
   ping: '연결 테스트',
 };
 

@@ -18,6 +18,8 @@ import { alive, beginFlow, charType, ctxOf, editIf, engine, ensureConversation, 
 import { npcEngagement } from './engagement';
 import { koreanDisplayName, localBio, orgDisplayName } from './names';
 import { addMemory, addPost, logActivity, noteRelationChange, pushNoti } from './progress';
+import { setLoves } from './love';
+import { ensureBonds } from './bonds';
 import { computeRegister, initRelation, isRelationKind, setCharacterStats, setCharacterType, typeDefaults, typeLabel } from './relationship';
 import { injectRoster, rosterNeedsUpdate, traitsWithPresets } from './roster';
 import { CHARACTER_CAP } from './rules';
@@ -77,6 +79,9 @@ export interface CharacterInput {
   age?: number;
   /** (v3.2) 호감도·설렘·정복도 직접 조절(편집기 슬라이더) */
   stats?: { affinity?: number; romance?: number; devotion?: number };
+  /** (v3.5) 다른 인물을 향한 사랑(상대 ID → 0~100, 없으면 건드리지 않음) · 사랑에 관심 없음 */
+  loves?: Record<ID, number>;
+  loveOff?: boolean;
 }
 
 export function saveCharacter(input: CharacterInput, editId?: ID): ActionResult {
@@ -147,6 +152,7 @@ export function saveCharacter(input: CharacterInput, editId?: ID): ActionResult 
         const ch = setCharacterStats(d, c.id, input.stats);
         if (ch) noteRelationChange(d, ch);
       }
+      if (input.loves !== undefined) setLoves(d, c.id, input.loves, input.loveOff);
       logActivity(d, '✏️', `${c.name} 캐릭터 설정을 바꿨어요`);
       addMemory(d, `${c.name}(@${c.handle})의 설정이 바뀜: ${input.description.slice(0, 60)}`);
       return;
@@ -419,7 +425,8 @@ export function onScenarioCreated(sid: ID): void {
   const first = sc.firstFollowerId ? sc.characters[sc.firstFollowerId] : undefined;
   // 첫 쪽지는 AI 조절(새 이야기의 첫 쪽지)을 켰을 때만
   if (tune().firstDM && first && !first.inactive && !sc.dms[first.id]?.messages.length) void firstFollowerDM(sid, first.id);
-  if (first?.id.startsWith('cf_')) void regenerateBioIn(sid, first.id);
+  // 인물들의 자리·나이·서로를 향한 마음 정리(AI 1회, 첫 쪽지와 겹치지 않게 조금 뒤에)
+  setTimeout(() => void ensureBonds(sid), 4000);
   // 직접 만든 세계관의 첫 하루 정산은 타임라인을 채우는 일이라 설정과 상관없이 한다
   if (tickDue(sc)) void runDayTick(sid, { force: true });
 }

@@ -114,6 +114,7 @@ const offlineEngine: AIEngine = {
   threadComments: offline,
   draftCharacter: offline,
   generateCast: offline,
+  castBonds: offline,
 };
 
 const CLAUDE_MODE = { fast: '빠름', balanced: '균형', quality: '고품질' } as const;
@@ -197,6 +198,7 @@ function withChain(links: Link[], settings: AISettings, onError: (e: Error) => v
     threadComments: wrap('threadComments'),
     draftCharacter: wrap('draftCharacter'),
     generateCast: wrap('generateCast'),
+    castBonds: wrap('castBonds'),
   };
 }
 

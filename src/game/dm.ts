@@ -9,7 +9,8 @@ import { tap } from '../utils/haptics';
 import { addNpcLines, activeChar, alive, beginFlow, ctxOf, editIf, engine, ensureConversation, fail, G, OK, trimMessages, type ActionResult, type Flow } from './core';
 import { diffOf, scaleSocial } from './difficulty';
 import { giftBlocked, giftEffect, GIFTS } from './items';
-import { addMemory, addXp, applyAffinity, logActivity, pushItemLog, questProgress, tickClock } from './progress';
+import { heartEligible, noteTouch, setHeart } from './love';
+import { addMemory, addXp, applyAffinity, logActivity, noteTouchFromText, pushItemLog, questProgress, tickClock } from './progress';
 import { DM_MAX_LEN, TIME_COST, XP } from './rules';
 import { hitsAvoid, scrubAvoid, withCharAvoid } from '../ai/context';
 import { takeAvoid } from './avoid';
@@ -39,6 +40,8 @@ export function sendDM(characterId: ID, text: string): ActionResult {
     cv.updatedTs = Date.now();
     addXp(d, XP.dm);
     questProgress(d, 'dm', 1);
+    // 괄호로 쓴 행동에 스킨십이 있으면 이 인물에 적어 둔다
+    noteTouchFromText(d, body, [characterId]);
   });
   tap();
   void dmConversation(beginFlow(sid), characterId, body, days);
@@ -137,6 +140,9 @@ async function dmConversation(flow: Flow, characterId: ID, message: string, days
         applyAffinity(d, characterId, aff, rom, dev);
       }
       if (r.historySummary) cv.summary = r.historySummary;
+      // 이 대화 직후의 속마음(여성 + 호감도 기준 이상일 때만) · 이 대화에서 실제로 한 스킨십
+      if (r.heart && heartEligible(d, c)) setHeart(d, characterId, r.heart);
+      if (r.touch && !r.leave && noteTouch(d, characterId, r.touch)) addMemory(d, fill('플레이어가 {c}와(과) {a}을(를) 함', { c: c.name, a: r.touch }));
       // 대화 끝에 그 인물이 자기 계정에 올리는 글(하루에 한 번까지, 대화방을 나가는 경우는 제외)
       if (r.post && !r.leave && !gift && cv.echoDay !== d.clock.day) {
         cv.echoDay = d.clock.day;

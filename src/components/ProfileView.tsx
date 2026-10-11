@@ -1,5 +1,5 @@
 /**
- * 프로필 화면 공용(X 스타일): 배너 · 겹친 프로필 사진 · 이름 ✓ · @아이디 · 소개 · 위치/가입일 · 팔로우 수 · 탭(게시물/답글/미디어/마음에 들어요)
+ * 프로필 화면 공용(X 스타일): 배너 · 겹친 프로필 사진 · 이름 ✓ · @아이디 · 소개(내 프로필) 또는 속마음(인물) · 위치/가입일 · 팔로우 수 · 탭(게시물/답글/미디어/마음에 들어요)
  * 내 프로필과 캐릭터 프로필이 같은 틀을 쓴다. 내 프로필은 미디어 탭이 없다(hideMedia).
  */
 import { useNavigation } from '@react-navigation/native';
@@ -29,6 +29,8 @@ export interface ProfileInfo {
   bannerColor: string;
   badge: BadgeKind | null;
   bio: string;
+  /** 속마음(인물 프로필: 여성 + 호감도 기준 이상일 때만 넘어온다) */
+  heart?: string;
   location?: string;
   joined?: string;
   following: number;
@@ -85,6 +87,12 @@ export function ProfileView({ sc, info, actions, extra, showLikes, hideMedia }: 
           {info.followsMe ? <Text style={[styles.follows, { backgroundColor: c.surfaceAlt, color: c.subtext }]}>나를 팔로우합니다</Text> : null}
         </View>
         {info.bio ? <Text style={{ color: c.text, fontSize: font.body, lineHeight: 21, marginTop: 10 }}>{info.bio}</Text> : null}
+        {info.heart ? (
+          <View testID="profile-heart" style={[styles.heart, { backgroundColor: c.surfaceAlt }]} accessibilityLabel={`속마음: ${info.heart}`}>
+            <Text style={{ fontSize: font.small }}>💭</Text>
+            <Text style={{ color: c.text, fontSize: font.body, lineHeight: 20, fontStyle: 'italic', flexShrink: 1 }}>{info.heart}</Text>
+          </View>
+        ) : null}
         <View style={styles.meta}>
           {info.location ? (
             <View style={styles.metaItem}>
@@ -132,5 +140,6 @@ const styles = StyleSheet.create({
   actions: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 10 },
   follows: { fontSize: 11, paddingHorizontal: 4, paddingVertical: 1, borderRadius: 4, overflow: 'hidden' },
   meta: { flexDirection: 'row', flexWrap: 'wrap', gap: 14, marginTop: 10 },
+  heart: { flexDirection: 'row', alignItems: 'flex-start', gap: 6, alignSelf: 'flex-start', marginTop: 10, borderRadius: 14, borderTopLeftRadius: 4, paddingHorizontal: 11, paddingVertical: 7, maxWidth: '100%' },
   metaItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
 });

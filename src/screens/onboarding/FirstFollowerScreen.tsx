@@ -208,7 +208,9 @@ export function FirstFollowerScreen() {
                 <Text style={{ color: c.subtext, fontSize: font.body }}>
                   @{p.handle} · {ARCHETYPE_LABEL[p.archetype]} · 팔로워 {formatCount(p.followers)}
                 </Text>
-                <Text style={{ color: c.text, fontSize: font.body, lineHeight: 20, marginTop: 4 }}>{p.bio}</Text>
+                {p.title || p.age ? (
+                  <Text style={{ color: c.subtext, fontSize: font.body, lineHeight: 20, marginTop: 4 }}>{[p.title, p.age ? `${p.age}살` : ''].filter(Boolean).join(' · ')}</Text>
+                ) : null}
               </View>
               <View style={[styles.radio, { borderColor: on ? c.primary : c.borderStrong, backgroundColor: on ? c.primary : 'transparent' }]}>{on && <IconCheck size={14} color="#fff" />}</View>
             </Pressable>

@@ -5,12 +5,14 @@
  * - v3.1: 기본 세계관 인물의 긴 설명(말투·이모지·말버릇 규칙)을 핵심 특징만 남긴 새 설명으로(사용자가 고친 설명은 그대로)
  * - v3.3: 연애 수위 값 이름 변경(normal→racy, spicy→erotic)
  * - v3.4: 등장인물(핵심 인물)은 반드시 사람 얼굴 사진 — 사진 없이 이모지만 쓰던 사람에게 성별·나이대에 맞는 프리셋 얼굴을 준다
+ * - v3.5: 전원 20대로 바꿨던 것(v3.4의 한때)을 되돌린다 — 나이는 그 자리의 현실 나이. 직함·나이가 빈 인물은 설명에서 읽어 채운다
  * 받은 객체(JSON에서 막 읽은 것)를 직접 고친다.
  */
 import { separateFromPlayer } from './lookalike';
 import { pickFace, resolveFace, themeOfWorld, usedFaceKeys } from '../data/facePool';
 import { AVATARS } from '../data/photos';
-import { seedMeta } from '../data/castMeta';
+import { ageForTitle } from '../data/ageNorms';
+import { ageInText, seedMeta, titleInText } from '../data/castMeta';
 import { findSeed } from '../data/worlds';
 import { LEGACY_DESC_HASH } from '../data/worlds/legacy';
 import type { Character, Scenario } from '../types';
@@ -18,11 +20,25 @@ import { hashStr } from '../utils';
 import { initRelation } from './relationship';
 import { KEEP } from './rules';
 
-/** "38살"·"(41)"·"33세" 같은 30대 이상 나이 표기 → 20대 후반(세계관 파일과 같은 규칙: 30~31→27, 32~34→28, 35↑→29) */
+/** (되돌리기 전용) 한때 30대 이상 나이를 20대 후반으로 바꿔 저장했던 규칙: 30~31→27, 32~34→28, 35↑→29 */
+const youngAge = (n: number) => (n < 30 ? n : n <= 31 ? 27 : n <= 34 ? 28 : 29);
 function youngify(text: string): string {
-  const m = (n: number) => String(n <= 31 ? 27 : n <= 34 ? 28 : 29);
+  const m = (n: number) => String(youngAge(n));
   return text.replace(/(?<![0-9])(3\d|4\d)(살|세)/g, (_, a: string, b: string) => m(Number(a)) + b).replace(/\((3\d|4\d)([,)])/g, (_, a: string, b: string) => `(${m(Number(a))}${b}`);
 }
+
+/** 직함 표에서 이름을 바꾼 것(예전 값 → 새 표 값으로 갈아 준다) */
+const OLD_TITLE: Record<string, string> = {
+  office__hangyeol: 'PM',
+  office__seungjae: '개발자',
+  office__eunjung: '피플팀',
+  office__yunseul: '선배 개발자',
+  office__jaehyun: 'QA',
+  office__bom: '신입',
+  influencer__sujin: '팀장',
+  football__ryu_agent: '에이전트',
+  youtuber__sojeong: 'MCN 매니저',
+};
 
 /** 얼굴 사진이 꼭 있어야 하는 사람: 핵심 인물(뉴스·단체·공통 캐릭터 제외). 공통 캐릭터는 실존 인물일 수 있어 가상 얼굴을 붙이지 않는다 */
 const needsFace = (c: Character) => c.tier !== 'crowd' && !c.isNews && c.badge !== 'gold' && !c.rosterId && !c.inactive;
@@ -72,13 +88,25 @@ export function migrateScenarioData(raw: Scenario): Scenario {
       const seed = findSeed(tid, c.id);
       if (seed) {
         const meta = seedMeta(tid, seed);
-        if (c.title === undefined && meta.title) c.title = meta.title;
+        // 한때 20대로 바꿔 저장했던 설명·소개·나이를 원래(현실 나이)대로 — 사용자가 고친 글은 그대로 둔다
+        if (c.description !== seed.description && c.description === youngify(seed.description)) c.description = seed.description;
+        if (c.bio !== seed.bio && c.bio === youngify(seed.bio)) c.bio = seed.bio;
+        if (meta.age && meta.age >= 30 && c.age === youngAge(meta.age)) c.age = meta.age;
+        // 직함은 표가 바뀌었으면 새 표로(예전 표의 값 그대로일 때만)
+        if (meta.title && (c.title === undefined || OLD_TITLE[`${tid}__${seed.key}`] === c.title)) c.title = meta.title;
         if (c.age === undefined && meta.age) c.age = meta.age;
         if (c.gender === undefined && seed.photo.gender && !seed.org) c.gender = seed.photo.gender;
-        // 전원 20대: 예전 설명·소개에 남은 30대 이상 나이 표기를 고친다
-        c.description = youngify(c.description ?? '');
-        c.bio = youngify(c.bio ?? '');
-        if (c.ageGroup && c.ageGroup > 20) c.ageGroup = 20;
+      }
+    }
+    // 직접 만든 세계관·인물: 설명 첫 대목에 적힌 계급·직급과 나이를 읽어 채운다(적어 둔 값은 건드리지 않는다)
+    if (!c.isNews && c.badge !== 'gold' && !c.rosterId) {
+      if (c.title === undefined) {
+        const t = titleInText(c.description);
+        if (t) c.title = t;
+      }
+      if (c.age === undefined) {
+        const age = ageInText(c.description ?? '') ?? ageInText(c.bio ?? '') ?? ageForTitle(c.title, c.id);
+        if (age && age >= 19) c.age = age;
       }
     }
     initRelation(c, day);

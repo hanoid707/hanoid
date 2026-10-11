@@ -19,6 +19,7 @@ import { AppearIn } from '../../components/ui';
 import { markConversationRead, sendDM } from '../../game/actions';
 import { dayLabel, minutesBetween } from '../../game/clock';
 import { GIFTS } from '../../game/items';
+import { heartShown } from '../../game/love';
 import { DM_MAX_LEN } from '../../game/rules';
 import type { RootNav, RootStackParamList } from '../../navigation/types';
 import { useActive, useGame } from '../../store/game';
@@ -128,7 +129,7 @@ export function ChatScreen() {
                 <VerifiedBadge kind={badge} />
               </View>
               <Text style={{ color: c.subtext, fontSize: font.body }}>@{ch.handle}</Text>
-              {ch.bio ? <Text style={{ color: c.text, fontSize: font.body, textAlign: 'center', marginTop: 6, lineHeight: 20 }}>{ch.bio}</Text> : null}
+              {heartShown(sc, ch) ? <Text style={{ color: c.text, fontSize: font.body, textAlign: 'center', marginTop: 6, lineHeight: 20, fontStyle: 'italic' }}>💭 {heartShown(sc, ch)}</Text> : null}
               <Text style={{ color: c.subtext, fontSize: font.small, marginTop: 6 }}>
                 {ch.joined ? `가입일: ${ch.joined} · ` : ''}팔로워 {formatCount(ch.followers)}명{ch.followsMe ? ' · 나를 팔로우합니다' : ''}
               </Text>

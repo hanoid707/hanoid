@@ -20,7 +20,7 @@ import { activeChar, alive, beginFlow, ctxOf, editIf, engine, fail, G, lineAutho
 import { diffOf, scaleSocial } from './difficulty';
 import { burstDelays, isInfluencer, npcEngagement } from './engagement';
 import { dedupeLines, replyLikes } from './post';
-import { addReply, addXp, applyDeltas, consumeBoost, logActivity, questProgress, recomputeStatus, tickClock } from './progress';
+import { addReply, addXp, applyDeltas, consumeBoost, logActivity, noteTouchFromText, questProgress, recomputeStatus, tickClock } from './progress';
 import { hitsAvoid } from '../ai/context';
 import { takeAvoid } from './avoid';
 import { POST_MAX_LEN, TIME_COST, XP } from './rules';
@@ -64,6 +64,8 @@ export function replyToPost(parentId: ID, text: string): ActionResult {
     questProgress(d, 'reply', 1);
     const target = d.characters[parent.authorId];
     logActivity(d, '💬', target ? `${target.name}님 글에 답글을 달았어요` : '답글을 달았어요');
+    // 괄호로 쓴 행동에 스킨십이 있으면 그 인물에 적어 둔다(답글 대상이 그 자리에 있던 사람)
+    noteTouchFromText(d, body, target ? [target.id] : []);
   });
   tap();
   if (myReplyId) void reactToMyReply(beginFlow(sid), parentId, myReplyId, body, days, boosted);

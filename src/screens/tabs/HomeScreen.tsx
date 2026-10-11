@@ -1,6 +1,6 @@
 /** 홈 타임라인(X 스타일) — 왼쪽 위 세계관(누르면 세계관·세이브 창) · 오른쪽 위 날짜(누르면 아이템) · 오른쪽 아래 글쓰기 버튼 */
 import { useNavigation, useScrollToTop } from '@react-navigation/native';
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ClockChip, EventCard, FeedSkeleton, StatusBanner } from '../../components/Hud';
@@ -10,6 +10,7 @@ import { SaveSwitcher } from '../../components/SaveList';
 import { Screen } from '../../components/Screen';
 import { AppearIn, EmptyState } from '../../components/ui';
 import { refreshFeed } from '../../game/actions';
+import { ensureBonds } from '../../game/bonds';
 import type { RootNav } from '../../navigation/types';
 import { useActive } from '../../store/game';
 import { font, space, useTheme } from '../../theme';
@@ -25,6 +26,11 @@ export function HomeScreen() {
   const listRef = useRef<FlatList<Post>>(null);
   // 홈 탭을 한 번 더 누르면 맨 위로(X와 같음)
   useScrollToTop(listRef);
+  // 이 이야기의 인물 정보(자리·나이·서로를 향한 마음)를 아직 안 채웠으면 뒤에서 한 번 채운다
+  const sid = sc?.id;
+  useEffect(() => {
+    if (sid) void ensureBonds(sid);
+  }, [sid]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);

@@ -96,7 +96,7 @@ export function ExploreScreen() {
   const results = useMemo(() => {
     if (!sc || !q.trim()) return null;
     const k = q.trim().toLowerCase().replace(/^@/, '');
-    const users = people.filter((ch) => ch.name.toLowerCase().includes(k) || ch.handle.toLowerCase().includes(k) || ch.bio.toLowerCase().includes(k)).slice(0, 8);
+    const users = people.filter((ch) => ch.name.toLowerCase().includes(k) || ch.handle.toLowerCase().includes(k) || (ch.title ?? '').toLowerCase().includes(k)).slice(0, 8);
     const posts = Object.values(sc.posts)
       .filter((p) => p.kind !== 'system' && p.text.toLowerCase().includes(k))
       .sort((a, b) => b.ts - a.ts)

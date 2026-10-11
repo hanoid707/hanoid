@@ -19,7 +19,7 @@ import { tap } from '../utils/haptics';
 import { activeChar, alive, beginFlow, castChars, ctxOf, editIf, engine, fail, G, lineAuthor, OK, revealLater, type ActionResult, type Flow, tune, addNpcLines, deliverOpeners } from './core';
 import { diffOf, scaleSocial } from './difficulty';
 import { burstDelays, growValue, isInfluencer, LIKES_MAX, postEngagement } from './engagement';
-import { addNewsPost, addPost, addReply, addXp, applyAffinity, applyDeltas, consumeBoost, logActivity, markViral, pushNoti, questKeyword, questProgress, recomputeStatus, tickClock } from './progress';
+import { addMemory, addNewsPost, addPost, addReply, addXp, applyAffinity, applyDeltas, applyLove, consumeBoost, logActivity, markViral, noteTouchFromText, pushNoti, questKeyword, questProgress, recomputeStatus, tickClock } from './progress';
 import { POST_MAX_LEN, TIME_COST, XP } from './rules';
 import { saveIdeas } from './ideas';
 import { takeAvoid } from './avoid';
@@ -102,6 +102,11 @@ export function publishPost(text: string, media?: PhotoRef, opts: { at?: { hour:
         logActivity(d, '🔁', `${sc0.name}님 글에 이어 썼어요`);
       }
     }
+    // 이어 쓴 글은 앞 글과 한 묶음으로 기억해 둔다(뒷날의 글·쪽지에서도 그 맥락이 이어지게)
+    const last = quote[quote.length - 1];
+    if (last && body) addMemory(d, `플레이어가 ${last.authorId === ME ? '자기' : last.name} 글("${snippet(last.text, 30)}")에 이어서 "${snippet(body, 40)}"라고 씀`);
+    // 괄호로 쓴 행동에 스킨십이 있으면 그 인물에 적어 둔다(이어 쓴 글이면 앞 글 작성자도 그 자리에 있던 사람)
+    noteTouchFromText(d, body, last && last.authorId !== ME ? [last.authorId] : []);
     // 숫자는 바로 자라기 시작(로컬 추정치) → AI 반응이 오면 최종값으로 이어서 자란다
     const pre = postEngagement({ followers: d.stats.followers, quality: localQuality(local), mood: local.mood, viral: false, boost: boosted, difficulty: diffOf(d) });
     p.likes = pre.likes;
@@ -267,6 +272,7 @@ function applyPostReaction(d: Scenario, postId: ID, r: PostReaction, o: { viral:
   }
   if (d.stats.status === 'cancelled' && (r.mood === 'apology' || r.mood === 'positive')) questProgress(d, 'recover', 1);
   saveIdeas(d, r.ideas);
+  applyLove(d, r.love);
   recomputeStatus(d);
 }
 

@@ -387,7 +387,6 @@ function RosterForm({ initial, onClose, onSaved, onDelete }: { initial: FormStat
         </View>
         <Field label="팔로워 직접 입력" value={f.followers} onChangeText={(t) => set('followers', digits(t))} keyboardType="number-pad" maxLength={10} />
 
-        <Field label="자기소개" value={f.bio} onChangeText={(t) => set('bio', t)} multiline maxLength={160} counter placeholder="(프로필에 보이는 한 줄 소개)" />
         <Field
           label="특징"
           value={f.traits}

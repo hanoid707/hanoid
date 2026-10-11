@@ -8,6 +8,7 @@
  * 캐릭터 설정·쪽지·관계를 같이 넘겨서 타임라인 답글과 쪽지 말투가 서로 이어지게 한다.
  */
 import { getWorldTemplate } from '../data/worlds';
+import { canLove, genderOf, heartEligible, heartTargets, jealousOf, lovable, lovables, loveOf, topLove, touchCandidates } from '../game/love';
 import { CROWD_LABEL, PERSONALITY_PRESETS, REGISTER_LABEL, RELATION_LABEL, SPEECH_PRESETS, registerOf } from '../game/relationship';
 import { GHOST, ME, SYSTEM, type Character, type Difficulty, type ID, type Post, type RepStatus, type Scenario, type SpeechRegister } from '../types';
 import { cutText, formatCount, hashStr } from '../utils';
@@ -31,8 +32,22 @@ export function buildContext(sc: Scenario): AIContext {
   const recent = feedPosts
     .slice(0, 10)
     .reverse()
-    .map((p) => ({ author: authorName(p), text: p.text, authorId: p.authorId }));
+    .map((p) => {
+      // 이어 쓴 글(재게시해서 그 밑에 쓴 글)은 앞 글과 함께 읽혀야 뜻이 통한다 → 앞 글을 같이 넘긴다
+      const q = p.quote?.[p.quote.length - 1];
+      const lead = q && !hit(q.text) ? `[${q.authorId === ME ? '자기' : q.name} 글 "${cutText(q.text.replace(/\s+/g, ' '), 40)}"에 이어서] ` : '';
+      return { author: authorName(p), text: lead + p.text, authorId: p.authorId };
+    });
   const t = getWorldTemplate(sc.world.templateId);
+  // 인물끼리의 마음(누가 누구를 사랑하는지)
+  const pool = lovables(sc);
+  const lovedBy = new Map<ID, { name: string; v: number }[]>();
+  for (const a of pool) {
+    for (const b of pool) {
+      const v = a.id === b.id ? 0 : loveOf(a, b.id);
+      if (v > 0) lovedBy.set(b.id, [...(lovedBy.get(b.id) ?? []), { name: a.name, v }]);
+    }
+  }
   // 인물별 최근 공개 발언(글·답글) 최신 3개 — 한 번 훑어서 모은다
   const castIds = new Set(chars.map((c) => c.id));
   const saidBy = new Map<ID, { k: number; line: string }[]>();
@@ -108,12 +123,13 @@ export function buildContext(sc: Scenario): AIContext {
         romance: c.romance ?? 0,
         devotion: c.devotion ?? 0,
         ...(c.rosterId ? { realPerson: true } : {}),
-        gender: c.gender,
+        gender: genderOf(c),
         ageGroup: c.ageGroup,
         personality: c.personality,
         speechStyle: c.speechStyle,
         dmTs: msgs.length ? msgs[msgs.length - 1].ts : 0,
         recentSaid: own.length ? recentSaidOf(c.id).filter((x) => !hitsAvoid(own, x)) : recentSaidOf(c.id),
+        ...loveInfo(sc, c, lovedBy.get(c.id), hitC),
       };
     }),
     recent,
@@ -131,11 +147,39 @@ export function buildContext(sc: Scenario): AIContext {
       .map((q) => ({ title: q.title, keyword: q.keyword })),
     pendingEvents: (sc.events ?? []).filter((e) => e.status === 'pending' && !hit(e.title)).map((e) => e.title),
     ...(avoid.length ? { avoid } : {}),
+    heartAsk: heartTargets(sc, 3).map((c) => c.id),
+    touchAsk: touchCandidates(sc)
+      .filter((x) => !hit(x.act))
+      .map((x) => ({ id: x.c.id, act: x.act })),
     myRecent: feedPosts
       .filter((p) => p.authorId === ME && p.kind === 'post' && p.text)
       .slice(0, 3)
       .reverse()
       .map((p) => p.text),
+  };
+}
+
+/** 한 인물의 마음 정보: 사랑하는 인물·가장 큰 쪽·받는 마음·무관심·질투·속마음·플레이어와 한 스킨십 */
+function loveInfo(sc: Scenario, c: Character, lovedBy: { name: string; v: number }[] | undefined, hit: (t: string | undefined) => boolean): Partial<CastInfo> {
+  const heartOk = heartEligible(sc, c);
+  if (!canLove(c)) return { ...(heartOk ? { heartOk } : {}), ...(c.heart && heartOk && !hit(c.heart) ? { heart: c.heart } : {}) };
+  const loves = Object.entries(c.loves ?? {})
+    .filter(([to, v]) => v > 0 && lovable(sc.characters[to]))
+    .map(([to, v]) => ({ name: sc.characters[to].name, v: Math.round(v) }))
+    .sort((a, b) => b.v - a.v)
+    .slice(0, 3);
+  const top = topLove(sc, c);
+  const jealous = jealousOf(sc, c).map((x) => x.name);
+  const touch = (c.touch ?? []).map((t) => t.act).filter((a) => !hit(a));
+  return {
+    ...(loves.length ? { loves } : {}),
+    ...(top && (loves.length || top.id !== 'me') ? { loveTop: top.id === 'me' ? '플레이어' : top.name } : {}),
+    ...(lovedBy?.length ? { lovedBy: [...lovedBy].sort((a, b) => b.v - a.v).slice(0, 3) } : {}),
+    ...(c.loveOff && !loves.length ? { loveOff: true } : {}),
+    ...(jealous.length ? { jealous } : {}),
+    ...(heartOk ? { heartOk } : {}),
+    ...(c.heart && heartOk && !hit(c.heart) ? { heart: c.heart } : {}),
+    ...(touch.length ? { touch } : {}),
   };
 }
 
@@ -267,6 +311,15 @@ export function fullEntry(c: CastInfo, descMax = 160, opts: { said?: boolean } =
   if (c.bio && (c.description ?? '').length < 60) lines.push(`  소개: ${clip(c.bio, 50)}`);
   if (c.relations) lines.push(`  관계: ${clip(c.relations, 60)}`);
   if (c.avoid?.length) lines.push(`  꺼내지 않는 화제: ${c.avoid.map((w) => clip(w, 20)).join(' · ')} (이 인물은 이 낱말·소재를 절대 말하지 않는다)`);
+  if (c.loves?.length) {
+    const all = [...c.loves.map((l) => `${l.name} ${l.v}`), ...(c.romance > 0 && !c.realPerson ? [`플레이어 ${c.romance}`] : [])];
+    lines.push(`  사랑: ${all.join(' · ')}${c.loveTop ? ` → 마음이 가장 큰 쪽은 ${c.loveTop}(그쪽을 따라간다)` : ''}`);
+  }
+  if (c.lovedBy?.length) lines.push(`  받는 마음: ${c.lovedBy.map((l) => `${l.name} ${l.v}`).join(' · ')}(본인은 수치를 모른다)`);
+  if (c.loveOff) lines.push('  연애 무관심: 일·자기 생활이 먼저다. 특별한 계기 없이는 누구에게도 연애 감정을 드러내지 않는다');
+  if (c.jealous?.length) lines.push(`  질투: 좋아하는 ${c.jealous.join('·')}이(가) 플레이어에게 마음이 있다 → 그 장면에서는 플레이어를 견제하거나 삐딱해진다(매번은 아님)`);
+  if (c.touch?.length) lines.push(`  스킨십: 플레이어와 ${c.touch.map((a) => clip(a, 14)).join('·')}까지 실제로 한 사이`);
+  if (c.heart) lines.push(`  속마음(본인만 안다): ${clip(c.heart, 44)}`);
   if (c.recentDM.length) lines.push(`  둘만의 쪽지: ${c.recentDM.slice(-2).map((m) => clip(m, 45)).join(' / ')}`);
   // 본인이 실제로 쓴 최신 글 한 줄 = 그 인물 말투의 표본(지어낸 예시보다 낫다)
   if (opts.said !== false && c.recentSaid?.length) lines.push(`  최근 글: ${clip(c.recentSaid[c.recentSaid.length - 1], 50)}`);
@@ -277,7 +330,8 @@ export function fullEntry(c: CastInfo, descMax = 160, opts: { said?: boolean } =
 export function briefEntry(c: CastInfo): string {
   const first = sentences(alignRegister((c.description || c.bio || '').replace(/\s+/g, ' ').trim(), c.register))[0] ?? '';
   const trait = clip(first, 40);
-  return `- @${c.handle} ${c.name} | ${kindLabel(c)}·${registerText(c)} | 호감${c.affinity}${c.devotion >= 30 ? ` 정복${c.devotion}` : ''}${c.realPerson || c.ageGroup === 10 ? ' | 연애X' : ''}${trait ? ` | ${trait}` : ''}${c.avoid?.length ? ` | 금지 화제: ${c.avoid.map((w) => clip(w, 12)).join('·')}` : ''}`;
+  const seat = [c.title ? clip(c.title, 12) : '', c.age ? `${c.age}살` : ''].filter(Boolean).join(' ');
+  return `- @${c.handle} ${c.name}${seat ? `(${seat})` : ''} | ${kindLabel(c)}·${registerText(c)} | 호감${c.affinity}${c.devotion >= 30 ? ` 정복${c.devotion}` : ''}${c.realPerson || c.ageGroup === 10 ? ' | 연애X' : ''}${trait ? ` | ${trait}` : ''}${c.avoid?.length ? ` | 금지 화제: ${c.avoid.map((w) => clip(w, 12)).join('·')}` : ''}${c.loves?.length ? ` | 사랑→${c.loves[0].name}${c.loves[0].v}` : ''}${c.loveOff ? ' | 연애 무관심' : ''}${c.jealous?.length ? ` | 질투(${c.jealous[0]})` : ''}`;
 }
 
 // ───────────────────────── 이번 일에 넣을 인물 고르기

@@ -64,6 +64,9 @@ export interface CastPreview {
   photo?: string;
   tier: 'core' | 'crowd';
   followers: number;
+  /** 계급·직함 · 나이(첫 팔로워 고르기 화면에서 한줄소개 대신 보여 준다) */
+  title?: string;
+  age?: number;
 }
 
 const badgeOf = (s: { org?: boolean; verified?: boolean; isNews?: boolean }): BadgeKind | null => (s.org ? 'gold' : s.verified ? 'blue' : null);
@@ -74,13 +77,14 @@ export function castPreview(templateId: string | null, customCast: CastDraft[] |
   if (t) {
     return t.cast.map((c) => ({
       key: c.key, name: c.name, handle: c.handle, emoji: c.emoji, color: c.color, archetype: c.archetype, bio: c.bio,
-      isNews: !!c.isNews, badge: badgeOf(c), photo: `${t.id}__${c.key}`, tier: c.tier, followers: c.followers,
+      isNews: !!c.isNews, badge: badgeOf(c), photo: `${t.id}__${c.key}`, tier: c.tier, followers: c.followers, ...seedMeta(t.id, c),
     }));
   }
   const faces = customFaces(customCast ?? []);
   return (customCast ?? []).map((c, i) => ({
     key: `custom${i}`, name: c.name, handle: c.handle, emoji: c.emoji, color: AVATAR_COLORS[i % AVATAR_COLORS.length], archetype: c.archetype, bio: c.bio,
     isNews: !!c.isNews, badge: c.isNews ? 'gold' : c.verified ? 'blue' : null, ...(faces[i] ? { photo: faces[i] } : {}), tier: 'core', followers: c.followers,
+    ...(c.title && !c.isNews ? { title: c.title } : {}), ...(c.age && !c.isNews ? { age: c.age } : {}),
   }));
 }
 
@@ -113,7 +117,7 @@ function buildWorld(input: NewScenarioInput): World {
     name: c.name,
     emoji: c.emoji || '🌍',
     color: pick(AVATAR_COLORS),
-    tagline: c.tone,
+    tagline: cutText(c.setting.replace(/\s+/g, ' ').trim(), 40),
     setting: c.setting,
     tone: c.tone,
     vocab: vocab.length ? vocab : ['오늘', '사건', '소문'],

@@ -1,5 +1,5 @@
 /**
- * 캐릭터 프로필(X 스타일) — 관계 칩 · 지금 쓰는 말투 · 호감도(-100~100)·설렘 막대 · 성별·나이·성격 · 그 사람의 글
+ * 캐릭터 프로필(X 스타일) — 속마음(여성 + 호감도 기준 이상) · 관계 칩 · 지금 쓰는 말투 · 호감도(-100~100)·설렘 막대 · 다른 인물을 향한 사랑 · 성별·나이·자리·성격 · 그 사람의 글
  * 버튼: 캐릭터 설정 · 선물(선물 3종 창 → 보내면 쪽지 대화로) · 쪽지 · 팔로우
  */
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
@@ -13,6 +13,7 @@ import { RelationChip } from '../../components/RelationChip';
 import { Screen, TopBar } from '../../components/Screen';
 import { FollowButton } from '../../components/UserRow';
 import { EmptyState, MeterBar } from '../../components/ui';
+import { genderOf, heartShown, loveRows, topLove } from '../../game/love';
 import { PERSONALITY_PRESETS, REGISTER_LABEL, registerOf, SPEECH_PRESETS } from '../../game/relationship';
 import type { RootNav, RootStackParamList } from '../../navigation/types';
 import { useActive } from '../../store/game';
@@ -21,8 +22,11 @@ import type { Character } from '../../types';
 /** "여성 · 20대 · ENFP · 담백·건조 말투" */
 function personLine(ch: Character): string {
   const parts: string[] = [];
-  if (ch.gender) parts.push(ch.gender === 'f' ? '여성' : '남성');
-  if (ch.ageGroup) parts.push(`${ch.ageGroup}대`);
+  const g = genderOf(ch);
+  if (g && !ch.isNews && ch.badge !== 'gold') parts.push(g === 'f' ? '여성' : '남성');
+  if (ch.age) parts.push(`${ch.age}살`);
+  else if (ch.ageGroup) parts.push(`${ch.ageGroup}대`);
+  if (ch.title) parts.push(ch.title);
   return parts.join(' · ');
 }
 
@@ -48,6 +52,9 @@ export function CharacterProfileScreen() {
   const speech = SPEECH_PRESETS.find((p) => p.id === ch.speechStyle);
   const who = personLine(ch);
   const showRomance = ch.tier !== 'crowd' && !ch.isNews && ch.relationBase !== 'family';
+  // 다른 인물을 향한 사랑(내가 좋아하는 인물 + 나를 좋아하는 인물 — 그쪽은 0이어도 보인다)
+  const loves = loveRows(sc, ch);
+  const top = topLove(sc, ch);
 
   const circle = (label: string, icon: React.ReactNode, onPress: () => void, testID?: string) => (
     <Pressable
@@ -73,7 +80,9 @@ export function CharacterProfileScreen() {
           banner: ch.banner,
           bannerColor: ch.avatar.color,
           badge: a.badge,
-          bio: ch.bio,
+          // 한줄소개 대신 속마음만(여성 + 호감도가 세계관 설정의 기준 이상일 때) — 아니면 비워 둔다
+          bio: '',
+          heart: heartShown(sc, ch),
           joined: ch.joined,
           following: ch.following ?? 0,
           followers: ch.followers,
@@ -121,7 +130,25 @@ export function CharacterProfileScreen() {
               </View>
               <Text style={[styles.barNum, { color: c.text }]}>{ch.devotion ?? 0}</Text>
             </View>
-            {who || personality || speech ? (
+            {loves.length ? (
+              <View testID="love-rows" style={{ gap: 6 }}>
+                {loves.map((r) => (
+                  <View key={r.id} style={styles.barRow}>
+                    <Text numberOfLines={1} style={[styles.loveLabel, { color: c.subtext }]}>
+                      {r.name} 사랑
+                    </Text>
+                    <View style={{ flex: 1 }}>
+                      <MeterBar value={r.v} min={0} max={100} color={c.like} />
+                    </View>
+                    <Text style={[styles.barNum, { color: c.text }]}>{r.v}</Text>
+                  </View>
+                ))}
+                {top && loves.filter((r) => r.v > 0).length + ((ch.romance ?? 0) > 0 && showRomance ? 1 : 0) >= 2 ? (
+                  <Text style={{ color: c.subtext, fontSize: font.tiny }}>지금 마음이 가장 큰 쪽: {top.id === 'me' ? '나' : top.name}</Text>
+                ) : null}
+              </View>
+            ) : null}
+            {who || personality || speech || ch.loveOff ? (
               <View style={styles.tags}>
                 {who ? <Text style={{ color: c.subtext, fontSize: font.small }}>{who}</Text> : null}
                 {personality ? (
@@ -132,6 +159,11 @@ export function CharacterProfileScreen() {
                 {speech ? (
                   <View style={[styles.tag, { borderColor: c.borderStrong }]}>
                     <Text style={{ color: c.text, fontSize: font.tiny, fontWeight: '700' }}>{speech.label} 말투</Text>
+                  </View>
+                ) : null}
+                {ch.loveOff && !loves.some((r) => r.v > 0) ? (
+                  <View testID="love-off" style={[styles.tag, { borderColor: c.borderStrong }]}>
+                    <Text style={{ color: c.subtext, fontSize: font.tiny, fontWeight: '700' }}>연애 무관심</Text>
                   </View>
                 ) : null}
               </View>
@@ -164,6 +196,7 @@ const styles = StyleSheet.create({
   barRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   barLabel: { fontSize: font.tiny, fontWeight: '700', width: 36 },
   barNum: { fontSize: font.tiny, fontWeight: '800', width: 30, textAlign: 'right', fontVariant: ['tabular-nums'] },
+  loveLabel: { fontSize: font.tiny, fontWeight: '700', width: 92 },
   tags: { flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' },
   tag: { borderWidth: 1, borderRadius: radius.pill, paddingHorizontal: 8, paddingVertical: 2 },
 });

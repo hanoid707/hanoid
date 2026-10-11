@@ -12,7 +12,7 @@ import { useGame, type GameState } from '../store/game';
 import { font, radius, useTheme } from '../theme';
 import { TypingDots } from './TypingDots';
 
-type Kind = 'event' | 'tick' | 'post' | 'reply' | 'refresh' | 'make' | 'bio' | 'variant';
+type Kind = 'event' | 'tick' | 'post' | 'reply' | 'refresh' | 'make' | 'bio' | 'variant' | 'bonds';
 const ND = Platform.OS !== 'web';
 
 const LINES: Record<Kind, [string, string][]> = {
@@ -37,6 +37,10 @@ const LINES: Record<Kind, [string, string][]> = {
   make: [['🧑‍🎨', '인물을 만드는 중']],
   bio: [['📝', '자기소개를 쓰는 중']],
   variant: [['🎲', '다른 이벤트를 찾는 중']],
+  bonds: [
+    ['🧭', '인물 관계를 정리하는 중'],
+    ['💞', '누가 누구를 좋아하는지 살피는 중'],
+  ],
 };
 /** 여러 일이 겹치면 앞에 있는 것부터 보여 준다 */
 const ORDER: [Kind, (k: string, sid: string) => boolean][] = [
@@ -48,6 +52,7 @@ const ORDER: [Kind, (k: string, sid: string) => boolean][] = [
   ['variant', (k) => k.startsWith('eventVariant:')],
   ['make', (k) => k === 'character:new'],
   ['bio', (k) => k.startsWith('bio:')],
+  ['bonds', (k, sid) => k === `bonds:${sid}`],
 ];
 
 const selKind = (s: GameState): Kind | '' => {

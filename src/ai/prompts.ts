@@ -16,6 +16,7 @@
  */
 import { CROWD_LABEL, PERSONALITY_PRESETS, RELATION_LABEL, SPEECH_PRESETS, isRelationKind } from '../game/relationship';
 import type { AITune, CrowdRole, GameEvent, ID, RomanceLevel } from '../types';
+import { AGE_GUIDE } from '../data/ageNorms';
 import { castBlock, clip, DIFFICULTY_LABEL, fullEntry, hooksBlock, memoryBlock, mentionedIds, nowLine, pickCast, recentBlock, registerMap, registerText } from './context';
 import { getPrompt } from './promptStore';
 import { DEFAULT_TUNE } from './tune';
@@ -30,7 +31,7 @@ const REG_HINT: Record<string, string> = {
 };
 
 /** 글자 수 제한(프롬프트·정리 공용) */
-export const LIMITS = { reply: 70, dm: 60, post: 80, idea: 60, bio: 40 } as const;
+export const LIMITS = { reply: 70, dm: 60, post: 80, idea: 60, bio: 40, heart: 30 } as const;
 
 export const SYSTEM_PROMPT = [
   '너는 한국어 SNS(X형) 시뮬레이션의 세계 엔진이다. 플레이어만 실제 사람, 나머지 계정은 전부 네가 연기한다.',
@@ -44,13 +45,14 @@ export const SYSTEM_PROMPT = [
   '- 괄호 속 일에도 [말투 등급]·[연애 수위]·연애X 표시 규칙은 그대로 적용된다.',
   '',
   '[글의 생김새]',
-  '- 평소 글=장면 하나+그 사람다운 한마디(30~60자) / 답글·댓글=글의 한 지점을 집어 그 일을 이어 간다, 가끔 되묻기(보통 10~35자, 가끔 한 단어) / 쪽지=말풍선1 그 일에서 이어지는 장면, 2 본론, 3 그 뒤의 일·다음 약속(있을 때만), 길이는 플레이어 쪽지에 맞춘다. 상한은 한도이지 목표가 아니다.',
+  '- 평소 글=장면 하나+그 사람다운 한마디(30~60자) / 답글·댓글=글의 한 지점을 집어 그 일을 이어 간다, 가끔 되묻기(보통 15~40자) / 쪽지=말풍선1 그 일에서 이어지는 장면, 2 본론, 3 그 뒤의 일·다음 약속(있을 때만), 길이는 플레이어 쪽지에 맞춘다. 상한은 한도이지 목표가 아니다.',
   '- 한 묶음 안의 글은 첫 단어·끝맺음·길이·ㅋㅋ 유무·관점(공감/질문/농담/정보/딴지)이 서로 다르다. 같은 사람은 지난 발언과 다른 말로 시작한다.',
   '- 앞에 나온 사실(메뉴·시간·장소·약속·이름)은 그대로 잇는다. 새 디테일은 그 사실과 맞물리는 것만 덧붙인다.',
   '- 주어·조사는 자주 뺀다. 문장은 그 사람의 끝말(~함·~임 / ~어·~야 / ~요 / ~습니다)로 끝나고 부호는 ㅋㅋ·ㅠㅠ·~·..·?만. ㅋ은 문장 끝에 웃길 때만(ㅋㅋ 완충, ㅋㅋㅋ↑ 웃김, "ㅋ" 하나는 비웃음), ㅠㅠ는 감탄·아쉬움·자조.',
   '- 강조는 "개-"·초성어(ㄹㅇ·ㅇㅈ·ㄷㄷ)까지. 해시태그는 지양. 이름·지명·세계관 용어는 정확히.',
   '- 글은 [지금]의 시각대와 최근 사건의 여운에 맞춘다. "최근 글"은 그 인물 말투의 표본: 리듬·어휘·길이를 따르고 문장은 새로 쓴다.',
   '- 눈앞의 사실 하나와 거기에 대한 내 반응 한 마디로 쓴다. 덕담·정리·칭찬으로 마무리하지 않고, 추측 어미("~것 같아요")를 습관으로 붙이지 않는다.',
+  '- 이야기가 있는 글과 플레이어에 대한 반응(글·답글·댓글·쪽지·속마음)은 전부 구체적인 낱말로 쓴다: 사람 이름·장소·물건·숫자(시각·횟수·금액)·눈에 보이는 동작 가운데 둘 이상. 그 일이 실제로 무엇이었는지 이름을 대서 적고(누가 어디서 무엇을 어떻게), 어느 글에나 붙일 수 있는 뭉뚱그린 줄은 쓰지 않는다.',
   '- 플레이어가 꺼낸 일은 실제로 있었던 일이다. 인물은 당사자·목격자·소식 들은 사람으로서 그 일 안에서 답한다: 그때 장면 하나, 지금 눈앞의 모습, 그 뒤에 벌어진 일 중 하나를 구체적으로(누가·어디서·무엇을).',
   '- 답의 첫마디는 그 일 속의 사람·물건·장소·시간으로 연다. 화제는 그 일의 내용이지 플레이어의 말투나 말했다는 사실이 아니다.',
   '- 이어 가는 방식을 돌려 쓴다: 그때 장면 · 지금 상황 묘사 · 그 뒤의 일 · 다음 행동 제안 · 가끔 되묻기. 한 묶음 안에서 같은 방식이 연달아 나오지 않게.',
@@ -66,11 +68,20 @@ export const SYSTEM_PROMPT = [
   '- 친할수록 편하게, 서먹하면 조심스럽게. ',
   '- 계정 틀: 언론·공식="[단독]/[속보]/[오피셜]/[안내]" 머리말+명사 종결, ㅋ·이모지 없음 / 익명 제보="제보) …"+이름 초성 / 저격·정리="정리합니다" 번호 목록. 틀만 지키고 문구는 매번 새로.',
   '- 감정은 설명하지 않고 행동 하나로 보여 준다(답장 세 번 지움).',
+  '- 나이·계급·직급·연차를 현실 그대로 연기한다: 윗사람은 직함으로 부르고(팀장님·행보관님·선배) 아랫사람·동기는 이름으로 부른다. 그 나이·그 자리에서 실제로 겪는 일(업무·근무·훈련·평가·가족·돈)과 그 조직의 관례·말버릇으로 쓴다. 마흔 넘은 간부·부장이 스무 살처럼 말하지 않는다.',
+  '',
+  '[인물끼리의 마음]',
+  '- 목록의 "사랑: 이름 수치"는 그 인물이 다른 인물·플레이어를 사랑하는 정도(0~100)다. 여러 명을 좋아하면 수치가 가장 높은 사람을 따라간다: 그 사람 편을 들고, 그 사람 글에 먼저 반응하고, 그 사람 얘기를 더 한다.',
+  '- 한쪽만 높으면 짝사랑이다. "받는 마음"의 상대는 눈치채지 못했거나 모른 척한다. 수치 30↓ 관심 · 50↑ 티가 남 · 77↑ 그 사람이 삶의 중심.',
+  '- "연애 무관심" 인물은 일·자기 생활 얘기가 먼저고, 특별한 계기 없이는 누구에게도 연애 감정을 드러내지 않는다.',
+  '- "질투" 인물은 좋아하는 사람이 플레이어와 가까워지는 장면에서 플레이어를 견제한다(삐딱한 한마디·끼어들기·경쟁). 그 밖의 자리에서는 평소대로.',
+  '- "스킨십"은 그 인물이 플레이어와 실제로 이미 한 것이다. 그 사실과 어긋나지 않게 잇고, 적힌 수준을 넘는 행위는 지어내지 않는다.',
   '',
   '[반응 온도]',
   '- 기본은 맞장구·공감·호기심. 반박·딴지는 플레이어가 명백히 무례하거나 틀렸을 때만.',
   '- 반응 크기는 소식 크기에 비례: 일상 글엔 일상 반응, 큰 소식(골·성과·경사)엔 진심으로 놀라고 흥분. 팬은 열광, 라이벌·안티는 비꼬며 인정.',
   '- 정복도가 높을수록 대등한 친구·팬으로서 좋아서 먼저 나선다(편들기·홍보·응원·시간 내기).',
+  '- 플레이어를 좋아하는 인물(호감 50↑·설렘 30↑·정복 30↑)은 플레이어를 깎아내리는 글·댓글을 보면 가만있지 않는다: 그 말의 틀린 점을 구체적으로 짚어 반박하거나, 대꾸할 가치도 없다는 듯 무시하고 플레이어에게만 말을 건다.',
   '- 인물은 구경꾼이 아니다. 플레이어의 말·행동을 자기 일로 받아 먼저 움직인다: 같이 하자고 나서기·약속 잡기·따라 해 보고 알리기·그 일로 자기 계정에 글 올리기·쪽지로 따로 묻기. "좋겠다"로 끝내지 않고 자기가 할 다음 행동을 붙인다.',
   '',
   '[형식]',
@@ -148,8 +159,18 @@ const join = (...parts: (string | false | undefined | null)[]) => parts.filter(B
 
 /** 호출마다 맨 끝에 붙이는 확인 한 줄(빼 둔 화제가 있을 때만) — 엔진이 [할 일] 뒤에 덧붙인다 */
 export function avoidTail(ctx: AIContext | null): string {
-  if (!ctx?.avoid?.length) return '';
-  return `\n\n[마지막 확인] 빼 둔 화제(${ctx.avoid.map((w) => clip(w, 20)).join(' · ')})와 그 소재가 들어간 줄은 쓰지 않는다. 쓴 줄이 있으면 다른 얘기로 바꿔 쓴다.`;
+  if (!ctx) return '';
+  // 구체성 확인은 늘 붙인다(두루뭉술한 줄 금지)
+  const concrete = '쓴 줄마다 구체적인 낱말(이름·장소·물건·숫자·동작)이 들어 있는지 본다. 어느 글에나 붙일 수 있는 뭉뚱그린 줄은 그 일의 장면으로 바꿔 쓴다.';
+  const avoid = ctx.avoid?.length ? ` 빼 둔 화제(${ctx.avoid.map((w) => clip(w, 20)).join(' · ')})와 그 소재가 들어간 줄은 쓰지 않는다. 쓴 줄이 있으면 다른 얘기로 바꿔 쓴다.` : '';
+  return `\n\n[마지막 확인] ${concrete}${avoid}`;
+}
+
+/** 인물끼리의 사랑 변화를 받는 줄(마음을 주고받는 인물이 둘 이상일 때만) */
+function loveLine(ctx: AIContext): string {
+  const n = ctx.cast.filter((c) => c.tier !== 'crowd' && !c.isNews && !c.realPerson).length;
+  if (n < 2) return '';
+  return '- love: 이 일로 인물이 다른 인물에게 마음이 움직였을 때만 {h: 마음이 움직인 인물, to: 상대 인물, d}. 같이 겪은 일·도움·고백·설레는 장면 +20~+38(77부터는 게임이 천천히 올린다), 실망·다툼·거절 -5~-25. 플레이어를 향한 마음은 rom에 적는다. 해당 없으면 []';
 }
 /** 이번 호출의 AI 조절값(답글·쪽지·새 글 수 …) */
 const tuneOf = (ctx: AIContext): AITune => ctx.tune ?? DEFAULT_TUNE;
@@ -217,9 +238,11 @@ export function reactPrompt(ctx0: AIContext, post: { text: string; hasMedia?: bo
       src ? `- 앞 글을 쓴 @${src.handle}(${src.name})는 반드시 답글을 단다: 자기 글에 플레이어가 이어 쓴 말을 받아서. 다른 답글도 앞 글과 이어지는 흐름으로 읽고 쓴다` : '',
       `- replies ${n}개: ${who}. 각 ${LIMITS.reply}자 이내`,
       n >= 4 ? '- 답글 단 사람 중 인플루언서(팔로워 10만↑·셀럽)가 있으면 그 답글 아래 대댓글 2~3개를 더 쓰고 re에 그 아이디' : '',
+      n >= 3 ? '- 플레이어에게 안 좋은 소리를 하는 답글(안티·시비·질투)이 섞이면, 플레이어를 좋아하는 인물이 그 답글에 반박하거나(re에 그 아이디) 아예 무시하고 플레이어 편을 든다' : '',
       `- aff: 답글 단 인물의 호감 변화. ${AFF_SCALE}`,
       `- rom: 설렘 있는 인물만, 플러팅·애정 표현이 있을 때 ${R.react}(무례·강요면 -2~-6). 없으면 []`,
       '- dev: 플레이어에게 빠져드는 인물(팬·가까운 사람)의 정복 변화 0~+8. 보통 []',
+      loveLine(ctx),
       `- quality: 20 흔한 글 · 45 무난 · 70 재밌거나 공감 큼 · 90 터질 글. 가장 가까운 값으로, 난이도 ${DIFFICULTY_LABEL[ctx.difficulty]}: ${GRADE_TONE[ctx.difficulty]}`,
       '- viral: 정말 터질 글만 true',
       `- followers -${Math.max(5, Math.round(f * 0.3))}~+${Math.max(20, Math.round(f * 0.5))}, aura·humor -5~+8, rep -20~+12(공격적인 글은 크게 깎는다)`,
@@ -266,6 +289,7 @@ export function threadPrompt(
       `- 나오는 사람: ① ${who} ② 이 답글·${t ? t.name : '그 사람'}과(와) 가장 관련 깊은 인물 2명 이상(그 일의 당사자·가까운 사이·스레드에 있던 사람·언급된 사람) ③ 이름 없는 일반인(h "-") 1명 이상`,
       `- ②의 인물 중 적어도 1명은 2번 이상 쓴다(${who}도 다시 써도 된다). 앞 댓글을 받아치며 서로 주고받는다: 누구 말에 한 말인지 re에 그 아이디(플레이어에게 한 말이면 re 생략)`,
       '- 댓글끼리 알아서 굴러간다: 그 일이 어떻게 됐는지 한 걸음 전개하거나(새 사실·약속·폭로·오해), 플레이어에 대해 자기들끼리 말한다(놀림·편들기·질투·소문). 같은 말 되풀이·맞장구만 하는 줄 없음',
+      '- 누가 플레이어를 깎아내리면 플레이어를 좋아하는 인물이 그 말에 구체적으로 반박하거나 무시하고 플레이어 편을 든다. "질투" 인물은 좋아하는 사람이 플레이어와 엮이는 대목에서 삐딱하게 끼어든다',
       '- 서로 다른 지점을 집고 길이·시작 단어·관점이 겹치지 않게',
       `- aff: 답글을 단 인물들의 호감 변화. ${AFF_SCALE}`,
       `- rom: 연애 감정이 걸린 인물이면 설렘 변화 ${R.thread}, 아니면 [] · dev: 정복 변화 0~+21, 보통 []`,
@@ -328,6 +352,10 @@ export function dmPrompt(
       '- devotionDelta 0~+8(플레이어에게 더 빠져들 때만, 보통 0)',
       tuneOf(ctx).dmPost ? `- post: 이 대화 뒤에 ${c.name}이(가) 자기 계정에 올리는 공개 글 1개(${LIMITS.post}자 이내). 약속·기분·그 일을 남들이 봐도 되는 선에서 티 내는 글. 대화 세 번에 한 번꼴로만 쓰고, 그 밖엔 ""` : '',
       '- leave: 플레이어가 심하게 무례하고 호감이 낮을 때만 true(대화방 나감)',
+      c.heartOk
+        ? `- heart: 이 대화 직후 ${c.name}의 속마음 한 줄(${LIMITS.heart}자 이내). 플레이어에게는 말하지 않은 진짜 마음을 혼잣말로, 방금 대화에 나온 말·물건·장면을 짚어서`
+        : '',
+      off ? '' : '- touch: 이 대화에서 플레이어와 실제로 한 스킨십이 있으면 그 이름 한 낱말(손잡기·포옹처럼). 말로만 하거나 없으면 ""',
       needSummary
         ? '- sum: [이전 대화 요약]과 이번 대화를 합쳐 새로 요약(260자 이내). 플레이어가 말한 사실(이름·날짜·약속·호불호·키워드·취향·페티쉬)은 전부 남기고, 마지막 줄에 지금 둘 사이 분위기 1문장. 사실만, 장면 묘사 없이'
         : '',
@@ -364,7 +392,7 @@ export function ambientPrompt(ctx: AIContext, count: number): string {
 
 export function tickPrompt(ctx: AIContext, day: number, returned: ID[] = []): string {
   const t = tuneOf(ctx);
-  const pick = pickCast(ctx, { must: returned, full: 5, brief: 5, crowd: 5, seed: `tick${day}` });
+  const pick = pickCast(ctx, { must: [...returned, ...(ctx.touchAsk ?? []).map((x) => x.id), ...(ctx.heartAsk ?? [])], full: 5, brief: 5, crowd: 5, seed: `tick${day}` });
   const back = returned.map((id) => ctx.cast.find((c) => c.id === id)).filter((c): c is CastInfo => !!c);
   const dmLine = back.length
     ? `- dm: ${back.map((c) => `@${c.handle}`).join(', ')}이(가) 서운해서 쪽지방을 나갔다가 오늘 돌아옴 → 돌아오며 보내는 첫 쪽지 1개씩(어색함이 남은 채로, 관계·등급대로). 그 밖에 먼저 쪽지 보내는 인물은 없음`
@@ -372,6 +400,9 @@ export function tickPrompt(ctx: AIContext, day: number, returned: ID[] = []): st
       ? `- dm: 플레이어에게 먼저 쪽지 보내는 인물 ${t.dayDMs <= 1 ? '1명' : `1~${t.dayDMs}명`} {h,t}. 플레이어가 최근 한 말·글·이벤트와 이어지는 용건으로(후일담·약속·부탁·안부). 가까운 인물이 한 명도 없을 때만 []`
       : '';
   const pending = ctx.pendingEvents?.length ? ` 진행 중인 이벤트와 겹치지 않게(${ctx.pendingEvents.map((x) => clip(x, 20)).join(', ')}).` : '';
+  // 속마음을 새로 받을 인물 · 플레이어와 한 스킨십을 오늘 새 일화로 쓸 인물
+  const hearts = heartCast(ctx);
+  const touch = (ctx.touchAsk ?? []).map((x) => ({ c: ctx.cast.find((c) => c.id === x.id), act: x.act })).filter((x): x is { c: CastInfo; act: string } => !!x.c);
   // 조절값에서 끈 항목은 아예 묻지 않는다(출력 토큰 절약)
   const must = [t.dayPosts > 0 ? 'posts' : '', t.dayNews ? 'news' : '', t.dayTrends ? 'trends' : '', t.dayMission ? 'mission' : ''].filter(Boolean);
   const optional = !!t.dayEvent || !!dmLine;
@@ -387,16 +418,29 @@ export function tickPrompt(ctx: AIContext, day: number, returned: ID[] = []): st
     [
       `[할 일] ${day}일차 시작. 세계를 한 걸음 움직이는 JSON. ${rule}`,
       t.dayPosts > 0 ? `- posts: 오늘 글 ${t.dayPosts}개(핵심 인물 + 일반 유저, 각 ${LIMITS.post}자 이내). 절반 이상은 플레이어가 최근 한 말·한 일의 후일담(그 뒤 벌어진 일·따라 해 본 것·@${ctx.persona.handle} 언급), 나머지는 각자의 사소한 장면` : '',
+      t.dayPosts > 0 && touch.length
+        ? `- 깊은 사이의 새 일화: ${touch.map((x) => `@${x.c.handle}(${x.c.name})는 플레이어와 이미 "${clip(x.act, 14)}"까지 한 사이`).join(', ')}. posts 중 1개는 그 인물이 오늘 플레이어와 또 그만큼의 스킨십(${touch.map((x) => clip(x.act, 14)).join('·')})을 했다는 새 이야기로 쓴다: 오늘의 장소·계기·그때 오간 한마디를 구체적으로, 남이 봐도 되는 선에서 티 내는 글. 그 수준을 넘는 행위는 쓰지 않는다`
+        : '',
+      t.dayPosts > 0 ? '- 인물끼리의 마음도 글에 드러난다: 좋아하는 사람 글에 반응하기·둘이 같이 있었던 장면·짝사랑의 티·질투. 연애 무관심 인물은 일·자기 생활 글' : '',
       t.dayPosts > 0 ? scenesLine(ctx) : '',
       t.dayNews ? '- news: 뉴스 기사 제목 1개' : '',
       t.dayTrends ? '- trends: 오늘의 트렌드 6개 {tag:"#…", n:1000~100000}' : '',
       t.dayMission ? '- mission: 오늘의 미션 {title, desc, kw:[글에 들어갈 단어 1~2개]}' : '',
       t.dayEvent ? `- event: 플레이어에게 닥친 사건 1개 또는 null(이틀에 한 번꼴). body 2문장 이내(플레이어가 어떻게 할지 고민할 상황), inv=관련 인물 h 0~2.${pending}` : '',
       dmLine,
+      hearts.length
+        ? `- hearts: ${hearts.map((c) => `@${c.handle}`).join(', ')}의 지금 속마음 한 줄씩 {h,t}(각 ${LIMITS.heart}자 이내). 플레이어에게는 말 못 한 진짜 마음을 혼잣말로, 최근 플레이어와 있었던 일의 구체적인 말·물건·장면을 짚어서`
+        : '',
+      loveLine(ctx),
     ]
       .filter(Boolean)
       .join('\n'),
   );
+}
+
+/** 오늘 속마음을 새로 받을 인물(맥락이 정해 준 대로) */
+function heartCast(ctx: AIContext): CastInfo[] {
+  return (ctx.heartAsk ?? []).map((id) => ctx.cast.find((c) => c.id === id)).filter((c): c is CastInfo => !!c);
 }
 
 // ───────────────────────── 이벤트
@@ -435,6 +479,7 @@ export function outcomePrompt(ctx: AIContext, event: GameEvent, choiceId?: strin
       '- aff: 이 일로 마음이 움직인 인물 3~8명의 호감 변화(관련 인물만이 아니라 소식을 들은 사람까지). 실망 -25 · 서운 -8 · 작은 호감 +5 · 감동 +25. 끝값도 실제로 쓴다',
       romanticIds.length ? `- rom: 연애 감정이 걸린 인물(${romanticIds.map((c) => c.handle).join(', ')})의 설렘 변화 ${R.outcome}, 해당 없으면 []` : '- rom: []',
       '- dev: 이 일로 플레이어에게 더 빠져든 인물의 정복 변화 0~+10, 없으면 []',
+      loveLine(ctx),
     ]
       .filter(Boolean)
       .join('\n'),
@@ -476,6 +521,7 @@ export function commentsPrompt(ctx0: AIContext, post: { authorId: ID; text: stri
       `[할 일] 이 글에 달린 댓글 ${count}개 JSON(comments). 인플루언서(팔로워 10만↑·셀럽) 댓글이 있으면 그 댓글 아래 대댓글 2~3개를 더 쓰고 re에 그 아이디`,
       `- ${mine ? '플레이어를 아는 인물·팬·안티·목록의 일반 유저' : '작성자와 아는 인물·팬·안티·목록의 일반 유저'} + 이름 없는 일반인(h "-")을 섞어서${mine ? '' : '(작성자 본인 제외)'}, 각 ${LIMITS.reply}자 이내`,
       `- ${mine ? '플레이어에게 하는 말, 인물마다 "플레이어에게" 등급 그대로' : '작성자에게 하는 말(플레이어 얘기 아님), 작성자와의 관계에 맞는 말투'}`,
+      mine ? '- 플레이어를 깎아내리는 댓글이 있으면 플레이어를 좋아하는 인물이 그 댓글에 반박하거나(re에 그 아이디) 무시하고 플레이어 편을 든다' : '- 작성자를 사랑하는 인물("사랑: 작성자 이름")이 있으면 그 사람이 먼저, 더 길게 반응한다',
     ].join('\n'),
   );
 }
@@ -536,14 +582,48 @@ ${clip(world.setting, 1200)}
 분위기: ${clip(world.tone, 300)}
 시대·장소가 설정에 없으면 지금의 한국이다. 이름·아이디·별명은 그 세계의 시대·장소에 맞춘다.
 
-[할 일] 이 세계의 SNS 등장인물 8명 JSON(cast). 전원 20대 성인, 실존 인물 아님, 유명인·연예인 계정 없음
+[나이 기준]
+${AGE_GUIDE}
+
+[할 일] 이 세계의 SNS 등장인물 8명 JSON(cast). 전원 성인, 실존 인물 아님, 유명인·연예인 계정 없음
 - archetype을 골고루: bestie, rival, mentor, fan, crush, chaos, troll, news 각 1명
 - 누구나 떠올릴 전형적인 주변 인물로(오랜 절친, 견제하는 동기, 챙겨 주는 선배처럼). 특이한 과거·복잡한 사연·세세한 버릇 없이 현실에 흔한 사람
 - name: 실제 한국 트위터 유저가 쓸 법한 표시 이름(실명형·닉네임+이모지 등), handle: 영문 소문자·숫자·밑줄 4~15자
 - emoji 1개, bio 20자 이내, description 한 문장 40자 이내(이 세계에서의 정체와 플레이어와의 사이만. 말투는 관계에 따라 게임이 정한다)
-- g: 성별 m 또는 f, age: 나이 20~29(사람은 전원 20대, 뉴스 계정은 생략)
+- 그 세계의 조직·관례를 현실 그대로: 실제로 있는 계급·직급·연차 체계와 호칭을 쓰고, 윗사람(간부·팀장·선배)과 또래·아랫사람이 섞이게 한다
+- g: 성별 m 또는 f, age: [나이 기준]에 맞는 실제 나이(자리와 연차에 맞게, 뉴스 계정은 생략)
 - title: 그 세계에서의 자리나 플레이어와의 사이를 8자 이내로(상병 · 맞선임 / 팀장 / 입사 동기 / 3학년 선배 / 팬). 뉴스 계정은 ""
 - followers: 300 ~ 2000000, isNews(뉴스 계정만 true), verified`;
+}
+
+// ───────────────────────── 인물 정보 채우기(직함·나이·인물끼리의 마음)
+
+/** 세이브마다 한 번: 인물 설정을 읽고 빠진 직함·나이를 채우고, 인물끼리 누가 누구를 사랑하는지 정한다 */
+export function bondsPrompt(ctx: AIContext): string {
+  const people = ctx.cast.filter((c) => c.tier !== 'crowd' && !c.isNews && !c.realPerson && c.badge !== 'gold').slice(0, 16);
+  const rows = people.map((c) => {
+    const head = [`@${c.handle} ${c.name}`, c.gender ? (c.gender === 'f' ? '여' : '남') : '', c.age ? `${c.age}살` : '나이 없음', c.title ? `자리: ${clip(c.title, 16)}` : '자리 없음', `플레이어에게 호감${c.affinity}${c.romance > 0 ? ` 설렘${c.romance}` : ''}`];
+    return `- ${head.filter(Boolean).join(' | ')}\n  특성: ${clip(c.description || c.bio, 150)}${c.relations ? `\n  관계: ${clip(c.relations, 80)}` : ''}`;
+  });
+  const hearts = heartCast(ctx).filter((c) => people.some((p) => p.id === c.id));
+  const off = Math.ceil(people.length / 3);
+  return join(
+    `[인물 ${people.length}명]\n${rows.join('\n')}`,
+    memoryBlock(ctx, 6),
+    recentBlock(ctx, 4, 50),
+    `[나이 기준]\n${AGE_GUIDE}`,
+    [
+      '[할 일] 위 인물 설정과 지금까지의 일을 자연스럽게 읽고 인물 정보 JSON(info에 위 인물 전원)',
+      '- title: 그 세계에서의 계급·직급·자리나 플레이어와의 사이를 8자 이내로(상병 · 맞선임 / 팀장 / 입사 동기 / 3학년 선배). 이미 적힌 자리가 있으면 그대로',
+      '- age: 실제 나이. 이미 적힌 나이·설정에 나온 나이·연차가 있으면 그대로 따르고, 없으면 [나이 기준]에서 그 자리에 맞게',
+      `- off: 사랑에 관심 없는 사람(일·자기 생활이 먼저)이면 true. ${people.length}명 중 ${off}명 이상은 true다(실제로도 셋 중 하나는 그렇다). off가 true면 loves는 []`,
+      '- loves: 그 인물이 사랑하는 다른 인물 {to: 상대 아이디, v: 20~80}. 설정·관계·지금까지의 일에서 근거가 있을 때만, 대부분 0~1명(드물게 2명). 짝사랑이 흔하다(상대는 0). 가족·실존 인물·플레이어는 적지 않는다(플레이어를 향한 마음은 설렘 수치가 따로 있다)',
+      '- 플레이어를 좋아하는 인물(설렘 30↑)을 좋아하는 인물이 한두 명 있으면 이야기가 생긴다(질투). 억지로 전원을 엮지 않는다',
+      hearts.length
+        ? `- hearts: ${hearts.map((c) => `@${c.handle}`).join(', ')}의 지금 속마음 한 줄씩 {h,t}(각 ${LIMITS.heart}자 이내). 플레이어에게는 말 못 한 진짜 마음을 혼잣말로, 플레이어와 있었던 일의 구체적인 말·물건·장면을 짚어서`
+        : '- hearts: []',
+    ].join('\n'),
+  );
 }
 
 /**
@@ -557,11 +637,13 @@ export const SHAPES = {
   comments: '{"comments":[{"h":"아이디","t":"댓글"},{"h":"-","t":"일반인 댓글"},{"h":"-","t":"인플루언서 댓글에 다는 대댓글","re":"인플루언서아이디"}]}',
   firstDM: '{"messages":["쪽지1","쪽지2"]}',
   draft: '{"name":"이름","handle":"handle_01","bio":"자기소개","emoji":"🙂","post":"첫 글"}',
-  cast: '{"cast":[{"name":"이름","handle":"handle","emoji":"🙂","archetype":"bestie","bio":"소개","description":"정체와 플레이어와의 사이 한 문장","g":"m|f","age":<20~29>,"title":"자리·사이 8자 이내","followers":<300~2000000>,"isNews":false,"verified":false}]}',
+  cast: '{"cast":[{"name":"이름","handle":"handle","emoji":"🙂","archetype":"bestie","bio":"소개","description":"정체와 플레이어와의 사이 한 문장","g":"m|f","age":<19~58>,"title":"자리·사이 8자 이내","followers":<300~2000000>,"isNews":false,"verified":false}]}',
+  bonds:
+    '{"info":[{"h":"아이디","title":"자리·사이 8자 이내","age":<19~60>,"off":false,"loves":[{"to":"상대 아이디","v":<20~80>}]}],"hearts":[{"h":"아이디","t":"속마음 한 줄"}]}',
 } as const;
 
 /** 하루 정산 응답 모양 — 조절값에서 끈 항목은 뺀다(안 쓸 글자를 받지 않게) */
-export function tickShape(t: AITune = DEFAULT_TUNE, returned = 0): string {
+export function tickShape(t: AITune = DEFAULT_TUNE, returned = 0, hearts = 0): string {
   const parts = [
     t.dayPosts > 0 ? '"posts":[{"h":"아이디","t":"글","m":null}]' : '',
     t.dayNews ? '"news":["기사 제목"]' : '',
@@ -569,6 +651,8 @@ export function tickShape(t: AITune = DEFAULT_TUNE, returned = 0): string {
     t.dayMission ? '"mission":{"title":"제목","desc":"설명","kw":["단어"]}' : '',
     t.dayEvent ? '"event":{"emoji":"⚡","title":"제목","body":"상황 1~2문장","inv":["아이디"]}' : '',
     t.dayDMs > 0 || returned > 0 ? '"dm":[{"h":"아이디","t":"쪽지"}]' : '',
+    hearts ? '"hearts":[{"h":"아이디","t":"속마음 한 줄"}]' : '',
+    '"love":[]',
   ].filter(Boolean);
   return `{${parts.join(',')}}`;
 }
@@ -576,16 +660,16 @@ export function tickShape(t: AITune = DEFAULT_TUNE, returned = 0): string {
 /** 이벤트 결과 응답 모양 — 결과 글을 0으로 두면 posts를 뺀다 */
 export function outcomeShape(t: AITune = DEFAULT_TUNE): string {
   const posts = t.eventPosts > 0 ? '"posts":[{"h":"아이디","t":"글","c":[{"h":"-","t":"댓글"},{"h":"아이디","t":"댓글"}]}],' : '';
-  return `{"text":"결과",${posts}"grade":<-2~2>,"followers":<-300~500>,"aura":<-5~10>,"humor":<-5~10>,"rep":<-15~12>,"xp":<0~20>,"aff":[{"h":"아이디","d":<-25~25>}],"rom":[],"dev":[]}`;
+  return `{"text":"결과",${posts}"grade":<-2~2>,"followers":<-300~500>,"aura":<-5~10>,"humor":<-5~10>,"rep":<-15~12>,"xp":<0~20>,"aff":[{"h":"아이디","d":<-25~25>}],"rom":[],"dev":[],"love":[]}`;
 }
 
 /** 내 글 반응 응답 모양 — 뒤따르는 공개 글(posts)·쪽지(dm)는 조절값에서 켠 경우만 */
 export function reactShape(t: AITune = DEFAULT_TUNE): string {
   const extra = `${t.echoPosts > 0 ? ',"posts":[{"h":"아이디","t":"이 일을 자기 쪽에서 이어 가는 글"}]' : ''}${t.echoDMs > 0 ? ',"dm":[{"h":"아이디","t":"따로 보내는 쪽지"}]' : ''}`;
-  return `{"mood":"positive|negative|funny|apology|question|brag|neutral 중 하나","replies":[{"h":"아이디","t":"답글"},{"h":"-","t":"일반인 답글"},{"h":"-","t":"인플루언서 답글에 다는 대댓글","re":"인플루언서아이디"}],"aff":[{"h":"아이디","d":<-6~18>}],"rom":[],"dev":[],"quality":<0~100>,"viral":false,"followers":<범위는 할 일>,"aura":<-5~8>,"humor":<-5~8>,"rep":<-20~12>,"news":[],"follow":[],"unfollow":[]${extra}}`;
+  return `{"mood":"positive|negative|funny|apology|question|brag|neutral 중 하나","replies":[{"h":"아이디","t":"답글"},{"h":"-","t":"일반인 답글"},{"h":"-","t":"인플루언서 답글에 다는 대댓글","re":"인플루언서아이디"}],"aff":[{"h":"아이디","d":<-6~18>}],"rom":[],"dev":[],"quality":<0~100>,"viral":false,"followers":<범위는 할 일>,"aura":<-5~8>,"humor":<-5~8>,"rep":<-20~12>,"news":[],"follow":[],"unfollow":[],"love":[]${extra}}`;
 }
 
 /** 쪽지 답장 응답 모양 — 공개 글(post)은 조절값에서 켠 경우만 */
-export function dmShape(t: AITune = DEFAULT_TUNE): string {
-  return `{"mood":"positive|negative|funny|apology|question|brag|neutral 중 하나","messages":["답장1","답장2"],"affinityDelta":<-6~12>,"romanceDelta":<범위는 할 일>,"devotionDelta":<0~8>,"leave":false,"sum":""${t.dmPost ? ',"post":""' : ''}}`;
+export function dmShape(t: AITune = DEFAULT_TUNE, heart = false): string {
+  return `{"mood":"positive|negative|funny|apology|question|brag|neutral 중 하나","messages":["답장1","답장2"],"affinityDelta":<-6~12>,"romanceDelta":<범위는 할 일>,"devotionDelta":<0~8>,"leave":false,"sum":"","touch":""${heart ? ',"heart":"속마음 한 줄"' : ''}${t.dmPost ? ',"post":""' : ''}}`;
 }

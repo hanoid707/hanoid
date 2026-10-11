@@ -16,7 +16,7 @@ import { ROMANCE_LABEL } from './content';
 import { addThreadedPosts, alive, beginFlow, ctxOf, engine, fail, G, OK, type ActionResult, type Flow } from './core';
 import { localVariant } from './localEvents';
 import { DIFFICULTY_LABEL, EVENT_AFFINITY_CAP, EVENT_ROMANCE_CAP, diffOf, scaleEventDeltas } from './difficulty';
-import { addMemory, addXp, applyDeltas, consumeBoost, logActivity, pushNoti, questProgress, recomputeStatus, tickClock } from './progress';
+import { addMemory, addXp, applyDeltas, applyLove, consumeBoost, logActivity, noteTouchFromText, pushNoti, questProgress, recomputeStatus, tickClock } from './progress';
 import { TIME_COST, XP } from './rules';
 import { runDayTick, usedEventKeys } from './tick';
 import { snapshot } from './undo';
@@ -112,6 +112,9 @@ async function resolveEventFlow(flow: Flow, eventId: ID, ans: { choiceId?: strin
       addMemory(d, ans.customText ? `${e.title} → 직접 답: "${snippet(ans.customText, 40)}" → ${outcome.text}` : `${e.title} → "${label}" 선택 → ${outcome.text}`);
       logActivity(d, e.emoji, ans.customText ? `${e.title}: 직접 답함 "${snippet(ans.customText, 20)}"` : `${e.title}: "${label}"`);
       questProgress(d, 'event', 1);
+      // 이 일로 바뀐 인물끼리의 사랑 · 직접 쓴 답의 괄호 행동에 든 스킨십
+      applyLove(d, outcome.love);
+      if (ans.customText) noteTouchFromText(d, ans.customText, e.involved.slice(0, 1));
       recomputeStatus(d);
       // 이벤트를 겪는 데 드는 시간만 흐른다(다음 날로 넘기지 않는다 — 하루 정산까지 겹치면 한 이벤트에 반응이 두 번 온다)
       days = tickClock(d, TIME_COST.event);

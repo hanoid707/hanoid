@@ -4,7 +4,8 @@
  * - 이상한 값(없는 인물, 숫자 아님, 너무 긴 글 등)은 버리거나 자른다. 수치 범위는 게임 규칙(progress.ts)이 한 번 더 자른다.
  * - 예전 필드 이름(handle/text/affinity/followerDelta …)도 그대로 읽는다.
  */
-import { GHOST, type Archetype, type Deltas, type GameEvent, type ID, type SpeechRegister } from '../types';
+import { GHOST, type Archetype, type Deltas, type GameEvent, type ID, type LoveDelta, type SpeechRegister } from '../types';
+import { fitAge } from '../data/ageNorms';
 import { isPlayerName } from '../game/lookalike';
 import { hashStr } from '../utils';
 import { hitsAvoid } from './context';
@@ -13,7 +14,7 @@ import { localBio, localEmoji, nameCore, toHandle } from './local/names';
 import { hasBanmalAddress, textRegister, toRegister } from './local/register';
 import { LIMITS } from './prompts';
 import { DEFAULT_TUNE } from './tune';
-import type { AIContext, CastDraft, CharacterDraft, CharacterDraftArgs, DMReaction, EventDraft, EventOutcome, GeneratedLine, Mood, PostReaction, ThreadReaction, TickResult } from './types';
+import type { AIContext, CastBonds, CastDraft, CharacterDraft, CharacterDraftArgs, DMReaction, EventDraft, EventOutcome, GeneratedLine, Mood, PostReaction, ThreadReaction, TickResult } from './types';
 
 export type RawLine = { h?: string; handle?: string; t?: string; text?: string; m?: string | null; media?: string | null; re?: string | null };
 type Raw = Record<string, unknown>;
@@ -159,6 +160,25 @@ export function affinityMap(ctx: AIContext, list: unknown): Record<ID, number> {
   return out;
 }
 
+/** 인물끼리의 사랑 변화 [{h, to, d}] → 게임 ID로(플레이어·없는 인물·자기 자신은 버린다) */
+export function loveList(ctx: AIContext, list: unknown): LoveDelta[] {
+  const out: LoveDelta[] = [];
+  for (const a of arr<{ h?: string; from?: string; to?: string; d?: number; delta?: number }>(list)) {
+    const from = idOf(ctx, a?.h ?? a?.from);
+    const to = idOf(ctx, a?.to);
+    const d = clampN(num(a?.d ?? a?.delta), -30, 38);
+    if (from && to && from !== to && d) out.push({ from, to, d });
+  }
+  return out.slice(0, 3);
+}
+
+/** 속마음 [{h, t}] → 인물별 한 줄 */
+function heartList(ctx: AIContext, list: unknown): { id: ID; text: string }[] {
+  return arr<{ h?: string; handle?: string; t?: string; text?: string }>(list)
+    .map((b) => ({ id: idOf(ctx, b?.h ?? b?.handle), text: cleanText(b?.t ?? b?.text, LIMITS.heart + 12) }))
+    .filter((b): b is { id: ID; text: string } => !!b.id && b.text.length >= 4 && !hitsAvoid(ctx.avoid, b.text));
+}
+
 function handles(ctx: AIContext, list: unknown): ID[] {
   return [...new Set(arr<string>(list).map((h) => idOf(ctx, h)).filter((x): x is ID => !!x))];
 }
@@ -206,6 +226,7 @@ export function normReact(ctx: AIContext, r: Raw, o: { n?: number; seed?: string
     openers: lines(ctx, pick1(r, 'dm', 'dmOpeners'), { max: 3, maxLen: 120, noNews: true, toPlayer: true })
       .filter((l) => ctx.cast.find((c) => c.id === l.authorId)?.tier !== 'crowd')
       .slice(0, tn.echoDMs),
+    love: loveList(ctx, r.love),
   };
 }
 
@@ -241,6 +262,8 @@ export function normDM(r: Raw, reg?: SpeechRegister, maxBubbles = 3, avoid?: str
   const post = cleanText(str(r.post), LIMITS.post + 40);
   const messages = raw.flatMap(splitMessage).slice(0, Math.min(3, Math.max(1, maxBubbles)));
   const summary = cleanText(str(pick1(r, 'sum', 'historySummary')), 260);
+  const heart = cleanText(str(r.heart), LIMITS.heart + 12);
+  const touch = cleanText(str(r.touch), 14).replace(/[.!?~]+$/, '');
   return {
     mood: moodOf(r.mood),
     messages,
@@ -250,6 +273,8 @@ export function normDM(r: Raw, reg?: SpeechRegister, maxBubbles = 3, avoid?: str
     devotionDelta: num(pick1(r, 'devotionDelta', 'dev')),
     ...(summary ? { historySummary: summary } : {}),
     ...(post.length >= 4 && !hitsAvoid(avoid, post) ? { post } : {}),
+    ...(heart.length >= 4 && !hitsAvoid(avoid, heart) ? { heart } : {}),
+    ...(touch.length >= 2 && !/없|^""$|null|none/i.test(touch) && !hitsAvoid(avoid, touch) ? { touch } : {}),
   };
 }
 
@@ -299,10 +324,8 @@ export function normTick(ctx: AIContext, r: Raw): TickResult {
     dmOpeners: lines(ctx, pick1(r, 'dm', 'dmOpeners'), { max: 4, maxLen: 120, noNews: true, toPlayer: true }).filter((l) => ctx.cast.find((c) => c.id === l.authorId)?.tier !== 'crowd'),
     mission: str(mission?.title) && kw.length && !hitsAvoid(ctx.avoid, `${str(mission?.title)} ${str(mission?.desc)} ${kw.join(' ')}`) ? { title: cleanText(mission!.title, 30), desc: cleanText(mission!.desc, 80), keyword: kw } : null,
     ideas: ideasOf(r.ideas),
-    bios: arr<{ h?: string; handle?: string; bio?: string }>(r.bios)
-      .map((b) => ({ id: idOf(ctx, b?.h ?? b?.handle), bio: cleanText(b?.bio, LIMITS.bio + 10) }))
-      .filter((b): b is { id: ID; bio: string } => !!b.id && !!b.bio)
-      .slice(0, 1),
+    hearts: heartList(ctx, r.hearts).slice(0, 4),
+    love: loveList(ctx, r.love),
   };
 }
 
@@ -344,7 +367,27 @@ export function normOutcome(ctx: AIContext, r: Raw, event?: Pick<GameEvent, 'inv
     },
     posts,
     grade,
+    love: loveList(ctx, r.love),
   };
+}
+
+// ───────────────────────── 인물 정보 채우기
+
+export function normBonds(ctx: AIContext, r: Raw): CastBonds {
+  const info: CastBonds['info'] = [];
+  for (const x of arr<Raw>(r.info)) {
+    const id = idOf(ctx, pick1(x, 'h', 'handle'));
+    if (!id || info.some((i) => i.id === id)) continue;
+    const title = cleanText(x.title, 12);
+    const age = num(x.age, 0);
+    const loves = arr<{ to?: string; h?: string; v?: number }>(x.loves)
+      .map((l) => ({ to: idOf(ctx, l?.to ?? l?.h), v: clampN(num(l?.v), 0, 85) }))
+      .filter((l): l is { to: ID; v: number } => !!l.to && l.to !== id && l.v >= 10)
+      .slice(0, 2);
+    info.push({ id, ...(title ? { title } : {}), ...(age >= 18 && age <= 80 ? { age } : {}), off: x.off === true && !loves.length, loves });
+  }
+  if (!info.length) throw Object.assign(new Error('인물 정보가 비어 있어요'), { code: 'empty' });
+  return { info, hearts: heartList(ctx, r.hearts).slice(0, 4) };
 }
 
 // ───────────────────────── 남의 글 댓글
@@ -404,7 +447,11 @@ export function normCast(r: Raw): CastDraft[] {
         bio: cleanText(c.bio, 30),
         description: cleanText(c.description, 70),
         ...(c.g === 'm' || c.g === 'f' ? { gender: c.g as 'm' | 'f' } : {}),
-        ...(num(c.age, 0) >= 18 ? { age: Math.min(29, num(c.age, 0)) } : {}),
+        // 나이는 그 자리의 현실 범위로(스물다섯 살 부장처럼 어긋난 값만 고친다 — data/ageNorms.ts)
+        ...(c.isNews === true ? {} : (() => {
+          const age = fitAge(cleanText(c.title, 12) || cleanText(c.description, 70), num(c.age, 0) >= 18 ? Math.min(75, num(c.age, 0)) : undefined, name);
+          return age ? { age } : {};
+        })()),
         ...(cleanText(c.title, 12) ? { title: cleanText(c.title, 12) } : {}),
         followers: Math.max(0, num(c.followers, 1000)),
         isNews: c.isNews === true,

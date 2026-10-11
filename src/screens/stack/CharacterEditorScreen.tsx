@@ -1,9 +1,10 @@
 /**
  * 캐릭터 만들기·고치기
- *   만들기: 사진 프리셋(맨 위) · 유형 · 팔로워(누르거나 직접 입력) · 나이대 · 상세 특징만 쓰면 끝 → 이름·아이디·자기소개는 AI가 짓는다(작은 호출 1번)
+ *   만들기: 사진 프리셋(맨 위) · 유형 · 팔로워(누르거나 직접 입력) · 나이대 · 상세 특징만 쓰면 끝 → 이름·아이디는 AI가 짓는다(작은 호출 1번)
  *           성별 칸은 없다 — 고른 사진의 성별을 따른다(직접 올린 사진일 때만 성별 칸이 나온다). 나이대 기본은 20대
  *           성격 유형(16)·말투는 드롭다운에서 고르고 싶을 때만. 나머지(이름·사진·배지·관계 메모·말투/관계 고정)는 "더 설정하기" 안에
- *   고치기: 같은 칸 + 이름·아이디·자기소개("AI로 다시 쓰기") · 지금 관계·말투 · 삭제
+ *   고치기: 같은 칸 + 이름·아이디 · 지금 관계·말투 · 관계 수치 · 다른 인물을 향한 사랑(슬라이더)·사랑에 관심 없음 · 삭제
+ *   한줄소개(자기소개) 칸은 없다 — 프로필에는 AI가 쓰는 짧은 속마음만 보인다(여성 + 호감도가 세계관 설정의 기준 이상일 때)
  * 위치 칸은 없앴다. 관계·말투는 호감도·설렘으로 자동으로 바뀌고, 원하면 고정할 수 있다.
  */
 import { splitAvoid } from '../../game/avoid';
@@ -14,7 +15,7 @@ import { Avatar } from '../../components/Avatar';
 import { FacePicker } from '../../components/FacePicker';
 import { VerifiedBadge } from '../../components/Badge';
 import { Dropdown } from '../../components/Dropdown';
-import { IconCamera, IconChevronRight, IconTrash, IconWand } from '../../components/icons';
+import { IconCamera, IconChevronRight, IconTrash } from '../../components/icons';
 import { Photo } from '../../components/Photo';
 import { usePhotoPicker } from '../../components/PhotoCropper';
 import { RelationChip } from '../../components/RelationChip';
@@ -23,7 +24,8 @@ import { Screen, TopBar } from '../../components/Screen';
 import { Button, Chip, Field, FormLabel, MeterBar } from '../../components/ui';
 import { AVATAR_COLORS, AVATAR_EMOJIS } from '../../data/avatars';
 import { faceGender, usedFaceKeys } from '../../data/facePool';
-import { createQuickCharacter, deleteCharacter, regenerateBio, saveCharacter } from '../../game/actions';
+import { createQuickCharacter, deleteCharacter, saveCharacter } from '../../game/actions';
+import { lovable, lovables, loveOf } from '../../game/love';
 import {
   AGE_GROUPS,
   CORE_TYPES,
@@ -94,7 +96,6 @@ export function CharacterEditorScreen() {
   const [more, setMore] = useState(false);
   const [name, setName] = useState(editing?.name ?? '');
   const [handle, setHandle] = useState(editing?.handle ?? '');
-  const [bio, setBio] = useState(editing?.bio ?? '');
   const [emoji, setEmoji] = useState(editing?.avatar.emoji ?? '🙂');
   const [color, setColor] = useState(editing?.avatar.color ?? AVATAR_COLORS[1]);
   const [photo, setPhoto] = useState<PhotoRef>(editing ? { photo: editing.avatar.photo, mediaId: editing.avatar.mediaId, url: editing.avatar.url } : {});
@@ -111,7 +112,9 @@ export function CharacterEditorScreen() {
   const [rom, setRom] = useState(editing?.romance ?? 0);
   const [dev, setDev] = useState(editing?.devotion ?? 0);
   const [saving, setSaving] = useState(false);
-  const [rewriting, setRewriting] = useState(false);
+  // 다른 인물을 향한 사랑(상대 ID → 수치) · 사랑에 관심 없음
+  const [loves, setLoves] = useState<Record<string, number>>(() => ({ ...(editing?.loves ?? {}) }));
+  const [loveOff, setLoveOff] = useState(!!editing?.loveOff);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   // 이 세계에서 다른 인물이 이미 쓰는 기본 사진(프리셋에서 뺀다)
@@ -127,6 +130,8 @@ export function CharacterEditorScreen() {
   const previewAvatar = { emoji, color, ...photo };
   const badgeValue: BadgeKind | null | undefined = badge === 'auto' ? undefined : badge === 'none' ? null : badge;
   const shownBadge = badgeValue === undefined ? typeDefaults(type).badge : badgeValue;
+  // 마음을 주고받는 인물(이야기의 중심 인물)만 사랑 스탯을 가진다
+  const canLove = !!editing && lovable(editing);
 
   const addTrait = (t: string) => {
     if (traits.includes(t)) return;
@@ -185,7 +190,8 @@ export function CharacterEditorScreen() {
         emoji,
         color,
         archetype: typeChanged ? typeDefaults(type).archetype : editing.archetype,
-        bio: bio.trim(),
+        // 한줄소개는 더 입력받지 않는다(프로필에는 속마음만 보인다) — 저장된 값은 그대로 둔다
+        bio: editing.bio,
         description: traits.trim() || editing.description,
         relations: relations.trim(),
         badge: badgeValue === undefined ? badgeOf(editing) : badgeValue,
@@ -207,6 +213,7 @@ export function CharacterEditorScreen() {
           aff !== editing.affinity || rom !== (editing.romance ?? 0) || dev !== (editing.devotion ?? 0)
             ? { affinity: aff, romance: rom, devotion: dev }
             : undefined,
+        ...(canLove ? { loves, loveOff } : {}),
       },
       editing.id,
     );
@@ -217,18 +224,6 @@ export function CharacterEditorScreen() {
   };
 
   const save = () => (isEdit ? saveEdit() : void create());
-
-  const rewriteBio = async () => {
-    if (!editing || rewriting) return;
-    setRewriting(true);
-    try {
-      const next = await regenerateBio(editing.id);
-      if (next) setBio(next);
-      else showToast('지금은 소개를 새로 쓰지 못했어요', 'info');
-    } finally {
-      setRewriting(false);
-    }
-  };
 
   const remove = () => {
     if (!editing) return;
@@ -328,7 +323,7 @@ export function CharacterEditorScreen() {
         maxLength={800}
         counter
         placeholder="예) 28살 사수 선배. 칭찬은 짧게, 걱정은 길게. 커피는 무조건 아아."
-        hint={isEdit ? undefined : 'AI가 이 캐릭터를 연기할 때 가장 먼저 읽어요. 이름·아이디·자기소개는 AI가 지어 줘요.'}
+        hint={isEdit ? undefined : 'AI가 이 캐릭터를 연기할 때 가장 먼저 읽어요. 이름·아이디는 AI가 지어 줘요.'}
       />
       <View style={styles.wrap}>
         {TRAIT_PRESETS.map((t) => (
@@ -455,6 +450,58 @@ export function CharacterEditorScreen() {
     </View>
   );
 
+  // 다른 인물을 향한 사랑: 지금 좋아하는 인물·이 인물을 좋아하는 인물은 바로 보이고, 그 밖의 인물은 "대상 추가"로 넣는다
+  const loveTargets = canLove && editing ? lovables(sc).filter((o) => o.id !== editing.id && o.relationBase !== 'family') : [];
+  const shownTargets = loveTargets.filter((o) => loves[o.id] !== undefined || loveOf(o, editing!.id) > 0);
+  const addable = loveTargets.filter((o) => !shownTargets.includes(o));
+  const loveBox =
+    canLove && editing && loveTargets.length ? (
+      <View testID="love-box" style={[styles.statsBox, { borderColor: c.border }]}>
+        <Text style={{ color: c.text, fontSize: font.body, fontWeight: '800' }}>다른 인물을 향한 사랑</Text>
+        <Text style={{ color: c.subtext, fontSize: font.tiny, lineHeight: 16 }}>
+          한쪽만 높으면 짝사랑이에요. 여러 명을 좋아하면 수치가 가장 높은 쪽(나를 향한 설렘 포함)을 따라가요. 이야기 속 사건으로 한 번에 +20~+38씩 오르고 77부터는 천천히 올라요.
+        </Text>
+        {shownTargets.map((o) => (
+          <StatSlider
+            key={o.id}
+            label={`${o.name} 사랑`}
+            value={loves[o.id] ?? 0}
+            min={0}
+            max={100}
+            color={c.like}
+            disabled={loveOff}
+            onChange={(v) => setLoves((m) => ({ ...m, [o.id]: v }))}
+            hint={loveOf(o, editing.id) > 0 ? `${o.name} → ${editing.name} 사랑 ${loveOf(o, editing.id)}` : undefined}
+          />
+        ))}
+        {addable.length && !loveOff ? (
+          <Dropdown
+            label="대상 추가"
+            value={undefined}
+            placeholder="좋아하는 인물 고르기"
+            options={addable.map((o) => ({ id: o.id, label: o.name, desc: [o.title, o.age ? `${o.age}살` : ''].filter(Boolean).join(' · ') || undefined }))}
+            allowClear={false}
+            onChange={(id) => id && setLoves((m) => ({ ...m, [id]: 30 }))}
+          />
+        ) : null}
+        <View style={styles.switchRow}>
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: c.text, fontWeight: '700', fontSize: font.body }}>사랑에 관심 없음</Text>
+            <Text style={{ color: c.subtext, fontSize: font.small }}>일·자기 생활이 먼저인 사람. 특별한 사건이 없으면 누구도 좋아하지 않아요</Text>
+          </View>
+          <Switch
+            value={loveOff}
+            onValueChange={(v) => {
+              setLoveOff(v);
+              if (v) setLoves({});
+            }}
+            trackColor={{ true: c.primary, false: c.border }}
+            accessibilityLabel="사랑에 관심 없음"
+          />
+        </View>
+      </View>
+    ) : null;
+
   const moreToggle = (
     <Pressable onPress={() => setMore((m) => !m)} accessibilityRole="button" accessibilityLabel="더 설정하기" accessibilityState={{ expanded: more }} style={[styles.moreRow, { borderColor: c.border }]}>
       <Text style={{ color: c.text, fontWeight: '800', fontSize: font.body, flex: 1 }}>더 설정하기</Text>
@@ -533,7 +580,7 @@ export function CharacterEditorScreen() {
           ) : (
             <View style={{ paddingHorizontal: space.lg, paddingTop: space.lg, gap: 4 }}>
               <Text style={{ color: c.text, fontSize: font.h1, fontWeight: '900' }}>누구를 등장시킬까요?</Text>
-              <Text style={{ color: c.subtext, fontSize: font.body, lineHeight: 21 }}>유형·팔로워·특징만 정하면 이름·아이디·자기소개는 AI가 지어 줘요.</Text>
+              <Text style={{ color: c.subtext, fontSize: font.body, lineHeight: 21 }}>유형·팔로워·특징만 정하면 이름·아이디는 AI가 지어 줘요.</Text>
             </View>
           )}
 
@@ -548,21 +595,6 @@ export function CharacterEditorScreen() {
               hint={isEdit ? '성별은 고른 사진을 따라가요' : '성별은 사진을 따라가요 · 안 고르면 자동'}
             />
             {isEdit ? nameHandle : null}
-            {isEdit ? (
-              <View style={{ gap: 8 }}>
-                <Field label="자기소개(프로필에 보임)" value={bio} onChangeText={setBio} multiline maxLength={160} counter />
-                <Button
-                  title="AI로 다시 쓰기"
-                  size="sm"
-                  variant="outline"
-                  icon={<IconWand size={15} color={c.text} />}
-                  loading={rewriting}
-                  loadingTitle="AI가 소개를 쓰는 중…"
-                  onPress={rewriteBio}
-                  style={{ alignSelf: 'flex-start' }}
-                />
-              </View>
-            ) : null}
             {typeChips}
             {followerBox}
             {genderAge}
@@ -584,12 +616,13 @@ export function CharacterEditorScreen() {
                 <StatSlider label="정복도" value={dev} min={0} max={100} color={c.aura} onChange={setDev} hint="높을수록 내 부탁을 기꺼이 들어주고 먼저 더 해 줘요(열성 팬처럼)" />
               </View>
             ) : null}
+            {loveBox}
             {moreToggle}
             {more ? advanced : null}
             {isEdit ? (
               <Button title="저장" size="lg" full disabled={!valid} onPress={save} />
             ) : (
-              <Button title="세계에 등장시키기" size="lg" full disabled={!valid} loading={saving} loadingTitle="AI가 이름·소개를 만드는 중…" onPress={save} />
+              <Button title="세계에 등장시키기" size="lg" full disabled={!valid} loading={saving} loadingTitle="AI가 이름을 짓는 중…" onPress={save} />
             )}
             {!isEdit && !valid && !saving ? (
               <Text style={{ color: c.subtext, fontSize: font.small, textAlign: 'center' }}>{handleTaken ? '이미 있는 아이디예요' : '상세 특징을 적어 주세요'}</Text>

@@ -1,5 +1,5 @@
 /**
- * 계정 한 줄(X의 "팔로우 추천" 모양): 사진 · 이름 ✓ · @아이디 · 관계 칩 · 소개 · 팔로우 버튼
+ * 계정 한 줄(X의 "팔로우 추천" 모양): 사진 · 이름 ✓ · @아이디 · 관계 칩 · 팔로우 버튼(한줄소개는 보여 주지 않는다)
  * 왼쪽 가는 띠 = 분류 색(셀럽 노랑 · 친구 보라 · 같은 업계 파랑 · 언론·비즈니스 회색). 색은 RelationChip 한 곳에서 정한다.
  */
 import { useNavigation } from '@react-navigation/native';
@@ -21,7 +21,8 @@ export function FollowButton({ c: ch, size = 'sm' }: { c: Character; size?: 'sm'
   );
 }
 
-export function UserRow({ ch, showBio = true, right, onPress, showRelation = true }: { ch: Character; showBio?: boolean; right?: React.ReactNode; onPress?: () => void; showRelation?: boolean }) {
+/** showBio: 예전 화면 호환용(한줄소개는 더 보여 주지 않는다) */
+export function UserRow({ ch, right, onPress, showRelation = true }: { ch: Character; showBio?: boolean; right?: React.ReactNode; onPress?: () => void; showRelation?: boolean }) {
   const { c } = useTheme();
   const nav = useNavigation<RootNav>();
   const badge = ch.badge === undefined ? (ch.isNews ? 'gold' : ch.verified ? 'blue' : null) : ch.badge;
@@ -57,11 +58,6 @@ export function UserRow({ ch, showBio = true, right, onPress, showRelation = tru
           </View>
           {right ?? <FollowButton c={ch} />}
         </View>
-        {showBio && ch.bio ? (
-          <Text numberOfLines={2} style={{ color: c.text, fontSize: font.body, lineHeight: 20, marginTop: 2 }}>
-            {ch.bio}
-          </Text>
-        ) : null}
       </View>
     </Pressable>
   );

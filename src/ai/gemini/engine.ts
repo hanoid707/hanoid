@@ -30,6 +30,7 @@ const MAX_OUT = {
   firstDM: 200,
   draft: 300,
   cast: 1800,
+  bonds: 1700,
 } as const;
 
 export function createGeminiEngine(settings: AISettings, opts: { via?: GeminiVia } = {}): AIEngine {
@@ -43,7 +44,7 @@ export function createGeminiEngine(settings: AISettings, opts: { via?: GeminiVia
     async reactToPost(ctx, post, o) {
       const n = clamp(Math.round(o?.replies ?? 6), 1, 6);
       const tn = ctx.tune ?? DEFAULT_TUNE;
-      const r = await call(ctx, P.reactPrompt(ctx, post, n), S.reactSchema(n, tn), 'react', MAX_OUT.react(n) + tn.echoPosts * 110 + tn.echoDMs * 80);
+      const r = await call(ctx, P.reactPrompt(ctx, post, n), S.reactSchema(n, tn), 'react', MAX_OUT.react(n) + tn.echoPosts * 110 + tn.echoDMs * 80 + 60);
       return N.normReact(ctx, r, { n, seed: post.id });
     },
 
@@ -58,7 +59,9 @@ export function createGeminiEngine(settings: AISettings, opts: { via?: GeminiVia
       const reg = ctx.cast.find((x) => x.id === characterId)?.register;
       const tn = ctx.tune ?? DEFAULT_TUNE;
       const bubbles = tn.dmBubbles;
-      const r = N.normDM(await call(ctx, P.dmPrompt(ctx, { characterId, history, message, priorSummary }), S.dmSchema(bubbles, !!tn.dmPost), 'dm', MAX_OUT.dm + (tn.dmPost ? 110 : 0)), reg, bubbles, ctx.avoid);
+      const cc = ctx.cast.find((x) => x.id === characterId);
+      const heart = !!cc?.heartOk;
+      const r = N.normDM(await call(ctx, P.dmPrompt(ctx, { characterId, history, message, priorSummary }), S.dmSchema(bubbles, !!tn.dmPost, heart), 'dm', MAX_OUT.dm + (tn.dmPost ? 110 : 0) + (heart ? 70 : 20)), reg, bubbles, ctx.avoid);
       if (!r.messages.length && !r.leave) throw new GeminiError('빈 답장이 왔어요', 200, false, 'empty');
       return r;
     },
@@ -68,7 +71,7 @@ export function createGeminiEngine(settings: AISettings, opts: { via?: GeminiVia
     },
 
     async worldTick(ctx, { day, returned }) {
-      return N.normTick(ctx, await call(ctx, P.tickPrompt(ctx, day, returned), S.tickSchema(ctx.tune ?? DEFAULT_TUNE, returned?.length ?? 0), 'tick', MAX_OUT.tick));
+      return N.normTick(ctx, await call(ctx, P.tickPrompt(ctx, day, returned), S.tickSchema(ctx.tune ?? DEFAULT_TUNE, returned?.length ?? 0, ctx.heartAsk?.length ?? 0), 'tick', MAX_OUT.tick + (ctx.heartAsk?.length ?? 0) * 60 + 60));
     },
 
     async resolveEvent(ctx, { event, choiceId, customText }) {
@@ -102,6 +105,10 @@ export function createGeminiEngine(settings: AISettings, opts: { via?: GeminiVia
 
     async generateCast(world) {
       return N.normCast(await call(null, P.castPrompt(world), S.CAST_SCHEMA, 'cast', MAX_OUT.cast, 1));
+    },
+
+    async castBonds(ctx) {
+      return N.normBonds(ctx, await call(ctx, P.bondsPrompt(ctx), S.BONDS_SCHEMA, 'bonds', MAX_OUT.bonds, 0.8));
     },
   };
 }

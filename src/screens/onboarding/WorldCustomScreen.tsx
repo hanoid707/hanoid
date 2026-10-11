@@ -11,7 +11,8 @@ import { useGame } from '../../store/game';
 import { font, space, useTheme } from '../../theme';
 
 const EMOJIS = ['🌍', '🏫', '🏰', '🚀', '🏙️', '🌊', '🎮', '🍳', '⚽', '🕵️', '🎻', '🐉'];
-const TONES = ['코믹', '진지', '로맨스 판타지', '스릴러', '일상', '막장'];
+/** 분위기는 고르지 않는다 — 어떤 세계든 현실에 있을 법한 사람·나이·관례로 굴러간다(분위기는 세계관 설정 글과 이야기 흐름이 정한다) */
+const TONE = '사실적이고 현실적인 분위기. 실제로 있을 법한 사람·나이·조직 관례와 일상의 디테일';
 
 export function WorldCustomScreen() {
   const { c } = useTheme();
@@ -22,7 +23,6 @@ export function WorldCustomScreen() {
   const [name, setName] = useState('');
   const [emoji, setEmoji] = useState('🌍');
   const [setting, setSetting] = useState('');
-  const [tone, setTone] = useState('코믹');
   const [loading, setLoading] = useState(false);
 
   const ok = name.trim().length >= 2 && setting.trim().length >= 10;
@@ -31,7 +31,7 @@ export function WorldCustomScreen() {
     setLoading(true);
     try {
       const engine = createEngine(settings, (e) => showToast(`AI 오류 → 다른 AI로 만들었어요 (${e.message})`, 'error'));
-      const world = { name: name.trim(), setting: setting.trim(), tone };
+      const world = { name: name.trim(), setting: setting.trim(), tone: TONE };
       const cast = await engine.generateCast(world);
       if (!cast.length) throw new Error('등장인물을 받지 못했어요');
       setDraft({ templateId: null, custom: { ...world, emoji }, customCast: cast, firstFollowerKey: null });
@@ -65,16 +65,8 @@ export function WorldCustomScreen() {
             multiline
             maxLength={400}
             counter
-            hint="AI가 이 설정을 읽고 등장인물을 만들어요. 언어를 정하고 싶으면 여기 적으세요."
+            hint="AI가 이 설정을 읽고 등장인물을 만들어요. 계급·직급·나이는 그 세계의 실제 관례에 맞춰져요. 언어를 정하고 싶으면 여기 적으세요."
           />
-          <View style={{ gap: 6 }}>
-            <Text style={{ color: c.text, fontWeight: '700', fontSize: font.small }}>분위기</Text>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-              {TONES.map((t) => (
-                <Chip key={t} label={t} selected={tone === t} onPress={() => setTone(t)} />
-              ))}
-            </View>
-          </View>
           <Button title={loading ? '등장인물 만드는 중…' : '등장인물 만들기'} size="lg" full disabled={!ok} loading={loading} onPress={next} />
           <Text style={{ color: c.faint, fontSize: font.tiny, textAlign: 'center' }}>
             {activeEngine(settings).primary ? 'AI가 이 설정을 읽고 등장인물을 만들어요' : 'AI 연결이 필요해요(나 탭 → AI 연결에서 키를 넣어 주세요)'}

@@ -57,7 +57,7 @@ const HINT: Record<string, [string, boolean]> = {
 };
 
 /** 짧은 반응 = quick, 세계를 움직이는 일 = default */
-const WORLD_KINDS = new Set(['tick', 'event', 'newEvent', 'cast']);
+const WORLD_KINDS = new Set(['tick', 'event', 'newEvent', 'cast', 'bonds']);
 /** 글자 수 → 토큰 추정(한국어). 클로드 토크나이저 실측 0.75~0.86 토큰/자 → 약 1.25자/토큰 */
 const estTokens = (chars: number) => Math.round(chars / 1.25);
 
@@ -103,7 +103,8 @@ export function createClaudeEngine(settings: AISettings): AIEngine {
     async dmReply(ctx, { characterId, history, message, priorSummary }) {
       if (!ctx.cast.some((x) => x.id === characterId)) return { mood: 'neutral', messages: [], leave: false, affinityDelta: 0, romanceDelta: 0, devotionDelta: 0 };
       const reg = ctx.cast.find((x) => x.id === characterId)?.register;
-      const r = N.normDM(await call(ctx, P.dmPrompt(ctx, { characterId, history, message, priorSummary }), P.dmShape(ctx.tune ?? DEFAULT_TUNE), 'dm'), reg, (ctx.tune ?? DEFAULT_TUNE).dmBubbles, ctx.avoid);
+      const heart = !!ctx.cast.find((x) => x.id === characterId)?.heartOk;
+      const r = N.normDM(await call(ctx, P.dmPrompt(ctx, { characterId, history, message, priorSummary }), P.dmShape(ctx.tune ?? DEFAULT_TUNE, heart), 'dm'), reg, (ctx.tune ?? DEFAULT_TUNE).dmBubbles, ctx.avoid);
       if (!r.messages.length && !r.leave) throw new ClaudeError('빈 답장이 왔어요', 'empty', false);
       return r;
     },
@@ -113,7 +114,7 @@ export function createClaudeEngine(settings: AISettings): AIEngine {
     },
 
     async worldTick(ctx, { day, returned }) {
-      return N.normTick(ctx, await call(ctx, P.tickPrompt(ctx, day, returned), P.tickShape(ctx.tune ?? DEFAULT_TUNE, returned?.length ?? 0), 'tick'));
+      return N.normTick(ctx, await call(ctx, P.tickPrompt(ctx, day, returned), P.tickShape(ctx.tune ?? DEFAULT_TUNE, returned?.length ?? 0, ctx.heartAsk?.length ?? 0), 'tick'));
     },
 
     async resolveEvent(ctx, { event, choiceId, customText }) {
@@ -145,6 +146,10 @@ export function createClaudeEngine(settings: AISettings): AIEngine {
 
     async generateCast(world) {
       return N.normCast(await call(null, P.castPrompt(world), P.SHAPES.cast, 'cast'));
+    },
+
+    async castBonds(ctx) {
+      return N.normBonds(ctx, await call(ctx, P.bondsPrompt(ctx), P.SHAPES.bonds, 'bonds'));
     },
   };
 }

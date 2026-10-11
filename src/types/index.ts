@@ -161,6 +161,25 @@ export interface Character {
   rosterId?: ID;
   /** 시나리오에서 빠진 상태(목록·AI에서 제외, 지난 글 표시용으로만 남김) */
   inactive?: boolean;
+
+  // ── v3.5: 속마음 · 인물끼리의 마음 · 플레이어와 한 스킨십
+  /** 짧은 속마음(AI가 쓴다, 직접 입력 안 함). 프로필에는 여성이고 호감도가 기준(Scenario.heartMin, 기본 50) 이상일 때만 보인다 */
+  heart?: string;
+  /** 속마음을 마지막으로 쓴 게임 일차 */
+  heartDay?: number;
+  /** 다른 인물을 향한 사랑 0~100(상대 인물 ID → 수치). 플레이어를 향한 사랑은 romance(설렘) */
+  loves?: Record<ID, number>;
+  /** 사랑에 관심 없음(일·자기 생활이 먼저) — 특별한 계기가 없으면 누구도 좋아하지 않는다 */
+  loveOff?: boolean;
+  /** 플레이어와 실제로 한 스킨십·행위(최근 3개, 최신이 뒤). 깊은 사이면 뒷날 그 수준의 새 일화를 글로 쓴다 */
+  touch?: { act: string; day: number }[];
+}
+
+/** AI가 알려 준 인물끼리의 사랑 변화 한 건(from이 to를 향해 d만큼) */
+export interface LoveDelta {
+  from: ID;
+  to: ID;
+  d: number;
 }
 
 export interface Persona {
@@ -498,6 +517,13 @@ export interface Scenario {
   itemLog?: { id: ID; item: ItemKind; text: string; ts: number; at: GameTime; target?: ID }[];
   /** 공통 캐릭터 등장 방식(없으면 off) */
   roster?: RosterUse;
+  // ── v3.5
+  /** 프로필에 속마음이 보이기 시작하는 호감도(기본 50). 세계관 설정에서 조절 */
+  heartMin?: number;
+  /** 인물 정보 채우기(직함·나이·인물끼리의 마음)를 마친 판 번호 — 없으면 아직 안 함(game/bonds.ts) */
+  bondV?: number;
+  /** 인물 정보 채우기를 AI가 실패한 횟수(3번 실패하면 규칙으로 채운다) */
+  bondTry?: number;
 }
 
 /** 쓸 AI(예전 세이브의 'mock'은 불러올 때 'gemini'로 바뀐다) */

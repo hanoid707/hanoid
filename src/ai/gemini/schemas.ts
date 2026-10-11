@@ -20,6 +20,8 @@ const LINE = obj({ h: STR, t: STR });
 /** 사진 장면 key(m)를 붙일 수 있는 글 */
 const LINE_M = obj({ h: STR, t: STR, m: { type: 'STRING', nullable: true } }, ['h', 't']);
 const DELTA = obj({ h: STR, d: INT });
+/** 인물끼리의 사랑 변화(h가 to를 향해 d) */
+const LOVE = obj({ h: STR, to: STR, d: INT });
 /** (v3.1) 답글 한 줄 + re: 인플루언서 답글에 다는 대댓글이면 그 계정 아이디 */
 const LINE_RE = obj({ h: STR, t: STR, re: { type: 'STRING', nullable: true } }, ['h', 't']);
 
@@ -40,6 +42,7 @@ export function reactSchema(n: number, t?: AITune) {
     news: arr(STR, 1),
     follow: arr(STR, 3),
     unfollow: arr(STR, 3),
+    love: arr(LOVE, 3),
     ...(t && t.echoPosts > 0 ? { posts: arr(LINE, t.echoPosts) } : {}),
     ...(t && t.echoDMs > 0 ? { dm: arr(LINE, t.echoDMs) } : {}),
   });
@@ -57,7 +60,7 @@ export function threadSchema(n: number) {
 }
 
 /** 쪽지 답장: 말풍선 최대 수(조절값) */
-export const dmSchema = (bubbles: number, withPost = false) => obj(
+export const dmSchema = (bubbles: number, withPost = false, withHeart = false) => obj(
   {
     mood: MOOD,
     messages: arr(STR, Math.min(3, Math.max(1, bubbles))),
@@ -67,6 +70,8 @@ export const dmSchema = (bubbles: number, withPost = false) => obj(
     leave: BOOL,
     /** 대화가 12줄 넘게 길어졌을 때만 요청 — 갱신된 이전 대화 요약 */
     sum: STR,
+    touch: STR,
+    ...(withHeart ? { heart: STR } : {}),
     ...(withPost ? { post: STR } : {}),
   },
   ['mood', 'messages', 'affinityDelta', 'romanceDelta', 'devotionDelta', 'leave'],
@@ -89,7 +94,7 @@ export const EVENT_SCHEMA = obj(EVENT_PROPS);
  * 하루 정산: 조절값에서 켠 항목만 넣는다(끈 항목은 아예 쓰지 않게).
  * 필수(posts·news·trends·mission)를 먼저, 이유가 있을 때만 채우는 것(event·dm)은 뒤에 — 빠뜨림을 줄인다
  */
-export function tickSchema(t: AITune, returned = 0) {
+export function tickSchema(t: AITune, returned = 0, hearts = 0) {
   const props: Record<string, object> = {};
   if (t.dayPosts > 0) props.posts = arr(LINE_M, t.dayPosts);
   if (t.dayNews) props.news = arr(STR, 1);
@@ -97,6 +102,8 @@ export function tickSchema(t: AITune, returned = 0) {
   if (t.dayMission) props.mission = obj({ title: STR, desc: STR, kw: arr(STR, 2) });
   if (t.dayEvent) props.event = { ...obj(EVENT_PROPS), nullable: true };
   if (t.dayDMs > 0 || returned > 0) props.dm = arr(LINE, Math.max(1, t.dayDMs, returned));
+  if (hearts > 0) props.hearts = arr(LINE, hearts);
+  props.love = arr(LOVE, 3);
   return obj(props);
 }
 
@@ -114,8 +121,15 @@ export function outcomeSchema(posts: number) {
     aff: arr(DELTA, 8),
     rom: arr(DELTA, 4),
     dev: arr(DELTA, 6),
+    love: arr(LOVE, 3),
   });
 }
+
+/** 인물 정보 채우기: 직함·나이·사랑에 관심 없음·사랑하는 인물 + 첫 속마음 */
+export const BONDS_SCHEMA = obj({
+  info: arr(obj({ h: STR, title: STR, age: INT, off: BOOL, loves: arr(obj({ to: STR, v: INT }), 2) }), 16),
+  hearts: arr(LINE, 4),
+});
 
 export function commentsSchema(count: number) {
   return obj({ comments: arr(LINE_RE, Math.min(10, Math.max(1, count) + 3)) });

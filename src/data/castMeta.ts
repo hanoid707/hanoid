@@ -1,7 +1,7 @@
 /**
  * 기본 세계관 인물의 계급·직함·나이 — 타임라인의 이름 옆에 보인다("맞선임 상병 · 22").
  *   직함: 아래 표(세계관ID__인물 key). 플레이어와의 사이(동기·맞선임·팀장)나 그 세계에서의 자리(상병·중대장·부장)를 6자 안팎으로.
- *   나이: 세계관 파일의 사진 사양(photo.age), 없으면 설명에 적힌 "○○살/세"에서 읽는다. 전원 20대.
+ *   나이: 세계관 파일의 사진 사양(photo.age), 없으면 설명에 적힌 "○○살/세"에서 읽는다. 그 자리의 현실 나이(data/ageNorms.ts 기준)로 적어 둔다.
  * 직접 만든 세계관·캐릭터는 인물 설정의 "계급·직함"·"나이" 칸에 적은 값을 쓴다(character.title · character.age).
  */
 import type { CharacterSeed } from './worldTypes';
@@ -36,7 +36,7 @@ export const CAST_TITLE: Record<string, string> = {
   football__harin: '구단 콘텐츠팀',
   football__abel: '플레이메이커',
   football__rocha: '공격수',
-  football__ryu_agent: '에이전트',
+  football__ryu_agent: '에이전트 · 대표',
   football__dawn4am: '개발자',
   football__jiwoo_n: '직관러',
   football__donghae_fan: '라이벌 팬',
@@ -51,15 +51,15 @@ export const CAST_TITLE: Record<string, string> = {
   football__mingyu: '고교 친구',
   // 사내연애 금지
   office__haesol: '팀장',
-  office__hangyeol: 'PM',
+  office__hangyeol: 'PM · 사수',
   office__sodam: '입사 동기',
   office__dowon: '옆팀 디자이너',
-  office__bom: '신입',
-  office__seungjae: '개발자',
-  office__eunjung: '피플팀',
-  office__yunseul: '선배 개발자',
+  office__bom: '신입 개발자',
+  office__seungjae: '입사 동기 · 개발',
+  office__eunjung: '피플팀 과장',
+  office__yunseul: '8년차 개발자',
   office__chaeeun: '대학 동기',
-  office__jaehyun: 'QA',
+  office__jaehyun: 'QA · 옆자리',
   office__hayoon: 'CX팀',
   office__minkyu: '취준생',
   office__dabin: '신입',
@@ -99,7 +99,7 @@ export const CAST_TITLE: Record<string, string> = {
   youtuber__seoha: '유튜버',
   youtuber__jiho: '대학 동기',
   youtuber__hangyeol: '편집자',
-  youtuber__sojeong: 'MCN 매니저',
+  youtuber__sojeong: 'MCN 9년차',
   youtuber__yerin: '구독자',
   youtuber__haesol: '유튜버',
   youtuber__kimsil: '이슈 유튜버',
@@ -119,7 +119,7 @@ export const CAST_TITLE: Record<string, string> = {
   influencer__haeun: '선배 인플루언서',
   influencer__eunsol: '동갑 절친',
   influencer__junseo: '포토그래퍼',
-  influencer__sujin: '팀장',
+  influencer__sujin: '에이전시 팀장',
   influencer__danbi: '1호 팬',
   influencer__doyoon: 'MD',
   influencer__algo: '직장인',
@@ -135,9 +135,21 @@ export const CAST_TITLE: Record<string, string> = {
 };
 
 /** 설명·소개에 적힌 나이("24살", "(25, …", "27세") */
-function ageInText(text: string): number | undefined {
+export function ageInText(text: string): number | undefined {
   const m = text.match(/(?<![0-9])(1[89]|[2-7][0-9])(?:살|세)/) ?? text.match(/\((1[89]|[2-7][0-9])[,)]/);
   return m ? Number(m[1]) : undefined;
+}
+
+const RANK = '행정보급관|행보관|주임원사|대대장|중대장|소대장|분대장|이병|일병|상병|병장|하사|중사|상사|원사|소위|중위|대위|소령|중령|대령|인턴|신입|대리|과장|차장|부장|팀장|실장|본부장|교수|조교|감독|코치|주장';
+const RANK_RE = new RegExp(`(${RANK})(?![을를의님께]|에게|한테|[이가와과] )`);
+
+/**
+ * 인물 설명의 첫 대목에 적힌 계급·직급("3중대 행정보급관 상사(41)" → "행정보급관") — 예전 세이브·직접 만든 인물에 직함 채우기용.
+ * 남의 직함("팀장을 어려워함")을 잘못 집지 않게 첫 쉼표·마침표 앞까지만 보고, 목적어·호칭으로 쓰인 것은 뺀다.
+ */
+export function titleInText(text: string | undefined): string | undefined {
+  const head = (text ?? '').split(/[,.。\n]/)[0].slice(0, 44);
+  return head.match(RANK_RE)?.[1];
 }
 
 /** 기본 세계관 인물 한 명의 직함·나이(없으면 undefined) */

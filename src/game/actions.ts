@@ -149,7 +149,7 @@ export function savePersona(patch: Partial<Persona>) {
 }
 
 /** (v3.2) 세계관 전체 수정: 이름·이모지·한 줄 소개·설정·분위기·해시태그·자주 쓰는 말 */
-export function saveWorld(patch: Partial<Pick<World, 'name' | 'emoji' | 'tagline' | 'setting' | 'tone' | 'tag' | 'vocab'>>) {
+export function saveWorld(patch: Partial<Pick<World, 'name' | 'emoji' | 'tagline' | 'setting' | 'tone' | 'tag' | 'vocab'>> & { heartMin?: number }) {
   const sc = getActive();
   if (!sc) return;
   G().edit(sc.id, (d) => {
@@ -161,6 +161,8 @@ export function saveWorld(patch: Partial<Pick<World, 'name' | 'emoji' | 'tagline
     if (patch.tone !== undefined) w.tone = cutText(patch.tone.trim(), 300);
     if (patch.tag !== undefined && patch.tag.trim()) w.tag = `#${patch.tag.trim().replace(/^#+/, '').replace(/\s+/g, '')}`;
     if (patch.vocab !== undefined) w.vocab = patch.vocab.map((x) => x.trim()).filter(Boolean).slice(0, 30);
+    // 프로필에 속마음이 보이기 시작하는 호감도(여성 인물만 해당)
+    if (patch.heartMin !== undefined) d.heartMin = Math.max(0, Math.min(100, Math.round(patch.heartMin)));
     d.title = `${w.name} · ${d.persona.name}`;
     logActivity(d, '🌍', '세계관 설정을 바꿨어요');
     addMemory(d, `세계관 설정이 바뀜: ${cutText(w.setting, 60)}`);

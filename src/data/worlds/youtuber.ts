@@ -1,7 +1,7 @@
 /**
  * 세계관: 떡상할 때까지 — 구독자 0명에서 시작하는 현실 유튜버 생존기
  * - 등장하는 유튜버·MCN·브랜드·매체는 전부 가상. 수익화 조건 같은 플랫폼 규칙은 실제 기준을 따른다.
- * - 모든 인물은 성인(23~29세).
+ * - 모든 인물은 성인(23~36세).
  */
 import type { WorldTemplate } from '../worldTypes';
 
@@ -48,7 +48,7 @@ export const YOUTUBER: WorldTemplate = {
       color: '#334155',
       archetype: 'celeb',
       bio: '유튜브 「무진이네」 | 화·토 저녁 7시 업로드 | 비즈니스 문의는 프로필 링크 메일로만 (DM 못 봐요)',
-      description: '구독자 324만 기획형 예능 채널 「무진이네」 운영자(28). 무심한 선배라 플레이어 영상이 진짜 웃기거나 꾸준하면 툭 한마디 던지고, 칭찬도 조언도 짧다.',
+      description: '구독자 324만 기획형 예능 채널 「무진이네」 운영자(32). 무심한 선배라 플레이어 영상이 진짜 웃기거나 꾸준하면 툭 한마디 던지고, 칭찬도 조언도 짧다.',
       register: 'banmal',
       followers: 1180000,
       following: 214,
@@ -58,7 +58,7 @@ export const YOUTUBER: WorldTemplate = {
       photo: {
         kind: 'face',
         gender: 'm',
-        age: 28,
+        age: 32,
         prompt:
           'short messy black hair, round glasses, plain gray hoodie, slightly tired half smile, sitting on a folding chair in a cluttered filming studio with a softbox light behind him, candid photo taken by a staff member, slightly off-center framing',
       },
@@ -198,7 +198,7 @@ export const YOUTUBER: WorldTemplate = {
       color: '#B45309',
       archetype: 'mentor',
       bio: 'MCN 모닥불네트워크 파트너매니저 9년차 | 크리에이터 40팀 담당 | 개인 계정이며 회사 입장과 무관합니다',
-      description: 'MCN 파트너매니저 9년차(29). 플레이어를 잠재 계약 크리에이터로 지켜보면서도, 회사에 불리하더라도 계약의 위험 조항부터 알려 주는 공정한 업계 선배다.',
+      description: 'MCN 파트너매니저 9년차(36). 플레이어를 잠재 계약 크리에이터로 지켜보면서도, 회사에 불리하더라도 계약의 위험 조항부터 알려 주는 공정한 업계 선배다.',
       register: 'haeyo',
       followers: 8940,
       following: 1203,
@@ -207,7 +207,7 @@ export const YOUTUBER: WorldTemplate = {
       photo: {
         kind: 'face',
         gender: 'f',
-        age: 29,
+        age: 36,
         prompt:
           'shoulder-length straight black hair tucked behind her ears, minimal makeup, navy blazer over a white t-shirt, small stud earrings, calm direct expression, photo taken by a coworker in a bright office meeting room with a blank whiteboard behind her',
       },
@@ -309,7 +309,7 @@ export const YOUTUBER: WorldTemplate = {
       color: '#DC2626',
       archetype: 'troll',
       bio: '유튜브 「이슈정리 김실장」 구독자 41만 | 크리에이터 이슈 팩트만 정리합니다 | 제보 DM 환영 | 법적 문제 시 수정합니다',
-      description: '얼굴 없이 논란을 \'정리\'하는 사이버 렉카 채널 운영자(27, 구독자 41만). 플레이어가 조금이라도 뜨면 의혹 거리를 노리지만 욕설·협박은 하지 않고, 고소 얘기엔 말을 돌린다.',
+      description: '얼굴 없이 논란을 \'정리\'하는 사이버 렉카 채널 운영자(31, 구독자 41만). 플레이어가 조금이라도 뜨면 의혹 거리를 노리지만 욕설·협박은 하지 않고, 고소 얘기엔 말을 돌린다.',
       register: 'haeyo',
       followers: 18300,
       following: 77,
@@ -317,7 +317,7 @@ export const YOUTUBER: WorldTemplate = {
       photo: {
         kind: 'face',
         gender: 'm',
-        age: 27,
+        age: 31,
         prompt:
           'black bucket hat pulled low, black face mask covering most of the face, black zip-up hoodie, only tired eyes visible, dim room lit by a monitor, low-quality webcam-style selfie',
       },
@@ -376,7 +376,7 @@ export const YOUTUBER: WorldTemplate = {
       color: '#0EA5E9',
       archetype: 'mentor',
       bio: '1인 가구 데스크테리어 브랜드 모노룸 마케팅 4년차 | 협업 제안은 메일로 | 개인 계정이라 회사 욕은 안 함 (못 함)',
-      description: '데스크테리어 브랜드 「모노룸」의 인플루언서 마케팅 담당(27). 협업 후보인 플레이어에게 광고주가 실제로 보는 지표와 광고 표기의 중요성을 솔직하게 알려 주고, 개인적으로도 영상을 챙겨 본다.',
+      description: '데스크테리어 브랜드 「모노룸」의 인플루언서 마케팅 담당(30). 협업 후보인 플레이어에게 광고주가 실제로 보는 지표와 광고 표기의 중요성을 솔직하게 알려 주고, 개인적으로도 영상을 챙겨 본다.',
       register: 'haeyo',
       followers: 1340,
       following: 864,
@@ -385,7 +385,7 @@ export const YOUTUBER: WorldTemplate = {
       photo: {
         kind: 'face',
         gender: 'f',
-        age: 27,
+        age: 30,
         prompt:
           'low bun hairstyle, light brown cardigan over a striped shirt, small pearl earrings, friendly polite smile, holding a laptop, candid photo at a bright cafe table, slightly overexposed window light',
       },
@@ -598,7 +598,7 @@ export const YOUTUBER: WorldTemplate = {
       color: '#16A34A',
       archetype: 'fan',
       bio: '신도림↔강남 2호선 매일 왕복 | 그 시간에 롱폼 2개 봄',
-      description: '27세 직장인. 출퇴근 2호선에서 롱폼 보는 게 유일한 낙인 담백한 시청자.',
+      description: '30세 직장인. 출퇴근 2호선에서 롱폼 보는 게 유일한 낙인 담백한 시청자.',
       followers: 92,
       following: 301,
       joined: '2016년 9월',
@@ -622,14 +622,14 @@ export const YOUTUBER: WorldTemplate = {
       color: '#78716C',
       archetype: 'troll',
       bio: '구독 취소 직전 시청자 | 할 말은 함',
-      description: '27세 남성 시청자. 채널이 조금만 뜨면 초심을 잃었다고 트집 잡는 시비러지만 욕설·혐오 표현은 쓰지 않는다.',
+      description: '30세 남성 시청자. 채널이 조금만 뜨면 초심을 잃었다고 트집 잡는 시비러지만 욕설·혐오 표현은 쓰지 않는다.',
       followers: 57,
       following: 134,
       joined: '2021년 2월',
       photo: {
         kind: 'face',
         gender: 'm',
-        age: 27,
+        age: 30,
         prompt: 'short side-parted hair, plain navy jacket, unimpressed expression with arms crossed, slightly blurry photo in a parking lot at dusk',
       },
       posts: [
@@ -648,14 +648,14 @@ export const YOUTUBER: WorldTemplate = {
       color: '#EAB308',
       archetype: 'fan',
       bio: '라이브 단골 | 월급날엔 슈퍼챗 | 나이트 끝나고 라이브 보는 게 낙',
-      description: '27세 여성 간호사(교대 근무). 나이트 근무 끝나고 라이브 보는 게 낙이고 월급날마다 소액 슈퍼챗을 쏜다.',
+      description: '31세 여성 간호사(교대 근무). 나이트 근무 끝나고 라이브 보는 게 낙이고 월급날마다 소액 슈퍼챗을 쏜다.',
       followers: 318,
       following: 401,
       joined: '2017년 4월',
       photo: {
         kind: 'face',
         gender: 'f',
-        age: 27,
+        age: 31,
         prompt:
           'long straight black hair in a low ponytail, bare face, scrub top under a cardigan, sleepy gentle smile, selfie in a hospital break room at dawn',
       },
@@ -723,14 +723,14 @@ export const YOUTUBER: WorldTemplate = {
       color: '#0D9488',
       archetype: 'bestie',
       bio: '게임 채널 구독자 6.4만 | MCN 계약 끝나고 독립 2년차 | 계약서는 꼭 변호사한테',
-      description: '28세 남성 게임 크리에이터 태경. 초기 MCN 계약의 불리한 조항으로 고생한 경험을 담담하게 나누는 선배.',
+      description: '33세 남성 게임 크리에이터 태경. 초기 MCN 계약의 불리한 조항으로 고생한 경험을 담담하게 나누는 선배.',
       followers: 2410,
       following: 377,
       joined: '2014년 11월',
       photo: {
         kind: 'face',
         gender: 'm',
-        age: 28,
+        age: 33,
         prompt:
           'short neat hair with a few gray strands, light stubble, black hoodie, gaming headset resting around his neck, relaxed half smile, selfie in a dim room with purple led light',
       },

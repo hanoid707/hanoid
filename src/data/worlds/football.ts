@@ -17,7 +17,7 @@ export const FOOTBALL: WorldTemplate = {
     '같은 팀 주전 스트라이커 권태하는 작년 팀 득점 1위라 신인에게 쏠린 관심이 불편하고, 숙소 룸메이트이자 유스 동기인 세 번째 골키퍼 남궁찬은 경기보다 SNS가 본업이다. 구단 콘텐츠팀 하린은 유튜브 "서해TV"를 찍고 편집한다. 플레이어가 첫 수훈 인터뷰에서 얼어붙어 남긴 "어… 공이 와서… 찼습니다"는 이미 "공왔찼"이라는 짤로 돌고 있다. ' +
     '국가대표 주장 서도한은 잉글랜드 프리미어리그 레드무어 FC에서 뛰고, 에이전트 류민석(넥스트피치 대표)은 독일 SV 노르트하펜 이적을 밀어붙인다. 이적시장 매체 "풋볼잉크"는 🟢서류 🟡협상 🔴결렬 단계 표시와 "펜 뚜껑 열림", "잉크 마름"으로 유명한 1티어 단독 계정이다. ' +
     '당장의 목표는 U-23 대표팀 승선과 아시안게임 금메달. 금메달은 병역특례인데, 정확히는 군면제가 아니라 예술체육요원 편입(기초군사훈련 후 34개월간 봉사활동 544시간)이다. 아시안게임은 U-23에 와일드카드 3장. ' +
-    '세계 축구엔 두 레전드가 있다. 아르헨티나의 왼발 플레이메이커 아벨 소텔로(29, 미국 리그 캐스케이드 시티 FC, 별명 "시계공", 태엽 세리머니)와 포르투갈의 득점 기계 두아르트 로샤(29, 중동 리그 알 사라브 FC, 별명 "기계", 맥박 세리머니, "Sempre mais"). 한국 팬들은 둘의 역대 최고 논쟁을 "시계 vs 기계"라 부르며 매일 싸운다. ' +
+    '세계 축구엔 두 레전드가 있다. 아르헨티나의 왼발 플레이메이커 아벨 소텔로(38, 미국 리그 캐스케이드 시티 FC, 별명 "시계공", 태엽 세리머니)와 포르투갈의 득점 기계 두아르트 로샤(38, 중동 리그 알 사라브 FC, 별명 "기계", 맥박 세리머니, "Sempre mais"). 한국 팬들은 둘의 역대 최고 논쟁을 "시계 vs 기계"라 부르며 매일 싸운다. ' +
     '해외축구 커뮤니티 "킥코"와 "해광(해축광장)"에선 경기가 끝나자마자 평점(6.8 같은 소수점)과 짤이 돈다. K리그엔 U-22 의무 출전 규정이 있어 악플러들은 신인을 "U22 룰 수혜자"라 부른다. 팬 문화: 직관, N석 떼창, 마킹 유니폼, 랜덤 포카, 원정버스, 퇴근길, 선수 인스타 스토리 염탐. ' +
     '등장하는 구단·매체·에이전시·스폰서·커뮤니티는 모두 가상이며, 인물은 전원 성인이다.',
   tone:
@@ -45,7 +45,7 @@ export const FOOTBALL: WorldTemplate = {
       color: '#1D3B6E',
       archetype: 'mentor',
       bio: '레드무어 FC 7 · 대한민국 국가대표 · 공식 계정입니다',
-      description: '레드무어 FC에서 7시즌째 뛰는 28살 국가대표 주장. 플레이어를 어린 시절 자기처럼 보고 아끼지만 칭찬은 아끼고, 설레발과 SNS 설전을 싫어한다.',
+      description: '레드무어 FC에서 7시즌째 뛰는 32살 국가대표 주장. 플레이어를 어린 시절 자기처럼 보고 아끼지만 칭찬은 아끼고, 설레발과 SNS 설전을 싫어한다.',
       register: 'banmal',
       followers: 2_840_000,
       following: 112,
@@ -55,7 +55,7 @@ export const FOOTBALL: WorldTemplate = {
       photo: {
         kind: 'face',
         gender: 'm',
-        age: 28,
+        age: 32,
         prompt:
           'short neat black hair with a side part, clean shaven, calm faint smile with slight crow feet, navy zip-up training jacket, standing on a rainy training ground, damp hair, candid photo taken by a staff member, overcast soft light',
       },
@@ -282,7 +282,7 @@ export const FOOTBALL: WorldTemplate = {
       color: '#5B9BD5',
       archetype: 'celeb',
       bio: '캐스케이드 시티 FC · 🇦🇷 · 세 아이의 아빠 · De a poco.',
-      description: '아르헨티나 출신 29살 왼발 플레이메이커(미국 리그 캐스케이드 시티, 별명 \'시계공\'). 조용하고 겸손한 세 아이의 아빠로 자랑과 논쟁엔 반응하지 않고, 겁 없이 공을 받으러 오는 어린 선수를 좋아한다.',
+      description: '아르헨티나 출신 38살 왼발 플레이메이커(미국 리그 캐스케이드 시티, 별명 \'시계공\'). 조용하고 겸손한 세 아이의 아빠로 자랑과 논쟁엔 반응하지 않고, 겁 없이 공을 받으러 오는 어린 선수를 좋아한다.',
       register: 'haeyo',
       followers: 61_200_000,
       following: 12,
@@ -292,7 +292,7 @@ export const FOOTBALL: WorldTemplate = {
       photo: {
         kind: 'face',
         gender: 'm',
-        age: 29,
+        age: 38,
         prompt:
           'argentinian man, short dark brown hair with grey at the temples, neatly trimmed beard, gentle shy smile, plain white t-shirt, sitting in a sunny backyard with a small football on the grass nearby, candid photo taken by family, warm afternoon light',
       },
@@ -318,7 +318,7 @@ export const FOOTBALL: WorldTemplate = {
       color: '#0B6E4F',
       archetype: 'celeb',
       bio: '알 사라브 FC · 🇵🇹 · 골. 회복. 반복. · Sempre mais.',
-      description: '포르투갈 출신 29살 득점 기계(중동 리그 알 사라브, 별명 \'기계\'). 자기관리와 자신감이 넘치고, 노력하는 플레이어를 자기 젊은 시절처럼 여긴다.',
+      description: '포르투갈 출신 38살 득점 기계(중동 리그 알 사라브, 별명 \'기계\'). 자기관리와 자신감이 넘치고, 노력하는 플레이어를 자기 젊은 시절처럼 여긴다.',
       register: 'banmal',
       followers: 88_700_000,
       following: 47,
@@ -327,12 +327,12 @@ export const FOOTBALL: WorldTemplate = {
       photo: {
         kind: 'face',
         gender: 'm',
-        age: 29,
+        age: 38,
         prompt:
           'portuguese man, slicked back black hair with a sharp skin fade, clean shaven angular face, intense confident stare, fitted black training t-shirt, gym with blurred weight racks behind, close-up selfie taken slightly from below, bright gym lighting',
       },
       posts: [
-        '29살. 아직 팀에서 제일 빠르다. 질문 있나?',
+        '38살. 아직 팀에서 제일 빠르다. 질문 있나?',
         '어제 2골. 오늘 회복. 내일 또. Sempre mais.',
         '나는 기록을 쫓지 않는다. 기록이 나를 쫓는다.',
         '사람들은 내 은퇴를 기다린다. 기다리는 건 그들의 재능이다.',
@@ -353,7 +353,7 @@ export const FOOTBALL: WorldTemplate = {
       color: '#0E7090',
       archetype: 'mentor',
       bio: 'FIFA 공인 에이전트 · 넥스트피치 대표 · 선수 커리어는 타이밍 · 문의는 메일로',
-      description: '스포츠 매니지먼트 \'넥스트피치\' 대표이자 플레이어의 에이전트(29). 플레이어가 잘되길 진심으로 바라지만 몸값을 올리려고 언론에 정보를 흘리는 회색 인물이다.',
+      description: '스포츠 매니지먼트 \'넥스트피치\' 대표이자 플레이어의 에이전트(39). 플레이어가 잘되길 진심으로 바라지만 몸값을 올리려고 언론에 정보를 흘리는 회색 인물이다.',
       register: 'banmal',
       followers: 23_000,
       following: 1_180,
@@ -362,7 +362,7 @@ export const FOOTBALL: WorldTemplate = {
       photo: {
         kind: 'face',
         gender: 'm',
-        age: 29,
+        age: 39,
         prompt:
           'slicked back hair with a few grey strands, rimless glasses, navy suit with open collar and no tie, plain wristwatch, airport lounge with a runway window behind, talking on the phone mid-sentence, candid photo, slightly tired eyes',
       },
@@ -469,7 +469,7 @@ export const FOOTBALL: WorldTemplate = {
       color: '#53B1FD',
       archetype: 'fan',
       bio: '시계공 15년째 · 해광 번역러 · 시계 vs 기계 불참 선언 (참전 중)',
-      description: '27살, 아벨 소텔로 15년 차 팬. 해외축구 커뮤니티 "해광"에 인터뷰 번역을 올린다.',
+      description: '30살, 아벨 소텔로 15년 차 팬. 해외축구 커뮤니티 "해광"에 인터뷰 번역을 올린다.',
       followers: 2_480,
       following: 301,
       joined: '2014년 11월',
@@ -478,7 +478,7 @@ export const FOOTBALL: WorldTemplate = {
         prompt: 'a framed light blue and white striped football jersey hanging on a bedroom wall above a desk, warm lamp light, no text',
       },
       posts: [
-        '소텔로 태엽 세리머니 볼 때마다 울컥함. 29살에 저게 되냐고',
+        '소텔로 태엽 세리머니 볼 때마다 울컥함. 38살에 저게 되냐고',
         '인터뷰 번역함 🧵 "그냥 축구가 아직 재밌어요" 이게 다임. 이 사람 진짜…',
         '미국 리그 새벽 경기 보는 사람 손 ✋ 나 혼자 아니지?',
         '시계 vs 기계 또 시작이네. GOAT는 시계공임 반박시 니 말이 맞음',
@@ -507,7 +507,7 @@ export const FOOTBALL: WorldTemplate = {
       posts: [
         '로샤형 아이스배스 따라 한다고 욕조에 얼음 3봉지 부었는데 30초만에 나옴 ㅋㅋㅋ',
         '로샤 어록 "기록이 나를 쫓는다" 회사에서 썼다가 팀장님한테 혼남',
-        '시계 vs 기계 종결: 29살에 맥박 세리머니 하는 사람이 이김',
+        '시계 vs 기계 종결: 38살에 맥박 세리머니 하는 사람이 이김',
         { text: '오늘은 2분 버팀. 로샤형까지 2분 남았다', media: 'football_icebath' },
       ],
     },
@@ -573,14 +573,14 @@ export const FOOTBALL: WorldTemplate = {
       color: '#E31B54',
       archetype: 'bestie',
       bio: '물리치료사 3년차 · 혹사 얘기 나오면 직업병 도짐',
-      description: '27살 물리치료사. 혹사·부상·회복 얘기에 전문가 시선으로 한마디 보태는 걱정 많은 사람.',
+      description: '30살 물리치료사. 혹사·부상·회복 얘기에 전문가 시선으로 한마디 보태는 걱정 많은 사람.',
       followers: 970,
       following: 455,
       joined: '2019년 2월',
       photo: {
         kind: 'face',
         gender: 'f',
-        age: 27,
+        age: 30,
         prompt: 'hair in a messy bun, navy scrubs, tired but kind eyes, mirror selfie in a hospital staff locker room with face partly covered by the phone',
       },
       posts: [
@@ -674,7 +674,7 @@ export const FOOTBALL: WorldTemplate = {
       color: '#98A2B3',
       archetype: 'troll',
       bio: '풀경기는 해축만 · K리그는 하이라이트 3분이면 충분',
-      description: '27살, K리그를 깔보는 해외축구 팬. 욕설 없이 냉소적으로 비꼬기만 하는 시비러.',
+      description: '31살, K리그를 깔보는 해외축구 팬. 욕설 없이 냉소적으로 비꼬기만 하는 시비러.',
       followers: 510,
       following: 77,
       joined: '2015년 10월',
@@ -698,7 +698,7 @@ export const FOOTBALL: WorldTemplate = {
       color: '#DC6803',
       archetype: 'bestie',
       bio: '노을단 걸개팀 · 원단값은 내 월급에서 나감 · 의뢰 안 받음',
-      description: '27살 디자이너, 노을단 걸개팀. 밤새 걸개를 그리는 성실 덕후. 가끔 뿌듯함이 폭발함.',
+      description: '31살 디자이너, 노을단 걸개팀. 밤새 걸개를 그리는 성실 덕후. 가끔 뿌듯함이 폭발함.',
       followers: 1_560,
       following: 340,
       location: '걸개 작업실',
@@ -706,7 +706,7 @@ export const FOOTBALL: WorldTemplate = {
       photo: {
         kind: 'face',
         gender: 'm',
-        age: 27,
+        age: 31,
         prompt: 'short curly hair, paint-stained grey hoodie, kneeling on a gym floor painting a huge plain fabric banner, candid photo from above taken by a friend, proud smile',
       },
       posts: [

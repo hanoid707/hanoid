@@ -1,7 +1,7 @@
 /**
  * 시간 — 하루 정산(월드 틱), 시간 건너뛰기, 타임라인 새로고침
  * 하루 정산 = ① 규칙 정리(즉시: 평판 회복·떡상 종료·대화방 복귀·지난 미션 정리)
- *            ② AI 1회(뒤에서: 캐릭터 글·뉴스·트렌드·새 이벤트·먼저 오는 쪽지·오늘의 미션 + 글쓰기 제안·자기소개 변화)
+ *            ② AI 1회(뒤에서: 캐릭터 글·뉴스·트렌드·새 이벤트·먼저 오는 쪽지·오늘의 미션 + 글쓰기 제안·속마음·인물끼리의 사랑 변화)
  * (v3.1) 시간 건너뛰기는 ①만 기다리고 바로 끝난다 — ②는 뒤에서 돌고 시계 칩에 ⏳로 보인다.
  *        ②가 실패하면 그날 AI 몫을 비워 두지 않고 다음 새로고침·시간 이동 때 다시 시도한다(틀 문장으로 채우지 않음).
  * 이미지·영상 생성은 어디에서도 하지 않는다(글만 AI가 쓴다).
@@ -11,11 +11,12 @@
 import { getActive } from '../store/game';
 import type { ID, Scenario } from '../types';
 import { DEFAULT_TUNE, dayPlan } from '../ai/tune';
-import { cutText, rand, sleep, uid } from '../utils';
+import { rand, sleep, uid } from '../utils';
 import { addNpcLines, activeChar, alive, beginFlow, ctxOf, deliverOpeners, engine, G, tune } from './core';
 import { pickLocalEvent } from './localEvents';
 import { saveIdeas } from './ideas';
-import { addNewsPost, dailyHousekeeping, logActivity, pushItemLog, pushNoti, tickClock } from './progress';
+import { heartEligible, setHeart } from './love';
+import { addNewsPost, applyLove, dailyHousekeeping, logActivity, pushItemLog, pushNoti, tickClock } from './progress';
 import { snapshot } from './undo';
 
 /** 이미 쓴 이벤트 템플릿 키(후보 포함) */
@@ -26,13 +27,6 @@ export function usedEventKeys(sc: Scenario): string[] {
     for (const v of e.variants ?? []) if (v.templateKey) keys.add(v.templateKey);
   }
   return [...keys];
-}
-
-/** 자기소개가 바뀌어도 되는 사이(가까운 핵심 인물, 3일에 한 번까지) */
-function canRewriteBio(c: Scenario['characters'][string], day: number): boolean {
-  if (c.inactive || c.tier === 'crowd' || c.isNews) return false;
-  const close = c.affinity >= 50 || c.relation === 'friend' || c.relation === 'bestie' || c.relation === 'lover' || c.relation === 'family';
-  return close && (c.bioDay === undefined || day - c.bioDay >= 3);
 }
 
 /** 하루 정산이 밀려 있는지(규칙 정리 또는 AI 몫) */
@@ -138,14 +132,13 @@ export async function runDayTick(sid: ID, opts: { force?: boolean } = {}) {
       }
       // 글쓰기 제안(따로 부르지 않고 하루 정산에 얹어 받음)
       saveIdeas(d, r.ideas);
-      // 최근 일로 자기소개가 바뀐 인물(가까운 사람만, 3일에 한 번)
-      for (const b of r.bios ?? []) {
-        const c = d.characters[b.id];
-        if (!c || !b.bio.trim() || !canRewriteBio(c, d.clock.day)) continue;
-        c.bio = cutText(b.bio.trim(), 80);
-        c.bioDay = d.clock.day;
-        logActivity(d, '📝', `${c.name}님이 자기소개를 바꿨어요`);
+      // 오늘의 속마음(여성 + 호감도 기준 이상인 인물만 — 프로필에 보인다)
+      for (const h of r.hearts ?? []) {
+        const c = d.characters[h.id];
+        if (c && heartEligible(d, c)) setHeart(d, h.id, h.text);
       }
+      // 오늘 글에서 드러난 인물끼리의 사랑 변화
+      applyLove(d, r.love);
       d.events = d.events.slice(-30);
     });
   } finally {

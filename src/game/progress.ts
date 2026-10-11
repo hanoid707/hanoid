@@ -4,7 +4,8 @@
  * 호감도·설렘은 반드시 applyAffinity(→ relationship.changeAffinity)로 바꾼다(관계·말투 자동 변화 + 알림·기억).
  */
 import { safeGhost } from './lookalike';
-import { GHOST, ME, SYSTEM, type Character, type CharacterType, type Deltas, type GameTime, type GhostAuthor, type ID, type ItemKind, type Noti, type Post, type QuestGoal, type RelationChange, type Scenario, type SpeechRegister } from '../types';
+import { GHOST, ME, SYSTEM, type Character, type CharacterType, type Deltas, type GameTime, type GhostAuthor, type ID, type ItemKind, type LoveDelta, type Noti, type Post, type QuestGoal, type RelationChange, type Scenario, type SpeechRegister } from '../types';
+import { applyLoveDeltas, detectTouchInParens, LOVE_SLOW, mentionedLovables, noteTouch } from './love';
 import { clamp, fill, rand, snippet, uid } from '../utils';
 import { advanceClock } from './clock';
 import { changeAffinity, describeChange, typeLabel, updateRelation } from './relationship';
@@ -210,6 +211,43 @@ export function applyAffinity(d: Scenario, id: ID, delta: number, romanceDelta =
   const ch = changeAffinity(d, id, delta, romanceDelta, devotionDelta);
   if (ch) noteRelationChange(d, ch);
   return ch;
+}
+
+// ───────────────────────── 인물끼리의 사랑 · 플레이어와 한 스킨십
+
+/** AI가 알려 준 인물끼리의 사랑 변화를 적용하고 기록한다(활동 기록 · 고비를 넘으면 알림·기억) */
+export function applyLove(d: Scenario, list: LoveDelta[] | undefined): void {
+  for (const ch of applyLoveDeltas(d, list)) {
+    const a = d.characters[ch.from];
+    const b = d.characters[ch.to];
+    if (!a || !b) continue;
+    const up = ch.after > ch.before;
+    logActivity(d, up ? '💘' : '💔', `${a.name} → ${b.name} 사랑 ${ch.before} → ${ch.after}`);
+    if (up && ch.before < 50 && ch.after >= 50) {
+      pushNoti(d, { type: 'relation', actorId: a.id, text: `님이 ${b.name}님을 좋아하게 됐어요` });
+      addMemory(d, `${a.name}이(가) ${b.name}을(를) 좋아하게 됨`);
+    } else if (up && ch.before < LOVE_SLOW && ch.after >= LOVE_SLOW) {
+      pushNoti(d, { type: 'relation', actorId: a.id, text: `님이 ${b.name}님에게 깊이 빠졌어요` });
+      addMemory(d, `${a.name}이(가) ${b.name}에게 깊이 빠짐`);
+    } else if (!up && ch.before >= 30 && ch.after < 30) {
+      addMemory(d, `${a.name}의 ${b.name}을(를) 향한 마음이 식음`);
+    }
+  }
+}
+
+/**
+ * 플레이어가 괄호로 쓴 행동("(지수를 안아 준다)")에 스킨십이 있으면 그 인물에 적어 둔다.
+ * ids: 그 자리에 있던 인물(쪽지 상대·답글 대상). 글에 이름·@아이디가 나온 인물이 있으면 그 사람이 먼저다(최대 2명).
+ */
+export function noteTouchFromText(d: Scenario, text: string, ids: ID[] = []): void {
+  const act = detectTouchInParens(text);
+  if (!act) return;
+  // 괄호 글에 이름이 나온 인물이 있으면 그 사람, 없으면 그 자리에 있던 인물
+  const named = mentionedLovables(d, text);
+  const who = [...new Set(named.length ? named : ids)].slice(0, 2);
+  for (const id of who) {
+    if (noteTouch(d, id, act)) addMemory(d, fill('플레이어가 {c}와(과) {a}을(를) 함', { c: d.characters[id].name, a: act }));
+  }
 }
 
 // ───────────────────────── 수치 적용
