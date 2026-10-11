@@ -11,7 +11,7 @@ import { diffOf, scaleSocial } from './difficulty';
 import { giftBlocked, giftEffect, GIFTS } from './items';
 import { addMemory, addXp, applyAffinity, logActivity, pushItemLog, questProgress, tickClock } from './progress';
 import { DM_MAX_LEN, TIME_COST, XP } from './rules';
-import { hitsAvoid, scrubAvoid } from '../ai/context';
+import { hitsAvoid, scrubAvoid, withCharAvoid } from '../ai/context';
 import { takeAvoid } from './avoid';
 import { runDayTick } from './tick';
 import { snapshot } from './undo';
@@ -88,8 +88,10 @@ async function dmConversation(flow: Flow, characterId: ID, message: string, days
     await sleep(rand(600, 1400));
     if (!editIf(flow, (d) => d.dms[characterId]?.messages.forEach((m) => void (m.from === 'me' && (m.read = true))))) return;
     const sc = G().scenarios[sid];
-    const ctx = ctxOf(sid);
-    if (!sc || !ctx) return;
+    const ctx0 = ctxOf(sid);
+    if (!sc || !ctx0) return;
+    // 이 인물이 꺼내지 않는 화제(캐릭터 설정)도 이 대화에서는 빼 둔 화제와 똑같이 다룬다
+    const ctx = withCharAvoid(ctx0, characterId);
     // 빼 둔 화제가 든 줄·요약 문장은 넘기지 않는다
     const history = (sc.dms[characterId]?.messages ?? [])
       .filter((m) => m.from !== 'system')

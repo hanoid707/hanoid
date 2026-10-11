@@ -11,6 +11,7 @@
  *   'post:<글ID>' · 'reply:<내 답글ID>' · 'dm:<캐릭터ID>' · 'event:<이벤트ID>' · 'eventVariant:<이벤트ID>' · 'thread:<글ID>'
  *   'tick:<시나리오ID>' · 'ideas' · 'character:new' · 'bio:<캐릭터ID>'
  */
+import { separateFromPlayer } from './lookalike';
 import { getActive, useGame } from '../store/game';
 import { useRoster } from '../store/roster';
 import type { ID, Persona, Stats, World } from '../types';
@@ -141,6 +142,8 @@ export function savePersona(patch: Partial<Persona>) {
     const handle = patch.handle !== undefined ? sanitizeHandle(patch.handle) || d.persona.handle : d.persona.handle;
     d.persona = { ...d.persona, ...patch, handle };
     d.title = `${d.world.name} · ${d.persona.name}`;
+    // 바꾼 이름·아이디·프사가 다른 계정과 겹치지 않게
+    separateFromPlayer(d);
     logActivity(d, '🪪', '프로필을 수정했어요');
   });
 }

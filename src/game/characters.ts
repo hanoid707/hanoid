@@ -6,6 +6,7 @@
  *   onScenarioCreated:    새 이야기 직후 — 첫 팔로워의 첫 쪽지(AI) · 직접 추가한 첫 팔로워의 자기소개(AI) · 직접 만든 세계관의 첫 하루 정산(AI)
  * (v3.1) 미리 써 둔 첫 글·첫 쪽지 틀 문장은 없앴다 — 인물이 하는 말은 전부 AI가 맥락을 보고 쓴다.
  */
+import { withCharAvoid } from '../ai/context';
 import { peerRegisterHint } from '../ai/local/register';
 import type { CharacterDraft, CharacterDraftArgs } from '../ai/types';
 import { AVATAR_COLORS, AVATAR_EMOJIS } from '../data/avatars';
@@ -68,6 +69,8 @@ export interface CharacterInput {
   registerOverride?: SpeechRegister | null;
   /** 관계 고정 */
   relationLocked?: boolean;
+  /** 이 인물이 꺼내지 않는 화제(없으면 건드리지 않음, 빈 배열 = 지우기) */
+  avoid?: string[];
   /** (v3.2) 호감도·설렘·정복도 직접 조절(편집기 슬라이더) */
   stats?: { affinity?: number; romance?: number; devotion?: number };
 }
@@ -109,6 +112,7 @@ export function saveCharacter(input: CharacterInput, editId?: ID): ActionResult 
       });
       if (input.gender) c.gender = input.gender;
       if (input.ageGroup) c.ageGroup = input.ageGroup;
+      if (input.avoid !== undefined) c.avoid = input.avoid.length ? input.avoid.slice(0, 12) : undefined;
       if (input.personality !== undefined) c.personality = input.personality || undefined;
       if (input.speechStyle !== undefined) c.speechStyle = input.speechStyle || undefined;
       if (input.relationLocked !== undefined) c.relationLocked = input.relationLocked;
@@ -174,6 +178,7 @@ export function saveCharacter(input: CharacterInput, editId?: ID): ActionResult 
       ...(input.ageGroup ? { ageGroup: input.ageGroup } : {}),
       ...(input.personality ? { personality: input.personality } : {}),
       ...(input.speechStyle ? { speechStyle: input.speechStyle } : {}),
+      ...(input.avoid?.length ? { avoid: input.avoid.slice(0, 12) } : {}),
       custom: true,
       bioDay: d.clock.day,
     };
@@ -231,6 +236,8 @@ export interface QuickCharacterInput {
   relations?: string;
   registerOverride?: SpeechRegister | null;
   relationLocked?: boolean;
+  /** 이 인물이 꺼내지 않는 화제 */
+  avoid?: string[];
 }
 
 /** AI가 지은 이름·아이디·소개·첫 글(실패하면 null — 대신 지어낸 문장을 쓰지 않는다) */
@@ -290,6 +297,7 @@ export async function createQuickCharacter(input: QuickCharacterInput): Promise<
         bio: cutText(input.bio?.trim() || draft?.bio?.trim() || localBio(type, ageGroup, traits), 160),
         description: traitsWithPresets(traits, input.personality, input.speechStyle),
         ...(input.relations?.trim() ? { relations: input.relations.trim() } : {}),
+        ...(input.avoid?.length ? { avoid: input.avoid.slice(0, 12) } : {}),
         archetype: def.archetype,
         badge: input.badge !== undefined ? input.badge : def.badge,
         isNews: def.isNews,
@@ -411,8 +419,9 @@ async function firstFollowerDM(sid: ID, characterId: ID): Promise<void> {
   G().setBusy(key, true);
   try {
     await new Promise((r) => setTimeout(r, rand(1200, 2400)));
-    const ctx = ctxOf(sid);
-    if (!ctx || !alive(flow)) return;
+    const ctx0 = ctxOf(sid);
+    if (!ctx0 || !alive(flow)) return;
+    const ctx = withCharAvoid(ctx0, characterId);
     editIf(flow, (d) => {
       const cv = ensureConversation(d, characterId);
       cv.typing = true;

@@ -5,6 +5,7 @@
  * - 예전 필드 이름(handle/text/affinity/followerDelta …)도 그대로 읽는다.
  */
 import { GHOST, type Archetype, type Deltas, type GameEvent, type ID, type SpeechRegister } from '../types';
+import { isPlayerName } from '../game/lookalike';
 import { hashStr } from '../utils';
 import { hitsAvoid } from './context';
 import { ghostAuthor } from './local/ghost';
@@ -101,13 +102,14 @@ export function lines(ctx: AIContext, list: unknown, o: LineOpts = {}): Generate
   for (const l of arr<RawLine>(list)) {
     if (!l || typeof l !== 'object') continue;
     const h = handleOfLine(l).replace(/^@/, '');
-    if (h.toLowerCase() === me) continue; // 플레이어 대사는 쓰지 않는다
+    if (h.toLowerCase() === me || isPlayerName(ctx.persona, h)) continue; // 플레이어 대사는 쓰지 않는다(아이디·이름·"플레이어" 어느 쪽으로 적어도)
     const text = cleanText(textOfLine(l), o.maxLen ?? 140);
     if (!text || seen.has(text)) continue;
     if (hitsAvoid(ctx.avoid, text)) continue; // 빼 둔 화제를 쓴 줄은 버린다
     let authorId = idOf(ctx, h);
     const c = authorId ? ctx.cast.find((x) => x.id === authorId) : undefined;
     if (authorId && (o.exclude?.includes(authorId) || (o.noNews && c?.isNews))) continue;
+    if (c?.avoid?.length && hitsAvoid(c.avoid, text)) continue; // 그 인물이 꺼내지 않기로 한 화제
     const media = str(l.m ?? l.media);
     let line: GeneratedLine;
     if (authorId) {

@@ -1,12 +1,13 @@
 /**
  * 앱 시작점
- * 1) 기기에 저장된 데이터·공통 캐릭터 불러오기(hydrate) → 2) DB 동기화 시작 → 3) 화면 구조(RootNavigator) 표시 → 4) 전역 토스트
+ * 1) 기기에 저장된 데이터·공통 캐릭터 불러오기(hydrate) → 2) DB 동기화 시작 → 3) 화면 구조(RootNavigator) 표시 → 4) 전역 토스트 · 진행 중 칩(BusyChip)
  * 웹에서는 폰 크기 틀(최대 480px) 안에 앱을 보여준다.
  */
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { ActivityIndicator, Platform, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { BusyChip } from './src/components/BusyChip';
 import { ToastHost } from './src/components/Toast';
 import { RootNavigator } from './src/navigation/RootNavigator';
 import { LoginGate } from './src/screens/LoginGate';
@@ -32,6 +33,7 @@ function Shell() {
   const app = (
     <LoginGate>
       <RootNavigator />
+      <BusyChip />
       <ToastHost />
       <StatusBar style={dark ? 'light' : 'dark'} />
     </LoginGate>

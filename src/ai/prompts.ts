@@ -134,12 +134,23 @@ export function systemFor(ctx: AIContext | null): string {
   if (p.description) me.push(`설정: ${clip(p.description, 400)}`);
   // 빼 둔 화제(플레이어가 (-단어)로 정한 것): 원치 않는 전개를 끊는다
   const avoid = ctx.avoid?.length
-    ? `[빼 둔 화제] ${ctx.avoid.map((w) => clip(w, 20)).join(' · ')}\n- 플레이어가 이야기에서 빼 달라고 한 것이다. 이 낱말과 그 소재는 글·답글·쪽지·기사·요약 어디에도 쓰지 않는다. 그 화제는 지나간 일로 두고 전혀 다른 일로 이어 간다.`
+    ? [
+        `[빼 둔 화제] ${ctx.avoid.map((w) => clip(w, 20)).join(' · ')}`,
+        '- 플레이어가 이야기에서 빼 달라고 한 것이다. 이 낱말은 물론 같은 소재(그 음식·그 물건·그 사건·그 농담)도 글·답글·쪽지·기사·이벤트·트렌드·미션·요약 어디에도 쓰지 않는다.',
+        '- 세계관·인물 설정이나 지난 대화에 이 화제가 있었더라도 없던 일처럼 넘어간다. 돌려 말하기·비슷한 말·줄임말로도 꺼내지 않는다.',
+        '- 플레이어가 먼저 꺼내면 한마디로 받고 곧바로 다른 화제로 옮긴다. 이 화제로 일을 키우지 않는다.',
+      ].join('\n')
     : '';
   return [SYSTEM_PROMPT, world.join('\n'), romance, me.join('\n'), avoid].filter(Boolean).join('\n\n');
 }
 
 const join = (...parts: (string | false | undefined | null)[]) => parts.filter(Boolean).join('\n\n');
+
+/** 호출마다 맨 끝에 붙이는 확인 한 줄(빼 둔 화제가 있을 때만) — 엔진이 [할 일] 뒤에 덧붙인다 */
+export function avoidTail(ctx: AIContext | null): string {
+  if (!ctx?.avoid?.length) return '';
+  return `\n\n[마지막 확인] 빼 둔 화제(${ctx.avoid.map((w) => clip(w, 20)).join(' · ')})와 그 소재가 들어간 줄은 쓰지 않는다. 쓴 줄이 있으면 다른 얘기로 바꿔 쓴다.`;
+}
 /** 이번 호출의 AI 조절값(답글·쪽지·새 글 수 …) */
 const tuneOf = (ctx: AIContext): AITune => ctx.tune ?? DEFAULT_TUNE;
 const nameOf = (ctx: AIContext, id: ID) => (id === 'me' ? '플레이어' : (ctx.cast.find((c) => c.id === id)?.name ?? '누군가'));

@@ -3,8 +3,8 @@
  * 이름 없는 일반 유저(GHOST) 글도 post.ghost로 이름·사진을 보여 주고, 숫자는 growFrom이 있으면 자라면서 보인다.
  */
 import { useNavigation } from '@react-navigation/native';
-import { memo, type ReactNode } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { memo, useEffect, useRef, type ReactNode } from 'react';
+import { Animated, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { toggleBookmark, toggleLike, toggleRepost } from '../game/actions';
 import { relativeTime } from '../game/clock';
 import type { RootNav } from '../navigation/types';
@@ -21,9 +21,21 @@ import { Photo } from './Photo';
 import { RichText } from './RichText';
 import { TypingDots } from './TypingDots';
 
-function Action({ icon, count, active, color, onPress, label, grow }: { icon: (col: string) => ReactNode; count?: number; active?: boolean; color: string; onPress?: () => void; label: string; grow?: number }) {
+function Action({ icon, count, active, color, onPress, label, grow, pop }: { icon: (col: string) => ReactNode; count?: number; active?: boolean; color: string; onPress?: () => void; label: string; grow?: number; pop?: boolean }) {
   const { c } = useTheme();
   const col = active ? color : c.subtext;
+  // 눌러서 켜질 때 아이콘이 톡 튄다(마음·재게시·북마크)
+  const scale = useRef(new Animated.Value(1)).current;
+  const was = useRef(active);
+  useEffect(() => {
+    if (pop && active && !was.current) {
+      Animated.sequence([
+        Animated.timing(scale, { toValue: 1.38, duration: 110, useNativeDriver: Platform.OS !== 'web' }),
+        Animated.spring(scale, { toValue: 1, friction: 4, tension: 160, useNativeDriver: Platform.OS !== 'web' }),
+      ]).start();
+    }
+    was.current = active;
+  }, [active]);
   return (
     <Pressable
       accessibilityRole="button"
@@ -32,7 +44,7 @@ function Action({ icon, count, active, color, onPress, label, grow }: { icon: (c
       onPress={onPress}
       style={({ pressed }) => [styles.action, grow ? [styles.actionGrow, { flexGrow: grow }] : null, { opacity: pressed ? 0.6 : 1 }]}
     >
-      {icon(col)}
+      {pop ? <Animated.View style={{ transform: [{ scale }] }}>{icon(col)}</Animated.View> : icon(col)}
       {count !== undefined ? (
         <Text numberOfLines={1} style={{ color: col, fontSize: count > 0 && formatCount(count).length >= 5 ? font.small - 1 : font.small, fontVariant: ['tabular-nums'], flexShrink: 1 }}>
           {count > 0 ? formatCount(count) : ''}
@@ -71,11 +83,11 @@ export function PostActions({ post, onReply }: { post: Post; onReply?: () => voi
       {/* 숫자 칸 4개는 정해진 비율로 나눠 갖는다(글마다 아이콘 줄이 맞고, 숫자가 커져도 옆 아이콘과 겹치지 않게).
           답글 수는 짧고(보통 두 자리) 재게시·마음·조회수는 "21.9만"·"6209만"처럼 다섯 글자까지 길어져 칸을 더 준다 */}
       <Action grow={0.72} label="답글" icon={(col) => <IconComment size={18} color={col} />} count={post.replies.length} color={c.primary} onPress={onReply} />
-      <Action grow={1.04} label="재게시" icon={(col) => <IconRepost size={18} color={col} />} count={g.reposts} active={post.reposted} color={c.repost} onPress={() => toggleRepost(post.id)} />
-      <Action grow={1.06} label="마음에 들어요" icon={(col) => <IconHeart size={18} color={col} fill={post.liked ? c.like : 'transparent'} />} count={g.likes} active={post.liked} color={c.like} onPress={() => toggleLike(post.id)} />
+      <Action pop grow={1.04} label="재게시" icon={(col) => <IconRepost size={18} color={col} />} count={g.reposts} active={post.reposted} color={c.repost} onPress={() => toggleRepost(post.id)} />
+      <Action pop grow={1.06} label="마음에 들어요" icon={(col) => <IconHeart size={18} color={col} fill={post.liked ? c.like : 'transparent'} />} count={g.likes} active={post.liked} color={c.like} onPress={() => toggleLike(post.id)} />
       <Action grow={1.18} label="조회수" icon={(col) => <IconViews size={18} color={col} />} count={g.views} color={c.primary} />
       <View style={{ flexDirection: 'row', gap: 10, flexShrink: 0 }}>
-        <Action label="북마크" icon={(col) => <IconBookmark size={18} color={col} fill={post.bookmarked ? c.primary : 'transparent'} />} active={post.bookmarked} color={c.primary} onPress={() => toggleBookmark(post.id)} />
+        <Action pop label="북마크" icon={(col) => <IconBookmark size={18} color={col} fill={post.bookmarked ? c.primary : 'transparent'} />} active={post.bookmarked} color={c.primary} onPress={() => toggleBookmark(post.id)} />
         <Action label="공유" icon={(col) => <IconShare size={18} color={col} />} color={c.primary} />
       </View>
     </View>

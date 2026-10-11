@@ -78,15 +78,20 @@ export function buildContext(sc: Scenario): AIContext {
     },
     clock: sc.clock,
     cast: chars.map((c): CastInfo => {
-      const msgs = (sc.dms[c.id]?.messages ?? []).filter((m) => m.from !== 'system' && !hit(m.text));
+      // 이 인물이 꺼내지 않는 화제(캐릭터 설정)까지 합쳐서, 그 낱말이 든 소개·특성 문장·쪽지·최근 글은 넘기지 않는다
+      const own = (c.avoid ?? []).filter(Boolean);
+      const all = own.length ? [...avoid, ...own] : avoid;
+      const hitC = (t: string | undefined) => hitsAvoid(all, t);
+      const msgs = (sc.dms[c.id]?.messages ?? []).filter((m) => m.from !== 'system' && !hitC(m.text));
       return {
         id: c.id,
         name: c.name,
         handle: c.handle,
         archetype: c.archetype,
-        bio: c.bio,
-        description: c.description,
-        relations: c.relations,
+        bio: scrubAvoid(all, c.bio),
+        description: scrubAvoid(all, c.description),
+        relations: scrubAvoid(all, c.relations) || undefined,
+        ...(own.length ? { avoid: own } : {}),
         affinity: c.affinity,
         followsMe: c.followsMe,
         iFollow: c.iFollow,
@@ -106,7 +111,7 @@ export function buildContext(sc: Scenario): AIContext {
         personality: c.personality,
         speechStyle: c.speechStyle,
         dmTs: msgs.length ? msgs[msgs.length - 1].ts : 0,
-        recentSaid: recentSaidOf(c.id),
+        recentSaid: own.length ? recentSaidOf(c.id).filter((x) => !hitsAvoid(own, x)) : recentSaidOf(c.id),
       };
     }),
     recent,
@@ -130,6 +135,13 @@ export function buildContext(sc: Scenario): AIContext {
       .reverse()
       .map((p) => p.text),
   };
+}
+
+/** 한 인물과 둘이 하는 일(쪽지)용 맥락: 그 인물이 꺼내지 않는 화제를 빼 둔 화제에 합친다 */
+export function withCharAvoid(ctx: AIContext, characterId: ID): AIContext {
+  const own = ctx.cast.find((c) => c.id === characterId)?.avoid;
+  if (!own?.length) return ctx;
+  return { ...ctx, avoid: [...new Set([...(ctx.avoid ?? []), ...own])] };
 }
 
 /** 빼 둔 화제가 들어 있는 글인지(띄어쓰기·대소문자 무시) */
@@ -251,6 +263,7 @@ export function fullEntry(c: CastInfo, descMax = 160, opts: { said?: boolean } =
   if (desc) lines.push(`  특성: ${desc}`);
   if (c.bio && (c.description ?? '').length < 60) lines.push(`  소개: ${clip(c.bio, 50)}`);
   if (c.relations) lines.push(`  관계: ${clip(c.relations, 60)}`);
+  if (c.avoid?.length) lines.push(`  꺼내지 않는 화제: ${c.avoid.map((w) => clip(w, 20)).join(' · ')} (이 인물은 이 낱말·소재를 절대 말하지 않는다)`);
   if (c.recentDM.length) lines.push(`  둘만의 쪽지: ${c.recentDM.slice(-2).map((m) => clip(m, 45)).join(' / ')}`);
   // 본인이 실제로 쓴 최신 글 한 줄 = 그 인물 말투의 표본(지어낸 예시보다 낫다)
   if (opts.said !== false && c.recentSaid?.length) lines.push(`  최근 글: ${clip(c.recentSaid[c.recentSaid.length - 1], 50)}`);
@@ -261,7 +274,7 @@ export function fullEntry(c: CastInfo, descMax = 160, opts: { said?: boolean } =
 export function briefEntry(c: CastInfo): string {
   const first = sentences(alignRegister((c.description || c.bio || '').replace(/\s+/g, ' ').trim(), c.register))[0] ?? '';
   const trait = clip(first, 40);
-  return `- @${c.handle} ${c.name} | ${kindLabel(c)}·${registerText(c)} | 호감${c.affinity}${c.devotion >= 30 ? ` 정복${c.devotion}` : ''}${c.realPerson || c.ageGroup === 10 ? ' | 연애X' : ''}${trait ? ` | ${trait}` : ''}`;
+  return `- @${c.handle} ${c.name} | ${kindLabel(c)}·${registerText(c)} | 호감${c.affinity}${c.devotion >= 30 ? ` 정복${c.devotion}` : ''}${c.realPerson || c.ageGroup === 10 ? ' | 연애X' : ''}${trait ? ` | ${trait}` : ''}${c.avoid?.length ? ` | 금지 화제: ${c.avoid.map((w) => clip(w, 12)).join('·')}` : ''}`;
 }
 
 // ───────────────────────── 이번 일에 넣을 인물 고르기

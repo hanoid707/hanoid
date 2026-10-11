@@ -6,9 +6,9 @@
  * 그 세계 분위기(군복·축구·네온·회사·여행·인플루언서)와 성별에 맞는 사진을, 한 세계관 안에서 겹치지 않게 골라 준다.
  *  - 결과는 고정 표(같은 입력이면 같은 결과). 사진·인물을 바꾼 뒤 다시 실행한다.
  *  - 뉴스·단체 계정(logo)과 얼굴 없는 일반 유저(반려동물·풍경 사진)는 자기 사진을 그대로 쓴다.
- *  - 예전 프리셋 키(preset__*)도 새 얼굴로 이어 준다(예전 세이브의 직접 만든 캐릭터·내 프로필이 이모지로 떨어지지 않게).
+ *  - 예전 프리셋 키(preset__*)와 풀에서 뺀 얼굴(scripts/faces/removed.json)도 새 얼굴로 이어 준다(예전 세이브의 직접 만든 캐릭터·내 프로필이 이모지로 떨어지지 않게).
  */
-import { writeFileSync } from 'fs';
+import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { FACE_PRESETS } from '../src/data/facePresets';
 import { WORLDS } from '../src/data/worlds';
@@ -100,6 +100,31 @@ const castCount = Object.keys(alias).length;
   }
 }
 
+// 풀에서 뺀 얼굴(안경·골든아워·역광 등)을 쓰던 예전 세이브: 성별·분위기·머리가 비슷한 얼굴로 잇는다
+let removedCount = 0;
+{
+  const file = join(__dirname, 'faces', 'removed.json');
+  const removed: { key: string; gender: 'm' | 'f'; theme: string; hair: string; origin: string }[] = existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : [];
+  const use = new Map<string, number>();
+  for (const r of removed) {
+    if (FACE_PRESETS.some((f) => f.key === r.key)) continue;
+    let best: (typeof FACE_PRESETS)[number] | undefined;
+    let bestCost = Infinity;
+    for (const f of FACE_PRESETS) {
+      if (f.gender !== r.gender) continue;
+      const cost = (f.theme === r.theme ? 0 : f.theme === 'daily' ? 3 : 6) + (f.hair === r.hair ? 0 : 2) + ((f.origin === 'fr') === (r.origin === 'fr') ? 0 : 5) + (use.get(f.key) ?? 0) * 4 + rnd();
+      if (cost < bestCost) {
+        best = f;
+        bestCost = cost;
+      }
+    }
+    if (!best) continue;
+    alias[r.key] = best.key;
+    use.set(best.key, (use.get(best.key) ?? 0) + 1);
+    removedCount++;
+  }
+}
+
 const lines = [
   '/**',
   ' * 얼굴 사진 대신 쓰기 표(자동 생성 — 직접 고치지 말고 scripts/gen_face_alias.ts 실행)',
@@ -114,4 +139,4 @@ const lines = [
 writeFileSync(join(__dirname, '..', 'src', 'data', 'faceAlias.ts'), lines.join('\n'), 'utf8');
 console.log(report.join('\n'));
 const reuse = [...globalUse.values()].filter((n) => n > 1).length;
-console.log(`\n세계관 인물 ${castCount}명 배정 · 예전 프리셋 ${Object.keys(alias).length - castCount}개 연결 · 두 세계관 이상에서 쓰인 얼굴 ${reuse}장`);
+console.log(`\n세계관 인물 ${castCount}명 배정 · 예전 프리셋 ${Object.keys(alias).length - castCount - removedCount}개 · 뺀 얼굴 ${removedCount}개 연결 · 두 세계관 이상에서 쓰인 얼굴 ${reuse}장`);

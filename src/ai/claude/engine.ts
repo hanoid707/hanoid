@@ -69,7 +69,7 @@ export function createClaudeEngine(settings: AISettings): AIEngine {
     const sample = await getSample();
     if (!sample) throw new ClaudeError('이 화면에서는 클로드를 쓸 수 없어요', 'unavailable', true);
     const tier = tierFor(kind);
-    const input = wellFormed(`${ctx ? P.systemFor(ctx) : P.LITE_SYSTEM}\n\n${prompt}\n\n[응답 형식]\n아래 모양의 JSON 값 하나만 출력한다(설명·코드펜스 없이). 글자 값은 자리일 뿐이니 새로 쓰고, <…> 자리는 [할 일]의 범위 안 정수로 바꿔 쓴다.\n${shape}`);
+    const input = wellFormed(`${ctx ? P.systemFor(ctx) : P.LITE_SYSTEM}\n\n${prompt}${P.avoidTail(ctx)}\n\n[응답 형식]\n아래 모양의 JSON 값 하나만 출력한다(설명·코드펜스 없이). 글자 값은 자리일 뿐이니 새로 쓰고, <…> 자리는 [할 일]의 범위 안 정수로 바꿔 쓴다.\n${shape}`);
     const t0 = Date.now();
     const usage = (ok: boolean, out: number) =>
       recordUsage({ provider: 'claude', model: `claude-${tier}`, kind, inTok: estTokens(input.length), outTok: out, ms: Date.now() - t0, ok, via: 'sample', estimated: true });

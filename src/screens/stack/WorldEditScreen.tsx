@@ -15,6 +15,7 @@ import { Screen, TopBar } from '../../components/Screen';
 import { StatSlider } from '../../components/StatSlider';
 import { Button, Chip, Field, Segmented } from '../../components/ui';
 import { saveCharacter, savePersona, saveWorld } from '../../game/actions';
+import { setAvoidWords, splitAvoid } from '../../game/avoid';
 import { AGE_GROUPS, CORE_TYPES, CROWD_TYPES, typeDefaults, typeLabel } from '../../game/relationship';
 import type { RootNav } from '../../navigation/types';
 import { useActive, useGame } from '../../store/game';
@@ -67,8 +68,10 @@ function WorldForm() {
   const [tone, setTone] = useState(w.tone);
   const [tag, setTag] = useState(w.tag);
   const [vocab, setVocab] = useState(w.vocab.join(', '));
+  const [avoid, setAvoid] = useState((sc.avoid ?? []).join(', '));
   const save = () => {
     saveWorld({ name, emoji, tagline, setting, tone, tag, vocab: vocab.split(/[,\n]/) });
+    setAvoidWords(splitAvoid(avoid));
     showToast('세계관 설정을 저장했어요 — 다음 반응부터 AI가 바로 반영해요', 'success');
   };
   return (
@@ -86,6 +89,17 @@ function WorldForm() {
       <Field label="분위기" value={tone} onChangeText={setTone} maxLength={300} />
       <Field label="대표 해시태그" value={tag} onChangeText={setTag} maxLength={30} />
       <Field label="자주 쓰는 말(쉼표로 구분)" value={vocab} onChangeText={setVocab} multiline style={{ minHeight: 80 }} />
+      <Field
+        testID="world-avoid"
+        label="빼 둘 화제(쉼표로 구분)"
+        hint="여기 적은 낱말·소재는 이 세계관의 글·답글·쪽지·이벤트·트렌드·요약에서 빠져요. 글에 (-낱말)로 써도 같아요"
+        value={avoid}
+        onChangeText={setAvoid}
+        placeholder="예) 떡볶이, 전 여친"
+        multiline
+        style={{ minHeight: 60 }}
+        maxLength={300}
+      />
       <Button title="세계관 저장" variant="ink" onPress={save} disabled={!name.trim() || !setting.trim()} />
     </>
   );
@@ -133,6 +147,7 @@ function CharacterCard({ ch, open, onToggle }: { ch: Character; open: boolean; o
   const [bio, setBio] = useState(ch.bio);
   const [desc, setDesc] = useState(ch.description);
   const [relations, setRelations] = useState(ch.relations ?? '');
+  const [avoid, setAvoid] = useState((ch.avoid ?? []).join(', '));
   const [aff, setAff] = useState(ch.affinity);
   const [rom, setRom] = useState(ch.romance ?? 0);
   const [dev, setDev] = useState(ch.devotion ?? 0);
@@ -164,6 +179,7 @@ function CharacterCard({ ch, open, onToggle }: { ch: Character; open: boolean; o
         ageGroup,
         personality: ch.personality,
         speechStyle: ch.speechStyle,
+        avoid: splitAvoid(avoid).slice(0, 12),
         stats: { affinity: aff, romance: rom, devotion: dev },
       },
       ch.id,
@@ -214,6 +230,7 @@ function CharacterCard({ ch, open, onToggle }: { ch: Character; open: boolean; o
           <Field label="자기소개" value={bio} onChangeText={setBio} multiline maxLength={160} counter />
           <Field label="특징(AI가 가장 먼저 읽는 설정)" value={desc} onChangeText={setDesc} multiline numberOfLines={8} style={{ minHeight: 180 }} maxLength={800} counter />
           <Field label="다른 인물과의 관계" value={relations} onChangeText={setRelations} multiline style={{ minHeight: 80 }} maxLength={400} />
+          <Field label="꺼내지 않을 화제(쉼표로 구분)" hint="이 인물은 여기 적은 낱말·소재를 글·답글·쪽지에서 말하지 않아요" value={avoid} onChangeText={setAvoid} placeholder="예) 떡볶이" maxLength={200} />
           <StatSlider label="호감도" value={aff} min={-100} max={100} color={c.success} onChange={setAff} />
           <StatSlider label="설렘" value={rom} min={0} max={100} color={c.like} onChange={setRom} disabled={!!ch.rosterId || ch.relationBase === 'family'} hint={ch.rosterId ? '공통 캐릭터(실존 인물일 수 있음)는 설렘을 쓰지 않아요' : undefined} />
           <StatSlider label="정복도" value={dev} min={0} max={100} color={c.aura} onChange={setDev} />

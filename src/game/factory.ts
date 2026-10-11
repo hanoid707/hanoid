@@ -4,6 +4,7 @@
  *        첫 팔로워의 첫 쪽지와 직접 만든 세계관의 첫 타임라인은 시작 직후 AI가 쓴다(characters.ts onScenarioCreated).
  *        기본 세계관의 지난 글·첫 이벤트는 세계관 파일에 인물별로 직접 쓴 설정 그대로(맥락이 정해져 있음).
  */
+import { separateFromPlayer } from './lookalike';
 import { peerRegisterHint } from '../ai/local/register';
 import type { CastDraft } from '../ai/types';
 import { ARCHETYPE_DEFAULTS, AVATAR_COLORS, AVATAR_EMOJIS } from '../data/avatars';
@@ -373,6 +374,8 @@ export function createScenario(input: NewScenarioInput): Scenario {
     d.events.push({ id: uid('ev'), emoji, title, body, choices, involved, ...(templateKey ? { templateKey } : {}), at: { ...d.clock }, status: 'pending' });
     pushNoti(d, { type: 'event', eventId: d.events[0].id, text: `새 이벤트: ${title}` });
   }
+  // 플레이어와 이름·아이디·프사가 겹치는 계정이 없게(game/lookalike.ts)
+  separateFromPlayer(d);
   logActivity(d, '🎬', `${world.name}에서 새 이야기를 시작했어요`);
   return sc;
 }

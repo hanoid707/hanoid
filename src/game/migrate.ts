@@ -7,6 +7,7 @@
  * - v3.4: 등장인물(핵심 인물)은 반드시 사람 얼굴 사진 — 사진 없이 이모지만 쓰던 사람에게 성별·나이대에 맞는 프리셋 얼굴을 준다
  * 받은 객체(JSON에서 막 읽은 것)를 직접 고친다.
  */
+import { separateFromPlayer } from './lookalike';
 import { pickFace, resolveFace, themeOfWorld, usedFaceKeys } from '../data/facePool';
 import { AVATARS } from '../data/photos';
 import { findSeed } from '../data/worlds';
@@ -62,6 +63,8 @@ export function migrateScenarioData(raw: Scenario): Scenario {
     initRelation(c, day);
   }
   ensureFaces(sc);
+  // 플레이어와 헷갈리는 계정(같은·비슷한 이름, 같은 프사)이 남아 있지 않게
+  if (sc.persona && sc.posts) separateFromPlayer(sc);
   // v3 기본값
   if (!sc.difficulty) sc.difficulty = 'normal';
   // v3.3: 연애 수위 이름 변경(normal→racy, spicy→erotic). 모르는 값은 기본(보통)으로

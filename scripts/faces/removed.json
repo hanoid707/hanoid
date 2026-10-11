@@ -1,0 +1,1066 @@
+[
+{
+"key": "face__g001_tl",
+"gender": "f",
+"theme": "military",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g001_tr",
+"gender": "f",
+"theme": "military",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g002_tr",
+"gender": "f",
+"theme": "military",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g003_tr",
+"gender": "f",
+"theme": "military",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g004_bl",
+"gender": "f",
+"theme": "military",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g004_br",
+"gender": "f",
+"theme": "military",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g004_tr",
+"gender": "f",
+"theme": "military",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g006_tr",
+"gender": "f",
+"theme": "military",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g007_bl",
+"gender": "f",
+"theme": "military",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g007_tr",
+"gender": "f",
+"theme": "military",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g008_tr",
+"gender": "f",
+"theme": "military",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g009_bl",
+"gender": "f",
+"theme": "military",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g009_br",
+"gender": "f",
+"theme": "military",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g009_tl",
+"gender": "f",
+"theme": "military",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g009_tr",
+"gender": "f",
+"theme": "military",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g010_tr",
+"gender": "f",
+"theme": "military",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g011_tr",
+"gender": "f",
+"theme": "military",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g012_tr",
+"gender": "f",
+"theme": "military",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g013_tr",
+"gender": "f",
+"theme": "football",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g014_tr",
+"gender": "f",
+"theme": "football",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g016_tr",
+"gender": "f",
+"theme": "football",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g017_tr",
+"gender": "f",
+"theme": "football",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g018_tr",
+"gender": "f",
+"theme": "football",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g019_tr",
+"gender": "f",
+"theme": "football",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g021_bl",
+"gender": "f",
+"theme": "cyberpunk",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g021_br",
+"gender": "f",
+"theme": "cyberpunk",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g021_tl",
+"gender": "f",
+"theme": "cyberpunk",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g021_tr",
+"gender": "f",
+"theme": "cyberpunk",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g022_bl",
+"gender": "f",
+"theme": "cyberpunk",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g022_br",
+"gender": "f",
+"theme": "cyberpunk",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g022_tr",
+"gender": "f",
+"theme": "cyberpunk",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g023_bl",
+"gender": "f",
+"theme": "cyberpunk",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g023_br",
+"gender": "f",
+"theme": "cyberpunk",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g023_tl",
+"gender": "f",
+"theme": "cyberpunk",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g023_tr",
+"gender": "f",
+"theme": "cyberpunk",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g024_bl",
+"gender": "f",
+"theme": "cyberpunk",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g024_br",
+"gender": "f",
+"theme": "cyberpunk",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g024_tl",
+"gender": "f",
+"theme": "cyberpunk",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g024_tr",
+"gender": "f",
+"theme": "cyberpunk",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g025_bl",
+"gender": "f",
+"theme": "cyberpunk",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g025_tl",
+"gender": "f",
+"theme": "cyberpunk",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g026_tr",
+"gender": "f",
+"theme": "cyberpunk",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g027_bl",
+"gender": "f",
+"theme": "cyberpunk",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g027_br",
+"gender": "f",
+"theme": "cyberpunk",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g027_tl",
+"gender": "f",
+"theme": "cyberpunk",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g027_tr",
+"gender": "f",
+"theme": "cyberpunk",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g028_tr",
+"gender": "f",
+"theme": "cyberpunk",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g029_tr",
+"gender": "f",
+"theme": "cyberpunk",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g031_bl",
+"gender": "f",
+"theme": "office",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g032_tr",
+"gender": "f",
+"theme": "office",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g033_bl",
+"gender": "f",
+"theme": "office",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g034_tr",
+"gender": "f",
+"theme": "office",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g036_tr",
+"gender": "f",
+"theme": "office",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g037_tr",
+"gender": "f",
+"theme": "office",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g038_tr",
+"gender": "f",
+"theme": "office",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g039_tr",
+"gender": "f",
+"theme": "office",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g041_tr",
+"gender": "f",
+"theme": "travel",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g042_bl",
+"gender": "f",
+"theme": "travel",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g042_br",
+"gender": "f",
+"theme": "travel",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g042_tr",
+"gender": "f",
+"theme": "travel",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g043_tr",
+"gender": "f",
+"theme": "travel",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g044_bl",
+"gender": "f",
+"theme": "travel",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g044_tl",
+"gender": "f",
+"theme": "travel",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g044_tr",
+"gender": "f",
+"theme": "travel",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g046_br",
+"gender": "f",
+"theme": "travel",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g046_tr",
+"gender": "f",
+"theme": "travel",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g047_bl",
+"gender": "f",
+"theme": "travel",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g047_br",
+"gender": "f",
+"theme": "travel",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g047_tl",
+"gender": "f",
+"theme": "travel",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g047_tr",
+"gender": "f",
+"theme": "travel",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g048_bl",
+"gender": "f",
+"theme": "influencer",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g048_br",
+"gender": "f",
+"theme": "influencer",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g048_tr",
+"gender": "f",
+"theme": "influencer",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g049_bl",
+"gender": "f",
+"theme": "influencer",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g049_tr",
+"gender": "f",
+"theme": "influencer",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g050_bl",
+"gender": "f",
+"theme": "influencer",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g050_br",
+"gender": "f",
+"theme": "influencer",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g050_tl",
+"gender": "f",
+"theme": "influencer",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g050_tr",
+"gender": "f",
+"theme": "influencer",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g051_tr",
+"gender": "f",
+"theme": "influencer",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g052_tr",
+"gender": "f",
+"theme": "influencer",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g053_tr",
+"gender": "f",
+"theme": "influencer",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g054_tr",
+"gender": "f",
+"theme": "influencer",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g055_tr",
+"gender": "f",
+"theme": "influencer",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g056_tr",
+"gender": "f",
+"theme": "daily",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g057_tr",
+"gender": "f",
+"theme": "daily",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g058_tr",
+"gender": "f",
+"theme": "daily",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g059_bl",
+"gender": "f",
+"theme": "daily",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g059_br",
+"gender": "f",
+"theme": "daily",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g059_tr",
+"gender": "f",
+"theme": "daily",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g060_br",
+"gender": "f",
+"theme": "daily",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g061_bl",
+"gender": "f",
+"theme": "daily",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g061_tr",
+"gender": "f",
+"theme": "daily",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g062_br",
+"gender": "f",
+"theme": "daily",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g062_tr",
+"gender": "f",
+"theme": "daily",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g063_tr",
+"gender": "f",
+"theme": "daily",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g064_bl",
+"gender": "f",
+"theme": "daily",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g064_br",
+"gender": "f",
+"theme": "daily",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g064_tr",
+"gender": "f",
+"theme": "daily",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g065_tr",
+"gender": "f",
+"theme": "daily",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g066_br",
+"gender": "f",
+"theme": "daily",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g066_tr",
+"gender": "f",
+"theme": "daily",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g067_bl",
+"gender": "f",
+"theme": "daily",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g067_tr",
+"gender": "f",
+"theme": "daily",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g068_br",
+"gender": "f",
+"theme": "daily",
+"hair": "long",
+"origin": "fr"
+},
+{
+"key": "face__g068_tr",
+"gender": "f",
+"theme": "daily",
+"hair": "long",
+"origin": "fr"
+},
+{
+"key": "face__g069_bl",
+"gender": "f",
+"theme": "daily",
+"hair": "short",
+"origin": "fr"
+},
+{
+"key": "face__g070_br",
+"gender": "f",
+"theme": "daily",
+"hair": "long",
+"origin": "fr"
+},
+{
+"key": "face__g070_tr",
+"gender": "f",
+"theme": "daily",
+"hair": "long",
+"origin": "fr"
+},
+{
+"key": "face__g071_bl",
+"gender": "f",
+"theme": "daily",
+"hair": "long",
+"origin": "fr"
+},
+{
+"key": "face__g071_br",
+"gender": "f",
+"theme": "daily",
+"hair": "long",
+"origin": "fr"
+},
+{
+"key": "face__g071_tr",
+"gender": "f",
+"theme": "daily",
+"hair": "long",
+"origin": "fr"
+},
+{
+"key": "face__g072_tr",
+"gender": "f",
+"theme": "daily",
+"hair": "short",
+"origin": "fr"
+},
+{
+"key": "face__g073_br",
+"gender": "f",
+"theme": "influencer",
+"hair": "long",
+"origin": "fr"
+},
+{
+"key": "face__g073_tr",
+"gender": "f",
+"theme": "influencer",
+"hair": "long",
+"origin": "fr"
+},
+{
+"key": "face__g074_bl",
+"gender": "f",
+"theme": "influencer",
+"hair": "short",
+"origin": "fr"
+},
+{
+"key": "face__g074_br",
+"gender": "f",
+"theme": "influencer",
+"hair": "short",
+"origin": "fr"
+},
+{
+"key": "face__g074_tl",
+"gender": "f",
+"theme": "influencer",
+"hair": "short",
+"origin": "fr"
+},
+{
+"key": "face__g074_tr",
+"gender": "f",
+"theme": "influencer",
+"hair": "short",
+"origin": "fr"
+},
+{
+"key": "face__g075_bl",
+"gender": "f",
+"theme": "influencer",
+"hair": "long",
+"origin": "fr"
+},
+{
+"key": "face__g075_br",
+"gender": "f",
+"theme": "influencer",
+"hair": "long",
+"origin": "fr"
+},
+{
+"key": "face__g075_tr",
+"gender": "f",
+"theme": "influencer",
+"hair": "long",
+"origin": "fr"
+},
+{
+"key": "face__g076_bl",
+"gender": "f",
+"theme": "travel",
+"hair": "long",
+"origin": "fr"
+},
+{
+"key": "face__g076_tr",
+"gender": "f",
+"theme": "travel",
+"hair": "long",
+"origin": "fr"
+},
+{
+"key": "face__g077_bl",
+"gender": "f",
+"theme": "travel",
+"hair": "short",
+"origin": "fr"
+},
+{
+"key": "face__g077_br",
+"gender": "f",
+"theme": "travel",
+"hair": "short",
+"origin": "fr"
+},
+{
+"key": "face__g077_tl",
+"gender": "f",
+"theme": "travel",
+"hair": "short",
+"origin": "fr"
+},
+{
+"key": "face__g077_tr",
+"gender": "f",
+"theme": "travel",
+"hair": "short",
+"origin": "fr"
+},
+{
+"key": "face__g078_br",
+"gender": "f",
+"theme": "travel",
+"hair": "long",
+"origin": "fr"
+},
+{
+"key": "face__g078_tr",
+"gender": "f",
+"theme": "travel",
+"hair": "long",
+"origin": "fr"
+},
+{
+"key": "face__g079_bl",
+"gender": "f",
+"theme": "cyberpunk",
+"hair": "long",
+"origin": "fr"
+},
+{
+"key": "face__g079_br",
+"gender": "f",
+"theme": "cyberpunk",
+"hair": "long",
+"origin": "fr"
+},
+{
+"key": "face__g079_tl",
+"gender": "f",
+"theme": "cyberpunk",
+"hair": "long",
+"origin": "fr"
+},
+{
+"key": "face__g079_tr",
+"gender": "f",
+"theme": "cyberpunk",
+"hair": "long",
+"origin": "fr"
+},
+{
+"key": "face__g080_bl",
+"gender": "f",
+"theme": "cyberpunk",
+"hair": "short",
+"origin": "fr"
+},
+{
+"key": "face__g080_br",
+"gender": "f",
+"theme": "cyberpunk",
+"hair": "short",
+"origin": "fr"
+},
+{
+"key": "face__g081_bl",
+"gender": "f",
+"theme": "office",
+"hair": "long",
+"origin": "fr"
+},
+{
+"key": "face__g081_br",
+"gender": "f",
+"theme": "office",
+"hair": "long",
+"origin": "fr"
+},
+{
+"key": "face__g081_tr",
+"gender": "f",
+"theme": "office",
+"hair": "long",
+"origin": "fr"
+},
+{
+"key": "face__g082_tr",
+"gender": "m",
+"theme": "daily",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g083_tr",
+"gender": "m",
+"theme": "daily",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g084_tr",
+"gender": "m",
+"theme": "daily",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g085_tr",
+"gender": "m",
+"theme": "daily",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g086_tr",
+"gender": "m",
+"theme": "football",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g087_tr",
+"gender": "m",
+"theme": "football",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g088_br",
+"gender": "m",
+"theme": "military",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g088_tl",
+"gender": "m",
+"theme": "military",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g088_tr",
+"gender": "m",
+"theme": "military",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g089_br",
+"gender": "m",
+"theme": "cyberpunk",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g089_tr",
+"gender": "m",
+"theme": "cyberpunk",
+"hair": "short",
+"origin": "kr"
+},
+{
+"key": "face__g091_tr",
+"gender": "f",
+"theme": "office",
+"hair": "long",
+"origin": "kr"
+},
+{
+"key": "face__g093_br",
+"gender": "f",
+"theme": "daily",
+"hair": "long",
+"origin": "fr"
+}
+]

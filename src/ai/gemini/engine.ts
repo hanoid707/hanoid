@@ -35,7 +35,7 @@ const MAX_OUT = {
 export function createGeminiEngine(settings: AISettings, opts: { via?: GeminiVia } = {}): AIEngine {
   const model = settings.model?.trim() || DEFAULT_GEMINI_MODEL;
   const call = (ctx: AIContext | null, prompt: string, schema: object, kind: string, maxOutputTokens: number, temperature?: number) =>
-    generateJSON<Raw>({ apiKey: settings.apiKey, model, system: ctx ? P.systemFor(ctx) : P.LITE_SYSTEM, prompt, schema, temperature, maxOutputTokens, kind, via: opts.via });
+    generateJSON<Raw>({ apiKey: settings.apiKey, model, system: ctx ? P.systemFor(ctx) : P.LITE_SYSTEM, prompt: prompt + P.avoidTail(ctx), schema, temperature, maxOutputTokens, kind, via: opts.via });
 
   return {
     id: 'gemini',

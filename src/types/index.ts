@@ -103,6 +103,8 @@ export interface Character {
   description: string;
   /** 다른 인물·플레이어와의 관계 */
   relations?: string;
+  /** 이 인물이 꺼내지 않는 화제(캐릭터 설정에서 정함). 이 인물의 글·답글·쪽지에서 그 낱말·소재를 뺀다 */
+  avoid?: string[];
   archetype: Archetype;
   /** 인증 배지(없으면 배지 없음) */
   badge?: BadgeKind | null;

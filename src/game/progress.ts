@@ -3,6 +3,7 @@
  * 모든 함수는 immer 초안(draft)을 직접 고친다. AI가 준 숫자도 여기서 범위를 잘라낸 뒤 적용한다.
  * 호감도·설렘은 반드시 applyAffinity(→ relationship.changeAffinity)로 바꾼다(관계·말투 자동 변화 + 알림·기억).
  */
+import { safeGhost } from './lookalike';
 import { GHOST, ME, SYSTEM, type Character, type CharacterType, type Deltas, type GameTime, type GhostAuthor, type ID, type ItemKind, type Noti, type Post, type QuestGoal, type RelationChange, type Scenario, type SpeechRegister } from '../types';
 import { clamp, fill, rand, snippet, uid } from '../utils';
 import { advanceClock } from './clock';
@@ -71,7 +72,8 @@ export function addPost(d: Scenario, p: Pick<Post, 'authorId' | 'text' | 'kind'>
     media: p.media,
   };
   if (p.at) post.at = { ...p.at };
-  if (p.ghost) post.ghost = p.ghost;
+  // 임시 계정이 플레이어와 헷갈리는 이름·프사면 다른 사람으로(game/lookalike.ts)
+  if (p.ghost) post.ghost = safeGhost(d, p.ghost, post.id);
   if (p.growFrom) post.growFrom = p.growFrom;
   if (p.boosted) post.boosted = true;
   d.posts[post.id] = post;

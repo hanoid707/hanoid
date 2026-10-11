@@ -3,12 +3,12 @@ import { useNavigation, useScrollToTop } from '@react-navigation/native';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ClockChip, EventCard, StatusBanner } from '../../components/Hud';
+import { ClockChip, EventCard, FeedSkeleton, StatusBanner } from '../../components/Hud';
 import { IconChevronRight, IconPlus } from '../../components/icons';
 import { PostCard } from '../../components/PostCard';
 import { SaveSwitcher } from '../../components/SaveList';
 import { Screen } from '../../components/Screen';
-import { EmptyState } from '../../components/ui';
+import { AppearIn, EmptyState } from '../../components/ui';
 import { refreshFeed } from '../../game/actions';
 import type { RootNav } from '../../navigation/types';
 import { useActive } from '../../store/game';
@@ -68,13 +68,19 @@ export function HomeScreen() {
         ref={listRef}
         data={posts}
         keyExtractor={(p) => p.id}
-        renderItem={({ item }) => <PostCard post={item} sc={sc} />}
+        renderItem={({ item }) => (
+          // 방금 올라온 글은 살짝 떠오르며 나타난다(처음부터 있던 글은 그대로)
+          <AppearIn animate={Date.now() - (item.ts ?? 0) < 2500} from={14}>
+            <PostCard post={item} sc={sc} />
+          </AppearIn>
+        )}
         ListHeaderComponent={
           <View>
             <StatusBanner sc={sc} />
             {pending.map((ev) => (
               <EventCard key={ev.id} ev={ev} />
             ))}
+            <FeedSkeleton sid={sc.id} />
           </View>
         }
         ListEmptyComponent={<EmptyState title="아직 조용하네요" desc="첫 글을 올려서 세계를 깨워보세요." />}

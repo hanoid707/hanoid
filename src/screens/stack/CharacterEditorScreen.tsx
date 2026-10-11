@@ -6,6 +6,7 @@
  *   고치기: 같은 칸 + 이름·아이디·자기소개("AI로 다시 쓰기") · 지금 관계·말투 · 삭제
  * 위치 칸은 없앴다. 관계·말투는 호감도·설렘으로 자동으로 바뀌고, 원하면 고정할 수 있다.
  */
+import { splitAvoid } from '../../game/avoid';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import { useMemo, useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
@@ -100,6 +101,7 @@ export function CharacterEditorScreen() {
   const [banner, setBanner] = useState<PhotoRef | undefined>(editing?.banner);
   const [badge, setBadge] = useState<BadgeChoice>(editing ? (badgeOf(editing) ?? 'none') : 'auto');
   const [relations, setRelations] = useState(editing?.relations ?? '');
+  const [avoidText, setAvoidText] = useState((editing?.avoid ?? []).join(', '));
   const [register, setRegister] = useState<SpeechRegister | 'auto'>(editing?.registerOverride ?? 'auto');
   const [relationLocked, setRelationLocked] = useState(!!editing?.relationLocked);
   const [followsMe, setFollowsMe] = useState(editing?.followsMe ?? true);
@@ -153,6 +155,7 @@ export function CharacterEditorScreen() {
         banner,
         badge: badgeValue,
         relations: relations.trim() || undefined,
+        avoid: splitAvoid(avoidText).slice(0, 12),
         registerOverride: register === 'auto' ? null : register,
         relationLocked,
       });
@@ -191,6 +194,7 @@ export function CharacterEditorScreen() {
         ageGroup: editing.ageGroup || ageTouched ? ageGroup : undefined,
         personality,
         speechStyle,
+        avoid: splitAvoid(avoidText).slice(0, 12),
         registerOverride: register === 'auto' ? null : register,
         relationLocked,
         stats:
@@ -404,6 +408,15 @@ export function CharacterEditorScreen() {
         </View>
       </View>
       <Field label="관계 메모(다른 인물·나와의 사이)" value={relations} onChangeText={setRelations} multiline maxLength={300} counter placeholder="예) 나와 같은 날 입사한 동기. 강해솔 팀장을 어려워함." />
+      <Field
+        testID="char-avoid"
+        label="꺼내지 않을 화제(쉼표로 구분)"
+        hint="이 인물은 여기 적은 낱말·소재를 글·답글·쪽지에서 말하지 않아요. 세계관 전체에서 빼려면 세계관 설정의 '빼 둘 화제'에 적어요"
+        value={avoidText}
+        onChangeText={setAvoidText}
+        placeholder="예) 떡볶이, 전 남친"
+        maxLength={200}
+      />
       <View style={{ gap: 8 }}>
         <FormLabel hint="자동 = 관계·호감도에 맞춰 바뀜">말투 고정</FormLabel>
         <View style={styles.wrap}>

@@ -217,7 +217,15 @@ export async function refreshFeed(): Promise<void> {
   const flow = beginFlow(sid);
   const ctx = ctxOf(sid);
   if (!ctx) return;
-  const lines = await engine().ambientPosts(ctx, count);
+  // 불러오는 동안 화면에 표시(진행 중 칩 · 타임라인 뼈대)
+  const key = `refresh:${sid}`;
+  G().setBusy(key, true);
+  let lines: Awaited<ReturnType<ReturnType<typeof engine>['ambientPosts']>>;
+  try {
+    lines = await engine().ambientPosts(ctx, count);
+  } finally {
+    G().setBusy(key, false);
+  }
   if (!lines?.length || !alive(flow)) return;
   let days = 0;
   G().edit(sid, (d) => {

@@ -58,6 +58,8 @@ export interface CastInfo {
   /** 사용자가 직접 입력한 성격·특성·행동 규칙 */
   description: string;
   relations?: string;
+  /** 이 인물이 꺼내지 않는 화제 */
+  avoid?: string[];
   affinity: number;
   followsMe: boolean;
   iFollow: boolean;

@@ -1,7 +1,7 @@
 /**
  * 사진 프리셋 고르기 — 미리 넣어 둔 가상 인물 사진(data/facePresets, 전원 20대) 중에서 프로필 사진을 고른다.
  * 캐릭터 만들기·캐릭터 설정·내 계정 만들기·프로필 수정이 같이 쓴다. 직접 찍은 사진·이모지 대신 고르는 "기본값".
- *   거르기: 성별(전체/여성/남성) · 머리(장발/단발) · 분위기(일상·회사·군복·축구·네온·여행·인플루언서·외국인)
+ *   거르기: 성별(전체/여성/남성) · 머리(장발/단발) · 분위기(셀카·일상·회사·군복·축구·네온·여행·인플루언서·외국인)
  *   gender : (선택) 처음 보여 줄 성별. 안 주면 전체
  *   exclude: 이 세계에서 이미 다른 인물이 쓰는 사진(목록에서 뺀다)
  */
@@ -15,10 +15,13 @@ import type { Gender } from '../types';
 import { Chip, FormLabel } from './ui';
 
 type GenderFilter = 'all' | Gender;
-type Mood = 'all' | FaceTheme | 'foreign';
+type Mood = 'all' | FaceTheme | 'foreign' | 'selfie';
 const SIZE = 54;
+/** 지금 고른 사진은 조금 크게(잘 보이게, 줄 높이는 크게 안 흔들리게) */
+const SIZE_ON = 76;
 const MOODS: { key: Mood; label: string }[] = [
   { key: 'all', label: '전체' },
+  { key: 'selfie', label: '셀카' },
   { key: 'daily', label: '일상' },
   { key: 'office', label: '회사' },
   { key: 'military', label: '군복' },
@@ -48,7 +51,7 @@ export function FacePicker({ value, onPick, gender, exclude, label = '사진 프
             f.key === cur ||
             ((filter === 'all' || f.gender === filter) &&
               (hair === 'all' || f.hair === hair) &&
-              (mood === 'all' || (mood === 'foreign' ? f.origin === 'fr' : f.theme === mood)) &&
+              (mood === 'all' || (mood === 'foreign' ? f.origin === 'fr' : mood === 'selfie' ? !!f.selfie : f.theme === mood)) &&
               !exclude?.has(f.key)),
         )
         // 지금 고른 사진을 맨 앞에, 나머지는 목록 순서(분위기별로 섞여 있음)
@@ -74,9 +77,10 @@ export function FacePicker({ value, onPick, gender, exclude, label = '사진 프
         ))}
       </ScrollView>
       {list.length ? (
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingVertical: 2 }}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingVertical: 2, alignItems: 'center', minHeight: SIZE_ON + 10 }}>
           {list.map((f) => {
             const on = f.key === cur;
+            const size = on ? SIZE_ON : SIZE;
             return (
               <Pressable
                 key={f.key}
@@ -85,9 +89,9 @@ export function FacePicker({ value, onPick, gender, exclude, label = '사진 프
                 accessibilityRole="button"
                 accessibilityLabel={`${f.gender === 'f' ? '여성' : '남성'} ${f.hair === 'long' ? '장발' : '단발'} 사진 고르기`}
                 accessibilityState={{ selected: on }}
-                style={[styles.cell, { borderColor: on ? c.primary : 'transparent' }]}
+                style={[styles.cell, { width: size + 6, height: size + 6, borderRadius: (size + 6) / 2, borderColor: on ? c.primary : 'transparent' }]}
               >
-                <Image source={{ uri: AVATARS[f.key] }} style={styles.img} />
+                <Image source={{ uri: AVATARS[f.key] }} style={{ width: size, height: size, borderRadius: size / 2 }} />
               </Pressable>
             );
           })}
@@ -103,6 +107,5 @@ export function FacePicker({ value, onPick, gender, exclude, label = '사진 프
 const styles = StyleSheet.create({
   chips: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 6 },
   sep: { width: StyleSheet.hairlineWidth, height: 18, marginHorizontal: 2 },
-  cell: { width: SIZE + 6, height: SIZE + 6, borderRadius: (SIZE + 6) / 2, borderWidth: 3, alignItems: 'center', justifyContent: 'center' },
-  img: { width: SIZE, height: SIZE, borderRadius: SIZE / 2 },
+  cell: { borderWidth: 3, alignItems: 'center', justifyContent: 'center' },
 });

@@ -1,4 +1,5 @@
 /** 설정 — 세이브(세계관) 관리, AI 연결, DB 동기화, 화면, 공부용 도구 ((v3) 하루 건너뛰기는 아이템 화면으로 옮김) */
+import { BUILD } from '../../version';
 import { useNavigation } from '@react-navigation/native';
 import { ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { engineLabel } from '../../ai';
@@ -93,8 +94,8 @@ export function SettingsScreen() {
           </>
         )}
 
-        <Text style={{ color: c.subtext, fontSize: font.small, textAlign: 'center', lineHeight: 18, marginTop: 32 }}>
-          Xsta 3.1 · 앱공부 동아리용 클론{'\n'}React Native + Expo · 기기 저장 + Supabase 동기화
+        <Text testID="build-stamp" style={{ color: c.subtext, fontSize: font.small, textAlign: 'center', lineHeight: 18, marginTop: 32 }}>
+          Xsta 3.1 · 빌드 {BUILD}{'\n'}앱공부 동아리용 클론 · React Native + Expo · 기기 저장 + Supabase 동기화
         </Text>
       </ScrollView>
     </Screen>
