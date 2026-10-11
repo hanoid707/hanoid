@@ -71,7 +71,7 @@ export function createGeminiEngine(settings: AISettings, opts: { via?: GeminiVia
     },
 
     async worldTick(ctx, { day, returned }) {
-      return N.normTick(ctx, await call(ctx, P.tickPrompt(ctx, day, returned), S.tickSchema(ctx.tune ?? DEFAULT_TUNE, returned?.length ?? 0, ctx.heartAsk?.length ?? 0), 'tick', MAX_OUT.tick + (ctx.heartAsk?.length ?? 0) * 60 + 60));
+      return N.normTick(ctx, await call(ctx, P.tickPrompt(ctx, day, returned), S.tickSchema(ctx.tune ?? DEFAULT_TUNE, returned?.length ?? 0, Math.min(ctx.heartAsk?.length ?? 0, (ctx.tune ?? DEFAULT_TUNE).dayHearts)), 'tick', MAX_OUT.tick + Math.min(ctx.heartAsk?.length ?? 0, (ctx.tune ?? DEFAULT_TUNE).dayHearts) * 60 + 60));
     },
 
     async resolveEvent(ctx, { event, choiceId, customText }) {

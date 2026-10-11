@@ -114,7 +114,7 @@ export function createClaudeEngine(settings: AISettings): AIEngine {
     },
 
     async worldTick(ctx, { day, returned }) {
-      return N.normTick(ctx, await call(ctx, P.tickPrompt(ctx, day, returned), P.tickShape(ctx.tune ?? DEFAULT_TUNE, returned?.length ?? 0, ctx.heartAsk?.length ?? 0), 'tick'));
+      return N.normTick(ctx, await call(ctx, P.tickPrompt(ctx, day, returned), P.tickShape(ctx.tune ?? DEFAULT_TUNE, returned?.length ?? 0, Math.min(ctx.heartAsk?.length ?? 0, (ctx.tune ?? DEFAULT_TUNE).dayHearts)), 'tick'));
     },
 
     async resolveEvent(ctx, { event, choiceId, customText }) {

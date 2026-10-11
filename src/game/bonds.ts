@@ -65,6 +65,7 @@ function applyBonds(d: Scenario, r: CastBonds): void {
 export async function ensureBonds(sid: ID): Promise<void> {
   const sc = G().scenarios[sid];
   if (!bondsDue(sc)) return;
+  if (!tune().bonds) return; // AI 조절에서 꺼 둠
   const key = `bonds:${sid}`;
   if (G().busy[key]) return;
   if (Date.now() - (lastTry.get(sid) ?? 0) < 60_000) return;

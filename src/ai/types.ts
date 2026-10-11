@@ -48,6 +48,8 @@ export interface AIContext {
   tune?: AITune;
   /** (v3.5) 오늘 속마음을 새로 받을 인물(여성 + 호감도 기준 이상) */
   heartAsk?: ID[];
+  /** 오늘 이미 글을 올린 계정(handle) — 한 인물은 하루에 글 1개까지 */
+  postedToday?: string[];
   /** (v3.5) 오늘 "플레이어와 또 그만큼의 스킨십을 했다"는 새 글을 쓸 수 있는 인물 */
   touchAsk?: { id: ID; act: string }[];
 }

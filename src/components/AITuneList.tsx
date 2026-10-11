@@ -56,17 +56,22 @@ const GROUPS: GroupSpec[] = [
     cost: 'day',
     per: '하루 1번',
     rows: [
-      { key: 'dayPosts', label: '새 글', unit: '개' },
+      { key: 'dayPosts', label: '새 글', unit: '개', note: '한 인물은 하루에 글 1개까지' },
       { key: 'dayDMs', label: '먼저 쪽지 보내는 사람(최대)', unit: '명' },
       { key: 'dayNews', label: '뉴스' },
       { key: 'dayTrends', label: '트렌드' },
       { key: 'dayMission', label: '오늘의 미션' },
       { key: 'dayEvent', label: '새 이벤트', note: '끄면 세계관에 내장된 이벤트만 나와요' },
+      { key: 'dayHearts', label: '속마음 새로 쓰는 인물(최대)', unit: '명', note: '여성 + 호감도 기준 이상인 인물만' },
+      { key: 'dayTouch', label: '깊은 사이의 스킨십 일화 글', note: '새 글 중 1개를 그 일화로 써요' },
     ],
   },
   {
     title: '새 이야기를 시작할 때',
-    rows: [{ key: 'firstDM', label: '첫 팔로워의 첫 쪽지', cost: 'firstDM', per: '시작 1번' }],
+    rows: [
+      { key: 'firstDM', label: '첫 팔로워의 첫 쪽지', cost: 'firstDM', per: '시작 1번' },
+      { key: 'bonds', label: '인물 정보·관계 채우기', cost: 'bonds', per: '인물 12명마다', note: '직급·나이·인물끼리의 마음을 이야기마다 1번 정해요' },
+    ],
   },
 ];
 

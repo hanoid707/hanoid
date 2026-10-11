@@ -186,10 +186,25 @@ export function mediaRef(d: Scenario, key?: string): PhotoRef | undefined {
   if (!key || !d.world.templateId) return undefined;
   return { photo: sceneKey(d.world.templateId, key) };
 }
+/** 이 인물이 오늘(게임 일차) 이미 글을 올렸는지 — 한 인물은 하루에 글 1개까지(답글·뉴스 계정 제외) */
+export function postedToday(d: Scenario, id: ID): boolean {
+  const c = d.characters[id];
+  if (!c || c.isNews) return false;
+  const day = d.clock.day;
+  for (const pid of d.feed) {
+    const p = d.posts[pid];
+    if (!p) continue;
+    if (p.at.day < day - 1) break; // 타임라인은 최신순(어제 이전까지만 보면 된다)
+    if (p.authorId === id && p.kind !== 'reply' && p.at.day === day) return true;
+  }
+  return false;
+}
+
 export function addNpcLines(d: Scenario, lines: GeneratedLine[]) {
   for (const p of lines) {
     const c = activeChar(d, p.authorId);
     if (!c) continue;
+    if (postedToday(d, c.id)) continue; // 한 인물은 하루에 글 1개까지
     const e = npcEngagement(c.followers);
     addPost(d, { authorId: p.authorId, text: p.text, kind: c.isNews ? 'news' : 'post', likes: e.likes, reposts: e.reposts, views: e.views, media: mediaRef(d, p.media) }, true);
   }
@@ -203,7 +218,9 @@ export function addThreadedPosts(d: Scenario, lines: GeneratedLine[], seed: stri
   const ids: ID[] = [];
   lines.forEach((line, i) => {
     if (!line.comments?.length) return;
-    const who = lineAuthor(d, line, `${seed}:p${i}`, ghostAuthor);
+    let who = lineAuthor(d, line, `${seed}:p${i}`, ghostAuthor);
+    // 오늘 이미 글을 올린 인물이면 이름 없는 일반인 글로 돌린다(한 인물은 하루에 글 1개까지)
+    if (who.authorId !== GHOST && postedToday(d, who.authorId)) who = { authorId: GHOST, ghost: ghostAuthor(`${seed}:p${i}:g`) };
     const c = who.authorId === GHOST ? undefined : d.characters[who.authorId];
     const e = npcEngagement(c?.followers ?? 300 + Math.floor(Math.random() * 3000));
     const post = addPost(d, { authorId: who.authorId, text: line.text, kind: c?.isNews ? 'news' : 'post', likes: e.likes, reposts: e.reposts, views: e.views, ghost: who.ghost, media: mediaRef(d, line.media) }, true);

@@ -3,7 +3,8 @@ import { BUILD } from '../../version';
 import { useNavigation } from '@react-navigation/native';
 import { ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { engineLabel } from '../../ai';
-import { IconBackpack, IconBot, IconChevronRight, IconCloud, IconSliders } from '../../components/icons';
+import { IconBackpack, IconBot,
+  IconChevronRight, IconCloud, IconSliders } from '../../components/icons';
 import { SaveList } from '../../components/SaveList';
 import { Screen, TopBar } from '../../components/Screen';
 import { Button, Divider, Row, Segmented } from '../../components/ui';
@@ -34,6 +35,7 @@ export function SettingsScreen() {
 
         {head('연결')}
         <Row icon={<IconBot size={22} color={c.text} />} title="AI 연결" desc={engineLabel(settings.ai)} right={<IconChevronRight size={18} color={c.subtext} />} onPress={() => nav.navigate('AISettings')} />
+        <Row icon={<IconSliders size={22} color={c.text} />} title="AI 개수 조절" desc="하루 새 글·답글·댓글·쪽지 수(토큰) · 모든 세계관에 적용" right={<IconChevronRight size={18} color={c.subtext} />} onPress={() => nav.navigate('AITune')} />
         <Row icon={<IconCloud size={22} color={c.text} />} title="DB 저장·동기화" desc={syncText} right={<IconChevronRight size={18} color={c.subtext} />} onPress={() => nav.navigate('SyncSettings')} />
         <Divider thick />
 

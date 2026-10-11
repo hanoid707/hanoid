@@ -3,9 +3,10 @@
  *   위: 배너 · 프사 · 이름 · @아이디 · 팔로우 수 · 레벨·평판 한 줄 → 누르면 내 프로필(프로필 수정·스탯 조정은 그 안에서)
  *   활동: 미션 · 북마크 · 활동 기록
  *   세계관: 세계관 전체 수정 · 공통 캐릭터 · 캐릭터 만들기
- *   설정: AI 연결 · DB 동기화 · 난이도 · 연애 수위 · 다크 모드 · 기타 설정(세이브 관리·진동·실험 도구)
+ *   설정: AI 연결 · AI 개수 조절(토큰) · DB 동기화 · 난이도 · 연애 수위 · 다크 모드 · 기타 설정(세이브 관리·진동·실험 도구)
  * 여기 없는 것: 아이템 = 홈 오른쪽 위 날짜 / 세계관·세이브 바꾸기 = 홈 왼쪽 위 세계관 이름
  */
+import { normTune } from '../../ai/tune';
 import { useNavigation } from '@react-navigation/native';
 import type { ReactNode } from 'react';
 import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
@@ -21,6 +22,7 @@ import {
   IconCloudOff,
   IconFlame,
   IconGauge,
+  IconSliders,
   IconGlobe,
   IconMoon,
   IconScroll,
@@ -113,6 +115,7 @@ export function MeScreen() {
   const sc = useActive();
   const insets = useSafeAreaInsets();
   const ai = useGame((s) => s.settings.ai);
+  const tuneNow = normTune(ai.tune);
   const theme = useGame((s) => s.settings.theme);
   const setSettings = useGame((s) => s.setSettings);
   const showToast = useGame((s) => s.showToast);
@@ -208,6 +211,7 @@ export function MeScreen() {
         <Divider />
         <Group title="설정" />
         <MenuRow icon={ic(IconBot)} title="AI 연결" desc={aiText} onPress={() => nav.navigate('AISettings')} />
+        <MenuRow icon={ic(IconSliders)} title="AI 개수 조절" desc={`하루 새 글 ${tuneNow.dayPosts}개 · 답글 ${tuneNow.replies}개 · 댓글 ${tuneNow.comments}개 … (토큰)`} onPress={() => nav.navigate('AITune')} />
         <MenuRow icon={sync.status === 'off' || sync.status === 'error' ? ic(IconCloudOff) : ic(IconCloud)} title="DB 동기화" desc={syncText} onPress={() => nav.navigate('SyncSettings')} />
         <ChoiceRow icon={ic(IconGauge)} title="난이도" desc={DIFFICULTY_DESC[difficulty]}>
           <Segmented<Difficulty>

@@ -566,6 +566,12 @@ export interface AITune {
   dayMission: number;
   /** 하루가 바뀔 때: AI가 새 이벤트를 만든다(1/0, 끄면 세계관에 내장된 이벤트만) */
   dayEvent: number;
+  /** 하루가 바뀔 때: 속마음을 새로 쓰는 인물 수(최대, 여성 + 호감도 기준 이상) */
+  dayHearts: number;
+  /** 하루가 바뀔 때: 깊은 사이 인물이 나와 또 한 스킨십 일화를 글로 쓴다(1/0) */
+  dayTouch: number;
+  /** 이야기마다 1번: 인물 정보·관계 채우기(직급·나이·인물끼리의 마음)(1/0) */
+  bonds: number;
   /** 새 이야기를 시작할 때 첫 팔로워의 첫 쪽지(1/0) */
   firstDM: number;
 }

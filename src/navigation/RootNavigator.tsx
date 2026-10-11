@@ -32,6 +32,7 @@ import { ActivityScreen } from '../screens/stack/ActivityScreen';
 import { BookmarksScreen } from '../screens/stack/BookmarksScreen';
 import { SettingsScreen } from '../screens/stack/SettingsScreen';
 import { AISettingsScreen } from '../screens/stack/AISettingsScreen';
+import { AITuneScreen } from '../screens/stack/AITuneScreen';
 import { SyncSettingsScreen } from '../screens/stack/SyncSettingsScreen';
 import { CharacterEditorScreen } from '../screens/stack/CharacterEditorScreen';
 import { ItemsScreen } from '../screens/stack/ItemsScreen';
@@ -131,6 +132,7 @@ export function RootNavigator() {
         <Stack.Screen name="Bookmarks" component={BookmarksScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
         <Stack.Screen name="AISettings" component={AISettingsScreen} />
+        <Stack.Screen name="AITune" component={AITuneScreen} />
         <Stack.Screen name="SyncSettings" component={SyncSettingsScreen} />
         <Stack.Screen name="StatsEditor" component={StatsEditorScreen} />
         <Stack.Screen name="WorldEdit" component={WorldEditScreen} />

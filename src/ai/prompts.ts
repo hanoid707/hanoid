@@ -249,7 +249,7 @@ export function reactPrompt(ctx0: AIContext, post: { text: string; hasMedia?: bo
       '- news: 화제·논란일 때만 기사 제목 1개, 아니면 []',
       '- follow/unfollow: 이 글로 플레이어를 새로 팔로우·언팔할 인물의 h. 보통 []',
       t.echoPosts > 0
-        ? `- posts: 이 글을 본 인물이 자기 계정에 따로 올리는 글 ${t.echoPosts}개 {h,t}. 플레이어 글의 그 일을 자기 쪽에서 이어 간다(같이 겪은 장면·자기도 해 본 것·그 일로 잡은 약속·주변에 퍼진 얘기), @${ctx.persona.handle}를 부르거나 그 일을 구체적으로 짚어서. 핵심 인물 우선, 각 ${LIMITS.post}자 이내`
+        ? `- posts: 이 글을 본 인물이 자기 계정에 따로 올리는 글 ${t.echoPosts}개 {h,t}(한 계정 1개).${posted(ctx)} 플레이어 글의 그 일을 자기 쪽에서 이어 간다(같이 겪은 장면·자기도 해 본 것·그 일로 잡은 약속·주변에 퍼진 얘기), @${ctx.persona.handle}를 부르거나 그 일을 구체적으로 짚어서. 핵심 인물 우선, 각 ${LIMITS.post}자 이내`
         : '',
       t.echoDMs > 0
         ? `- dm: 이 글을 보고 플레이어에게 따로 쪽지를 보내는 인물 ${t.echoDMs <= 1 ? '1명' : `1~${t.echoDMs}명`} {h,t}. 가까운 사이·그 일의 당사자가 답글로는 못 할 말(걱정·약속·부탁·속마음)을 먼저 건넨다. 쪽지 보낼 만큼 가까운 인물이 없을 때만 []`
@@ -350,7 +350,7 @@ export function dmPrompt(
       off ? '- romanceDelta 0' : `- romanceDelta ${romantic ? R.dmRomantic : R.dmPlain}(플러팅·애정 표현이 있을 때만, 아니면 0)`,
       '- 답장은 받아 주기만 하지 않는다: 자기 쪽 소식·제안·약속·되묻기 중 하나를 얹어 대화를 먼저 끌고 간다',
       '- devotionDelta 0~+8(플레이어에게 더 빠져들 때만, 보통 0)',
-      tuneOf(ctx).dmPost ? `- post: 이 대화 뒤에 ${c.name}이(가) 자기 계정에 올리는 공개 글 1개(${LIMITS.post}자 이내). 약속·기분·그 일을 남들이 봐도 되는 선에서 티 내는 글. 대화 세 번에 한 번꼴로만 쓰고, 그 밖엔 ""` : '',
+      tuneOf(ctx).dmPost && !(ctx.postedToday ?? []).includes(c.handle) ? `- post: 이 대화 뒤에 ${c.name}이(가) 자기 계정에 올리는 공개 글 1개(${LIMITS.post}자 이내). 약속·기분·그 일을 남들이 봐도 되는 선에서 티 내는 글. 대화 세 번에 한 번꼴로만 쓰고, 그 밖엔 ""` : '',
       '- leave: 플레이어가 심하게 무례하고 호감이 낮을 때만 true(대화방 나감)',
       c.heartOk
         ? `- heart: 이 대화 직후 ${c.name}의 속마음 한 줄(${LIMITS.heart}자 이내). 플레이어에게는 말하지 않은 진짜 마음을 혼잣말로, 방금 대화에 나온 말·물건·장면을 짚어서. 연애X 표시 인물은 연애 감정 없이 동료·팬·친구로서의 마음만`
@@ -380,7 +380,7 @@ export function ambientPrompt(ctx: AIContext, count: number): string {
     nowLine(ctx),
     [
       `[할 일] 지금 타임라인에 올라올 평소 글 ${count}개 JSON(posts)`,
-      `- 서로 다른 계정(위 인물·일반 유저 섞어서). 각자 자기 일상·관심사의 사소한 장면 하나로, 특성·최근 사건·시각대와 이어지게, 각 ${LIMITS.post}자 이내. 플레이어 얘기가 아니어도 된다`,
+      `- 서로 다른 계정(한 계정은 1개만, 위 인물·일반 유저 섞어서).${posted(ctx)} 각자 자기 일상·관심사의 사소한 장면 하나로, 특성·최근 사건·시각대와 이어지게, 각 ${LIMITS.post}자 이내. 플레이어 얘기가 아니어도 된다`,
       scenesLine(ctx),
     ]
       .filter(Boolean)
@@ -402,7 +402,7 @@ export function tickPrompt(ctx: AIContext, day: number, returned: ID[] = []): st
   const pending = ctx.pendingEvents?.length ? ` 진행 중인 이벤트와 겹치지 않게(${ctx.pendingEvents.map((x) => clip(x, 20)).join(', ')}).` : '';
   // 속마음을 새로 받을 인물 · 플레이어와 한 스킨십을 오늘 새 일화로 쓸 인물
   const hearts = heartCast(ctx);
-  const touch = (ctx.touchAsk ?? []).map((x) => ({ c: ctx.cast.find((c) => c.id === x.id), act: x.act })).filter((x): x is { c: CastInfo; act: string } => !!x.c);
+  const touch = (t.dayTouch ? (ctx.touchAsk ?? []) : []).map((x) => ({ c: ctx.cast.find((c) => c.id === x.id), act: x.act })).filter((x): x is { c: CastInfo; act: string } => !!x.c);
   // 조절값에서 끈 항목은 아예 묻지 않는다(출력 토큰 절약)
   const must = [t.dayPosts > 0 ? 'posts' : '', t.dayNews ? 'news' : '', t.dayTrends ? 'trends' : '', t.dayMission ? 'mission' : ''].filter(Boolean);
   const optional = !!t.dayEvent || !!dmLine;
@@ -417,7 +417,7 @@ export function tickPrompt(ctx: AIContext, day: number, returned: ID[] = []): st
     nowLine(ctx),
     [
       `[할 일] ${day}일차 시작. 세계를 한 걸음 움직이는 JSON. ${rule}`,
-      t.dayPosts > 0 ? `- posts: 오늘 글 ${t.dayPosts}개(핵심 인물 + 일반 유저, 각 ${LIMITS.post}자 이내). 절반 이상은 플레이어가 최근 한 말·한 일의 후일담(그 뒤 벌어진 일·따라 해 본 것·@${ctx.persona.handle} 언급), 나머지는 각자의 사소한 장면` : '',
+      t.dayPosts > 0 ? `- posts: 오늘 글 ${t.dayPosts}개(핵심 인물 + 일반 유저, 각 ${LIMITS.post}자 이내). 한 계정은 1개만(같은 h 두 번 금지).${posted(ctx)} 절반 이상은 플레이어가 최근 한 말·한 일의 후일담(그 뒤 벌어진 일·따라 해 본 것·@${ctx.persona.handle} 언급), 나머지는 각자의 사소한 장면` : '',
       t.dayPosts > 0 && touch.length
         ? `- 깊은 사이의 새 일화: ${touch.map((x) => `@${x.c.handle}(${x.c.name})는 플레이어와 이미 "${clip(x.act, 14)}"까지 한 사이`).join(', ')}. posts 중 1개는 그 인물이 오늘 플레이어와 또 그만큼의 스킨십(${touch.map((x) => clip(x.act, 14)).join('·')})을 했다는 새 이야기로 쓴다: 오늘의 장소·계기·그때 오간 한마디를 구체적으로, 남이 봐도 되는 선에서 티 내는 글. 그 수준을 넘는 행위는 쓰지 않는다`
         : '',
@@ -438,9 +438,18 @@ export function tickPrompt(ctx: AIContext, day: number, returned: ID[] = []): st
   );
 }
 
+/** 한 인물은 하루에 글 1개까지: 오늘 이미 글을 올린 계정은 새 글을 쓰지 않는다 */
+function posted(ctx: AIContext): string {
+  const list = (ctx.postedToday ?? []).slice(0, 20);
+  return list.length ? ` 오늘 이미 글을 올린 계정(새 글 금지): ${list.map((h) => `@${h}`).join(' ')}` : '';
+}
+
 /** 오늘 속마음을 새로 받을 인물(맥락이 정해 준 대로) */
-function heartCast(ctx: AIContext): CastInfo[] {
-  return (ctx.heartAsk ?? []).map((id) => ctx.cast.find((c) => c.id === id)).filter((c): c is CastInfo => !!c);
+function heartCast(ctx: AIContext, n = tuneOf(ctx).dayHearts): CastInfo[] {
+  return (ctx.heartAsk ?? [])
+    .slice(0, Math.max(0, n))
+    .map((id) => ctx.cast.find((c) => c.id === id))
+    .filter((c): c is CastInfo => !!c);
 }
 
 // ───────────────────────── 이벤트

@@ -17,12 +17,15 @@ export const DEFAULT_TUNE: AITune = {
   eventPosts: 3,
   comments: 6,
   refreshPosts: 3,
-  dayPosts: 4,
+  dayPosts: 3,
   dayDMs: 2,
   dayNews: 1,
   dayTrends: 1,
   dayMission: 1,
   dayEvent: 1,
+  dayHearts: 3,
+  dayTouch: 1,
+  bonds: 1,
   firstDM: 1,
 };
 
@@ -43,6 +46,9 @@ export const TUNE_RANGE: Record<keyof AITune, [number, number]> = {
   dayTrends: [0, 1],
   dayMission: [0, 1],
   dayEvent: [0, 1],
+  dayHearts: [0, 3],
+  dayTouch: [0, 1],
+  bonds: [0, 1],
   firstDM: [0, 1],
 };
 
@@ -68,14 +74,14 @@ export function sameTune(a?: Partial<AITune> | null, b?: Partial<AITune> | null)
 
 /** 하루 정산을 어떻게 부를지: full = 하루 정산 1회 / posts = 새 글만(빠른 호출 1회) / none = AI 없음 */
 export function dayPlan(t: AITune): 'full' | 'posts' | 'none' {
-  const extras = t.dayDMs + t.dayNews + t.dayTrends + t.dayMission + t.dayEvent;
+  const extras = t.dayDMs + t.dayNews + t.dayTrends + t.dayMission + t.dayEvent + t.dayHearts + t.dayTouch;
   if (extras > 0) return 'full';
   return t.dayPosts > 0 ? 'posts' : 'none';
 }
 
 // ───────────────────────── 예상 소모
 
-export type CallKind = 'react' | 'thread' | 'dm' | 'event' | 'comments' | 'refresh' | 'day' | 'firstDM' | 'draft';
+export type CallKind = 'react' | 'thread' | 'dm' | 'event' | 'comments' | 'refresh' | 'day' | 'firstDM' | 'draft' | 'bonds';
 export interface CallCost {
   inTok: number;
   outTok: number;
@@ -92,6 +98,7 @@ const IN: Record<Exclude<CallKind, 'day' | 'refresh'> | 'tick' | 'ambient', numb
   tick: 4650,
   firstDM: 2950,
   draft: 2900,
+  bonds: 3600,
 };
 /** 출력에는 생각(thinking) 토큰이 조금 붙는다 */
 const OUT_PAD = 1.1;
@@ -117,12 +124,15 @@ export function callCost(kind: CallKind, t: AITune): CallCost {
       const plan = dayPlan(t);
       if (plan === 'none') return NONE;
       if (plan === 'posts') return c(IN.ambient, 20 + t.dayPosts * 70);
-      return c(IN.tick, 20 + t.dayPosts * 70 + t.dayNews * 30 + t.dayTrends * 90 + t.dayMission * 50 + t.dayEvent * 35 + t.dayDMs * 25);
+      return c(IN.tick, 20 + t.dayPosts * 70 + t.dayNews * 30 + t.dayTrends * 90 + t.dayMission * 50 + t.dayEvent * 35 + t.dayDMs * 25 + t.dayHearts * 30 + t.dayTouch * 10);
     }
     case 'firstDM':
       return t.firstDM ? c(IN.firstDM, 70) : NONE;
     case 'draft':
       return c(IN.draft, 150);
+    case 'bonds':
+      // 인물 12명 한 묶음 기준(이야기마다 1번, 인물이 많으면 묶음 수만큼)
+      return t.bonds ? c(IN.bonds, 60 + 12 * 45) : NONE;
   }
 }
 
