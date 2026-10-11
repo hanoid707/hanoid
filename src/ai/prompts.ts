@@ -599,8 +599,11 @@ ${AGE_GUIDE}
 // ───────────────────────── 인물 정보 채우기(직함·나이·인물끼리의 마음)
 
 /** 세이브마다 한 번: 인물 설정을 읽고 빠진 직함·나이를 채우고, 인물끼리 누가 누구를 사랑하는지 정한다 */
-export function bondsPrompt(ctx: AIContext): string {
-  const people = ctx.cast.filter((c) => c.tier !== 'crowd' && !c.isNews && !c.realPerson && c.badge !== 'gold').slice(0, 16);
+export function bondsPrompt(ctx: AIContext, ids?: ID[]): string {
+  // 인물이 많으면 게임이 여러 번에 나눠 부른다(ids = 이번에 채울 인물). 사랑 상대는 이번 묶음 밖의 인물도 고를 수 있게 이름만 따로 보여 준다
+  const all = ctx.cast.filter((c) => c.tier !== 'crowd' && !c.isNews && !c.realPerson && c.badge !== 'gold');
+  const people = (ids ? all.filter((c) => ids.includes(c.id)) : all).slice(0, 16);
+  const others = all.filter((c) => !people.includes(c)).slice(0, 40);
   const rows = people.map((c) => {
     const head = [`@${c.handle} ${c.name}`, c.gender ? (c.gender === 'f' ? '여' : '남') : '', c.age ? `${c.age}살` : '나이 없음', c.title ? `자리: ${clip(c.title, 16)}` : '자리 없음', `플레이어에게 호감${c.affinity}${c.romance > 0 ? ` 설렘${c.romance}` : ''}`];
     return `- ${head.filter(Boolean).join(' | ')}\n  특성: ${clip(c.description || c.bio, 150)}${c.relations ? `\n  관계: ${clip(c.relations, 80)}` : ''}`;
@@ -609,11 +612,13 @@ export function bondsPrompt(ctx: AIContext): string {
   const off = Math.ceil(people.length / 3);
   return join(
     `[인물 ${people.length}명]\n${rows.join('\n')}`,
+    others.length ? `[같은 세계의 다른 인물: 사랑 상대(to)로 고를 수 있다]\n${others.map((c) => `@${c.handle} ${c.name}${c.gender ? `(${c.gender === 'f' ? '여' : '남'}${c.age ? ` ${c.age}` : ''})` : ''}`).join(' · ')}` : '',
     memoryBlock(ctx, 6),
     recentBlock(ctx, 4, 50),
     `[나이 기준]\n${AGE_GUIDE}`,
     [
-      '[할 일] 위 인물 설정과 지금까지의 일을 자연스럽게 읽고 인물 정보 JSON(info에 위 인물 전원)',
+      `[할 일] 위 [인물 ${people.length}명]의 설정과 지금까지의 일을 자연스럽게 읽고 인물 정보 JSON. info에 ${people.length}명 전원을 한 명도 빠뜨리지 않고 적는다`,
+      '- title·age는 전원 반드시 채운다(빈 값 금지). 설정에 근거가 없으면 그 세계와 그 사람의 말투·역할에 가장 자연스러운 자리와 나이로',
       '- title: 그 세계에서의 계급·직급·자리나 플레이어와의 사이를 8자 이내로(상병 · 맞선임 / 팀장 / 입사 동기 / 3학년 선배). 이미 적힌 자리가 있으면 그대로',
       '- age: 실제 나이. 이미 적힌 나이·설정에 나온 나이·연차가 있으면 그대로 따르고, 없으면 [나이 기준]에서 그 자리에 맞게',
       `- off: 사랑에 관심 없는 사람(일·자기 생활이 먼저)이면 true. ${people.length}명 중 ${off}명 이상은 true다(실제로도 셋 중 하나는 그렇다). off가 true면 loves는 []`,

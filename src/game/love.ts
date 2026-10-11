@@ -183,10 +183,14 @@ export function ensureLoveOff(d: Scenario, prune = false): void {
   const weak = pool
     .filter((c) => !c.loveOff && (c.romance ?? 0) < 25 && c.loves)
     .sort((a, b) => Math.max(...Object.values(a.loves!)) - Math.max(...Object.values(b.loves!)));
+  // 인물끼리의 마음이 이야기에서 사라지지 않게 몇 명은 남긴다(플레이어를 좋아하는 인물이 이미 많은 세계에서 전부 지워지지 않도록)
+  const keep = Math.max(2, Math.floor(pool.length / 6));
+  let lovers = pool.filter((c) => c.loves && Object.values(c.loves).some((v) => v > 0)).length;
   for (const c of weak) {
-    if (count() >= need) break;
+    if (count() >= need || lovers <= keep) break;
     c.loves = undefined;
     c.loveOff = true;
+    lovers -= 1;
   }
 }
 

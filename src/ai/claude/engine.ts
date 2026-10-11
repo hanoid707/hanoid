@@ -148,8 +148,8 @@ export function createClaudeEngine(settings: AISettings): AIEngine {
       return N.normCast(await call(null, P.castPrompt(world), P.SHAPES.cast, 'cast'));
     },
 
-    async castBonds(ctx) {
-      return N.normBonds(ctx, await call(ctx, P.bondsPrompt(ctx), P.SHAPES.bonds, 'bonds'));
+    async castBonds(ctx, ids) {
+      return N.normBonds(ctx, await call(ctx, P.bondsPrompt(ctx, ids), P.SHAPES.bonds, 'bonds'));
     },
   };
 }

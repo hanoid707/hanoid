@@ -311,5 +311,5 @@ export interface AIEngine {
   /** 직접 만든 세계관의 등장인물 생성 */
   generateCast(world: { name: string; setting: string; tone: string }): Promise<CastDraft[]>;
   /** (v3.5) 인물 정보 채우기: 직함·나이·인물끼리의 마음(+ 첫 속마음) */
-  castBonds(ctx: AIContext): Promise<CastBonds>;
+  castBonds(ctx: AIContext, ids?: ID[]): Promise<CastBonds>;
 }

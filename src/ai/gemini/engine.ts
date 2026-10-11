@@ -107,8 +107,8 @@ export function createGeminiEngine(settings: AISettings, opts: { via?: GeminiVia
       return N.normCast(await call(null, P.castPrompt(world), S.CAST_SCHEMA, 'cast', MAX_OUT.cast, 1));
     },
 
-    async castBonds(ctx) {
-      return N.normBonds(ctx, await call(ctx, P.bondsPrompt(ctx), S.BONDS_SCHEMA, 'bonds', MAX_OUT.bonds, 0.8));
+    async castBonds(ctx, ids) {
+      return N.normBonds(ctx, await call(ctx, P.bondsPrompt(ctx, ids), S.BONDS_SCHEMA, 'bonds', MAX_OUT.bonds, 0.8));
     },
   };
 }
