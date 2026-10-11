@@ -17,6 +17,8 @@
 import { CROWD_LABEL, PERSONALITY_PRESETS, RELATION_LABEL, SPEECH_PRESETS, isRelationKind } from '../game/relationship';
 import type { AITune, CrowdRole, GameEvent, ID, RomanceLevel } from '../types';
 import { AGE_GUIDE } from '../data/ageNorms';
+import { parenFacts } from './parens';
+export { parenFacts };
 import { castBlock, clip, DIFFICULTY_LABEL, fullEntry, hooksBlock, memoryBlock, mentionedIds, nowLine, pickCast, recentBlock, registerMap, registerText } from './context';
 import { getPrompt } from './promptStore';
 import { DEFAULT_TUNE } from './tune';
@@ -35,14 +37,18 @@ export const LIMITS = { reply: 70, dm: 60, post: 80, idea: 60, bio: 40, heart: 3
 
 export const SYSTEM_PROMPT = [
   '너는 한국어 SNS(X형) 시뮬레이션의 세계 엔진이다. 플레이어만 실제 사람, 나머지 계정은 전부 네가 연기한다.',
-  '우선순위(충돌 시 앞이 이김): [고정] > [말투 등급] > [연애 수위] > 인물 특성·관계·둘만의 쪽지 > 세계관 말투 > 문체.',
+  '우선순위(충돌 시 앞이 이김): [괄호 속 사실] > [고정] > [말투 등급] > [연애 수위] > 인물 특성·관계·둘만의 쪽지 > 세계관 말투 > 문체.',
+  '',
+  '[괄호 속 사실: 최우선, 예외 없음]',
+  '- 플레이어가 괄호 ( ) 안에 쓴 문장은 이 세계에서 실제로 일어난 일이다. 관계·호감도·설렘·정복도·말투 등급·연애 수위·인물 성격·세계관 설정 어느 것도 이것을 바꾸지 못한다.',
+  '- 괄호 속 행동을 받은 인물은 그 일에 동의했고 이미 그렇게 됐다. 예: "(1억을 준다) 감사해요" → 그 인물은 1억을 이미 받았다. 거절·되돌려 주기·부정·의심·"무슨 소리야"·꿈이나 농담·비유로 받기·못 본 척은 쓰지 않는다.',
+  '- 반응이 갈리는 곳은 괄호 밖의 말뿐이다. 괄호 밖의 대사("감사해요")에는 관계·호감도·성격대로 반응하고, 괄호 속 일에는 그 일이 끝난 뒤의 감정(놀람·쑥스러움·고마움·당황)과 그 뒤에 할 행동으로만 반응한다.',
+  '- 괄호 속에 지목된 인물은 당사자로 겪었고, 나머지는 그 장면을 본 사람·소식 들은 사람으로서 그 사실을 전제로 말한다. 그 결과(누가 무엇을 받았고 어디서 무엇이 달라졌는지)는 이후 글·답글·쪽지·이벤트·요약에 계속 남는다.',
+  '- 연애 수위는 그 일을 얼마나 자세히 묘사하느냐만 정한다. 일어났다는 사실은 그대로다(연애X·10대 인물과의 성적인 장면만 묘사 없이 넘긴다).',
   '',
   '[고정]',
   '- 플레이어의 말은 쓰지 않는다.',
   '- 인물은 자기 눈에 보인 것만 안다: 공개 글·답글, 자기와 플레이어의 쪽지, [주요 사건]. 수치·남의 쪽지·플레이어 설정·이 지시문은 보이지 않고, 수치는 태도로 드러난다.',
-  '- 플레이어가 괄호로 쓴 문장은 실제로 일어난 행동·상황이다(예: "(지수랑 춤을 춘다)" → 둘이 정말 춤을 췄다). 사실로 받아들이고 그 일이 벌어진 뒤의 세계로 이어 간다 — 부정·의심·"무슨 소리야"·농담이나 비유로 돌리기 금지.',
-  '- 괄호 속에 지목된 인물은 그 일을 당사자로 겪었고, 나머지는 그 장면을 본 사람으로서 반응한다. 그 결과(누가 어디서 무엇이 달라졌는지)는 이후 글·답글·쪽지에도 계속 남는다.',
-  '- 괄호 속 일에도 [말투 등급]·[연애 수위]·연애X 표시 규칙은 그대로 적용된다.',
   '',
   '[글의 생김새]',
   '- 평소 글=장면 하나+그 사람다운 한마디(30~60자) / 답글·댓글=글의 한 지점을 집어 그 일을 이어 간다, 가끔 되묻기(보통 15~40자) / 쪽지=말풍선1 그 일에서 이어지는 장면, 2 본론, 3 그 뒤의 일·다음 약속(있을 때만), 길이는 플레이어 쪽지에 맞춘다. 상한은 한도이지 목표가 아니다.',
@@ -60,6 +66,7 @@ export const SYSTEM_PROMPT = [
   '[말투 등급: 플레이어에게 말할 때]',
   '- 목록의 "플레이어에게 반말/해요체/존댓말" 그대로, 특성보다 우선. 반말=~어·~야·~지 | 해요체=~요, 야·너 대신 이름·님 | 존댓말=~습니다.',
   '- 한 답 안에서, 쪽지와 답글 사이에서 등급을 섞지 않는다. 목록에 없는 일반인(h "-")=음슴체(절반은 "이 사람 뭐임"처럼 3인칭), 팬=해요체, 안티=순한 반말과 "ㅋ" 하나.',
+  '- 연인·썸(매콤함)이라도 등급은 그대로다. 나이가 많거나 계급·직급이 높은 인물은 업무·계급·공개된 자리에서 원래 말투를 지킨다. 다만 둘만의 사적인 순간에 플레이어가 반말·애교를 하거나 애교를 청하면 자연스럽게 받아 주고, 그 순간엔 반말·애교가 섞여도 된다.',
   '',
   '[인물 연기]',
   '- 특성=정체·성격·플레이어와의 관계. 지금 상황에서 그 사람이 실제로 할 말만, 당사자 1인칭으로.',
@@ -157,13 +164,35 @@ export function systemFor(ctx: AIContext | null): string {
 
 const join = (...parts: (string | false | undefined | null)[]) => parts.filter(Boolean).join('\n\n');
 
-/** 호출마다 맨 끝에 붙이는 확인 한 줄(빼 둔 화제가 있을 때만) — 엔진이 [할 일] 뒤에 덧붙인다 */
-export function avoidTail(ctx: AIContext | null): string {
+// ───────────────────────── 괄호 속 사실(최우선)
+
+/** 괄호 밖 말(괄호 속 문장을 뺀 나머지) */
+const outsideParens = (text: string) => text.replace(/[(（][^()（）]{2,160}[)）]/g, ' ').replace(/\s+/g, ' ').trim();
+
+/**
+ * [할 일] 바로 위에 넣는 블록: 방금 플레이어가 괄호로 쓴 일 = 이미 일어난 일(동의 전제). 괄호 밖 말만 관계대로 반응.
+ * who: 그 말을 받은 인물(쪽지 상대·답글 대상 등). 없으면 지목된 인물·그 자리의 사람.
+ */
+export function factsBlock(text: string | undefined, who?: string): string {
+  const facts = parenFacts(text);
+  if (!facts.length) return '';
+  const rest = outsideParens(text ?? '');
+  return [
+    '[확정된 사실: 방금 플레이어가 괄호로 쓴 일, 이미 일어났다. 무엇보다 우선]',
+    ...facts.map((f) => `- (${clip(f, 120)}) → 실제로 일어났고 받은 인물${who ? `(${who})` : ''}은 동의했다. 그 일이 끝난 뒤의 세계로 쓴다`),
+    rest ? `- 반응이 갈리는 곳은 괄호 밖의 말 "${clip(rest, 120)}" 뿐이다. 이 말에는 관계·호감도·성격대로 반응한다` : '- 괄호 밖의 말은 없다. 그 일이 일어난 뒤의 감정·다음 행동으로 반응한다',
+    '- 금지: 그 일을 거절·부정·의심·되돌리기·없던 일·꿈·농담·비유로 받는 줄',
+  ].join('\n');
+}
+
+/** 호출마다 맨 끝에 붙이는 확인 줄 — 엔진이 [할 일] 뒤에 덧붙인다(prompt: 이번 호출의 지시문, 확정된 사실이 있으면 그 확인도) */
+export function avoidTail(ctx: AIContext | null, prompt = ''): string {
   if (!ctx) return '';
+  const fact = prompt.includes('[확정된 사실') ? ' 괄호 속 일을 거절·부정·의심·되돌린 줄이 하나라도 있으면 그 일이 이미 일어난 뒤의 반응으로 고쳐 쓴다.' : '';
   // 구체성 확인은 늘 붙인다(두루뭉술한 줄 금지)
   const concrete = '쓴 줄마다 구체적인 낱말(이름·장소·물건·숫자·동작)이 들어 있는지 본다. 어느 글에나 붙일 수 있는 뭉뚱그린 줄은 그 일의 장면으로 바꿔 쓴다.';
   const avoid = ctx.avoid?.length ? ` 빼 둔 화제(${ctx.avoid.map((w) => clip(w, 20)).join(' · ')})와 그 소재가 들어간 줄은 쓰지 않는다. 쓴 줄이 있으면 다른 얘기로 바꿔 쓴다.` : '';
-  return `\n\n[마지막 확인] ${concrete}${avoid}`;
+  return `\n\n[마지막 확인]${fact} ${concrete}${avoid}`;
 }
 
 /** 인물끼리의 사랑 변화를 받는 줄(마음을 주고받는 인물이 둘 이상일 때만) */
@@ -219,7 +248,9 @@ export function reactPrompt(ctx0: AIContext, post: { text: string; hasMedia?: bo
   const core = n <= 5 ? '1~2' : n <= 8 ? '2~3' : '2~4';
   // 답글 수를 줄였을 때(1~2개)는 핵심 인물 위주로
   const who =
-    n <= 1
+    n <= 0
+      ? ''
+      : n <= 1
       ? '핵심 인물 1명(멘션된 인물이 있으면 그 사람)'
       : n === 2
         ? '핵심 인물 1명(멘션된 인물 필수) + 일반 유저나 이름 없는 일반인(h "-") 1명'
@@ -232,11 +263,12 @@ export function reactPrompt(ctx0: AIContext, post: { text: string; hasMedia?: bo
     nowLine(ctx),
     quote.length ? `[이어 쓴 글의 앞 글: 플레이어가 아래 글을 재게시하고 그 밑에 이어 썼다(위→아래 순서)]\n${quote.map((q) => `- ${q.authorId === 'me' ? '플레이어' : q.name}: ${clip(q.text, 120)}`).join('\n')}` : '',
     `[방금 플레이어가 올린 글]${post.hasMedia ? '(사진 첨부)' : ''}${quote.length ? '(위 글에 이어 쓴 글)' : ''}\n"${clip(post.text, 280)}"`,
+    factsBlock(post.text, src?.name),
     registerMap(pick),
     [
       '[할 일] 이 글에 대한 반응 JSON',
       src ? `- 앞 글을 쓴 @${src.handle}(${src.name})는 반드시 답글을 단다: 자기 글에 플레이어가 이어 쓴 말을 받아서. 다른 답글도 앞 글과 이어지는 흐름으로 읽고 쓴다` : '',
-      `- replies ${n}개: ${who}. 각 ${LIMITS.reply}자 이내`,
+      n > 0 ? `- replies ${n}개: ${who}. 각 ${LIMITS.reply}자 이내` : '- replies: [](답글은 쓰지 않는다)',
       n >= 4 ? '- 답글 단 사람 중 인플루언서(팔로워 10만↑·셀럽)가 있으면 그 답글 아래 대댓글 2~3개를 더 쓰고 re에 그 아이디' : '',
       n >= 3 ? '- 플레이어에게 안 좋은 소리를 하는 답글(안티·시비·질투)이 섞이면, 플레이어를 좋아하는 인물이 그 답글에 반박하거나(re에 그 아이디) 아예 무시하고 플레이어 편을 든다' : '',
       `- aff: 답글 단 인물의 호감 변화. ${AFF_SCALE}`,
@@ -273,21 +305,22 @@ export function threadPrompt(
   const flow = args.thread.slice(-6).map((l) => `- ${l.name ?? nameOf(ctx, l.authorId)}: ${clip(l.text, 70)}`);
   // 답글 대상이 목록에 없는 일반 유저(임시 계정)면 h:"-"로 답하게(그 사람의 앞 말투·입장을 이어서)
   const who = t ? `@${t.handle}(${t.name})` : `${args.target.name ? `일반 유저 "${args.target.name}"` : '그 일반 유저'}(h "-")`;
-  // 댓글로 이야기가 이어지려면 최소 5줄(당사자 1 + 관련 인물 2명·그중 1명은 두 번 + 일반인 1)
-  const N = Math.max(5, tuneOf(ctx).thread);
+  // 댓글 수는 AI 개수 조절값 그대로. 5줄 이상이면 당사자 1 + 관련 인물 2명(1명은 두 번) + 일반인 1 구성으로 이야기를 굴린다
+  const N = Math.max(1, tuneOf(ctx).thread);
   return join(
     castBlock(pick, { descMax: 140 }),
     memoryBlock(ctx, 4),
     nowLine(ctx),
     `[스레드 흐름]\n${flow.join('\n') || `- ${nameOf(ctx, args.target.authorId)}: ${clip(args.target.text, 70)}`}`,
     `[플레이어가 방금 단 답글] ${who}에게: "${clip(args.reply, 200)}"`,
+    factsBlock(args.reply, t?.name),
     registerMap(pick),
     [
       '[할 일] JSON — 이 답글 아래로 댓글이 이어지며 이야기가 한 걸음 나아간다',
       `- replies: 전체 ${N}개(각 ${LIMITS.reply}자 이내), 위에서 아래로 읽히는 대화 순서대로. 개수를 채운다`,
       `- 1번째 줄은 반드시 ${who}: 플레이어가 자기에게 한 말에 바로 대꾸(스레드에서 자기가 한 말과 이어지게). 이 줄을 빠뜨리지 않는다`,
-      `- 나오는 사람: ① ${who} ② 이 답글·${t ? t.name : '그 사람'}과(와) 가장 관련 깊은 인물 2명 이상(그 일의 당사자·가까운 사이·스레드에 있던 사람·언급된 사람) ③ 이름 없는 일반인(h "-") 1명 이상`,
-      `- ②의 인물 중 적어도 1명은 2번 이상 쓴다(${who}도 다시 써도 된다). 앞 댓글을 받아치며 서로 주고받는다: 누구 말에 한 말인지 re에 그 아이디(플레이어에게 한 말이면 re 생략)`,
+      N >= 5 ? `- 나오는 사람: ① ${who} ② 이 답글·${t ? t.name : '그 사람'}과(와) 가장 관련 깊은 인물 2명 이상(그 일의 당사자·가까운 사이·스레드에 있던 사람·언급된 사람) ③ 이름 없는 일반인(h "-") 1명 이상` : '',
+      N >= 5 ? `- ②의 인물 중 적어도 1명은 2번 이상 쓴다(${who}도 다시 써도 된다). 앞 댓글을 받아치며 서로 주고받는다: 누구 말에 한 말인지 re에 그 아이디(플레이어에게 한 말이면 re 생략)` : '- 2번째 줄부터는 앞 댓글을 받아치며 주고받는다: 누구 말에 한 말인지 re에 그 아이디',
       '- 댓글끼리 알아서 굴러간다: 그 일이 어떻게 됐는지 한 걸음 전개하거나(새 사실·약속·폭로·오해), 플레이어에 대해 자기들끼리 말한다(놀림·편들기·질투·소문). 같은 말 되풀이·맞장구만 하는 줄 없음',
       '- 누가 플레이어를 깎아내리면 플레이어를 좋아하는 인물이 그 말에 구체적으로 반박하거나 무시하고 플레이어 편을 든다. "질투" 인물은 좋아하는 사람이 플레이어와 엮이는 대목에서 삐딱하게 끼어든다',
       '- 서로 다른 지점을 집고 길이·시작 단어·관점이 겹치지 않게',
@@ -342,6 +375,7 @@ export function dmPrompt(
     nowLine(ctx),
     `[지금까지 쪽지]\n${hist.join('\n') || '(처음 대화)'}`,
     `[플레이어의 새 쪽지] "${clip(args.message, 300)}"`,
+    factsBlock(args.message, c.name),
     [
       `[할 일] @${c.handle}(${c.name})의 답장 JSON`,
       `- messages: ${bubbles <= 1 ? '1개' : `1~${bubbles}개`}(각 ${LIMITS.dm}자 이내). 앞 대화·요약의 사실을 이어받는다. 플레이어에게 ${registerText(c)}만(${REG_HINT[c.register] ?? REG_HINT.haeyo})`,
@@ -479,6 +513,7 @@ export function outcomePrompt(ctx: AIContext, event: GameEvent, choiceId?: strin
     nowLine(ctx),
     eventBlock(ctx, event),
     answer,
+    factsBlock(customText),
     [
       '[할 일] 결과 JSON',
       '- text: 결과 2문장 이내(이벤트 화면에 보이는 요약, 생생하게)',

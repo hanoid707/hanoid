@@ -5,6 +5,7 @@
  */
 import { safeGhost } from './lookalike';
 import { GHOST, ME, SYSTEM, type Character, type CharacterType, type Deltas, type GameTime, type GhostAuthor, type ID, type ItemKind, type LoveDelta, type Noti, type Post, type QuestGoal, type RelationChange, type Scenario, type SpeechRegister } from '../types';
+import { parenFacts } from '../ai/parens';
 import { applyLoveDeltas, detectTouchInParens, LOVE_SLOW, mentionedLovables, noteTouch } from './love';
 import { clamp, fill, rand, snippet, uid } from '../utils';
 import { advanceClock } from './clock';
@@ -233,6 +234,17 @@ export function applyLove(d: Scenario, list: LoveDelta[] | undefined): void {
       addMemory(d, `${a.name}의 ${b.name}을(를) 향한 마음이 식음`);
     }
   }
+}
+
+/**
+ * 플레이어가 괄호로 쓴 일은 실제로 일어난 일 — 세계 기억에 남겨 뒷날의 글·쪽지·이벤트도 그 사실을 전제로 하게 한다.
+ * who: 그 말을 받은 인물(쪽지 상대·답글 대상 등)
+ */
+export function noteParenFacts(d: Scenario, text: string, who?: ID): void {
+  const facts = parenFacts(text);
+  if (!facts.length) return;
+  const name = who ? d.characters[who]?.name : undefined;
+  for (const f of facts.slice(0, 3)) addMemory(d, `실제로 일어난 일(플레이어 행동${name ? `, ${name}에게` : ''}): ${snippet(f, 60)}`);
 }
 
 /**

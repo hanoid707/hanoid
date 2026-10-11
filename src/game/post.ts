@@ -19,7 +19,7 @@ import { tap } from '../utils/haptics';
 import { activeChar, alive, beginFlow, castChars, ctxOf, editIf, engine, fail, G, lineAuthor, OK, revealLater, type ActionResult, type Flow, tune, addNpcLines, deliverOpeners } from './core';
 import { diffOf, scaleSocial } from './difficulty';
 import { burstDelays, growValue, isInfluencer, LIKES_MAX, postEngagement } from './engagement';
-import { addMemory, addNewsPost, addPost, addReply, addXp, applyAffinity, applyDeltas, applyLove, consumeBoost, logActivity, markViral, noteTouchFromText, pushNoti, questKeyword, questProgress, recomputeStatus, tickClock } from './progress';
+import { addMemory, addNewsPost, addPost, addReply, addXp, applyAffinity, applyDeltas, applyLove, consumeBoost, logActivity, markViral, noteParenFacts, noteTouchFromText, pushNoti, questKeyword, questProgress, recomputeStatus, tickClock } from './progress';
 import { POST_MAX_LEN, TIME_COST, XP } from './rules';
 import { saveIdeas } from './ideas';
 import { takeAvoid } from './avoid';
@@ -107,6 +107,7 @@ export function publishPost(text: string, media?: PhotoRef, opts: { at?: { hour:
     if (last && body) addMemory(d, `플레이어가 ${last.authorId === ME ? '자기' : last.name} 글("${snippet(last.text, 30)}")에 이어서 "${snippet(body, 40)}"라고 씀`);
     // 괄호로 쓴 행동에 스킨십이 있으면 그 인물에 적어 둔다(이어 쓴 글이면 앞 글 작성자도 그 자리에 있던 사람)
     noteTouchFromText(d, body, last && last.authorId !== ME ? [last.authorId] : []);
+    noteParenFacts(d, body, last && last.authorId !== ME ? last.authorId : undefined);
     // 숫자는 바로 자라기 시작(로컬 추정치) → AI 반응이 오면 최종값으로 이어서 자란다
     const pre = postEngagement({ followers: d.stats.followers, quality: localQuality(local), mood: local.mood, viral: false, boost: boosted, difficulty: diffOf(d) });
     p.likes = pre.likes;
@@ -131,7 +132,9 @@ async function reactToMyPost(flow: Flow, postId: ID, text: string, hasMedia: boo
   try {
     const ctx = ctxOf(sid);
     if (!ctx) return;
-    const r = (await engine().reactToPost(ctx, { id: postId, text, hasMedia, ...(quote.length ? { quote: quote.map((q) => ({ authorId: q.authorId, name: q.name, text: q.text })) } : {}) }, { replies: tune().replies })) ?? silentReaction(text);
+    // AI 개수 조절에서 답글·뒤따르는 글·쪽지를 모두 0으로 두면 AI를 부르지 않는다(숫자만 게임 규칙으로)
+    const tn = tune();
+    const r = (tn.replies + tn.echoPosts + tn.echoDMs <= 0 ? null : await engine().reactToPost(ctx, { id: postId, text, hasMedia, ...(quote.length ? { quote: quote.map((q) => ({ authorId: q.authorId, name: q.name, text: q.text })) } : {}) }, { replies: tn.replies })) ?? silentReaction(text);
     if (!alive(flow)) return;
 
     // ② 최종 숫자 + 스탯·팔로우·제안

@@ -74,12 +74,20 @@ export function HomeScreen() {
         ref={listRef}
         data={posts}
         keyExtractor={(p) => p.id}
-        renderItem={({ item }) => (
-          // 방금 올라온 글은 살짝 떠오르며 나타난다(처음부터 있던 글은 그대로)
-          <AppearIn animate={Date.now() - (item.ts ?? 0) < 2500} from={14}>
-            <PostCard post={item} sc={sc} />
-          </AppearIn>
-        )}
+        renderItem={({ item, index }) => {
+          // 날이 바뀌는 자리(위 글과 일차가 다르면)에 구분선 — 메신저의 날짜 칩처럼 가운데 "N일차"
+          const prev = index > 0 ? posts[index - 1] : undefined;
+          const newDay = !!prev && prev.at.day !== item.at.day;
+          return (
+            <>
+              {newDay ? <DayDivider day={item.at.day} today={sc.clock.day} /> : null}
+              {/* 방금 올라온 글은 살짝 떠오르며 나타난다(처음부터 있던 글은 그대로) */}
+              <AppearIn animate={Date.now() - (item.ts ?? 0) < 2500} from={14}>
+                <PostCard post={item} sc={sc} />
+              </AppearIn>
+            </>
+          );
+        }}
         ListHeaderComponent={
           <View>
             <StatusBanner sc={sc} />
@@ -108,7 +116,27 @@ export function HomeScreen() {
   );
 }
 
+/** 타임라인의 날짜 구분선: 위아래로 조금 띄우고 가운데에 "어제 · 2일차" 칩 */
+function DayDivider({ day, today }: { day: number; today: number }) {
+  const { c } = useTheme();
+  const rel = day === today ? '오늘' : day === today - 1 ? '어제' : `${today - day}일 전`;
+  const title = day >= 1 ? `${day}일차` : '시작 전';
+  return (
+    <View testID="day-divider" style={[styles.dayWrap, { backgroundColor: c.surfaceAlt, borderTopColor: c.border, borderBottomColor: c.border }]} accessibilityRole="header" accessibilityLabel={title}>
+      <View style={[styles.dayLine, { backgroundColor: c.borderStrong }]} />
+      <View style={[styles.dayChip, { backgroundColor: c.bg, borderColor: c.borderStrong }]}>
+        <Text style={{ color: c.text, fontSize: font.small, fontWeight: '800' }}>{title}</Text>
+        {day >= 1 ? <Text style={{ color: c.subtext, fontSize: font.small }}>{` · ${rel}`}</Text> : null}
+      </View>
+      <View style={[styles.dayLine, { backgroundColor: c.borderStrong }]} />
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
+  dayWrap: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: space.lg, paddingVertical: 14, marginTop: 10, borderTopWidth: StyleSheet.hairlineWidth, borderBottomWidth: StyleSheet.hairlineWidth },
+  dayLine: { flex: 1, height: StyleSheet.hairlineWidth },
+  dayChip: { flexDirection: 'row', alignItems: 'center', borderWidth: StyleSheet.hairlineWidth, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 4 },
   header: { zIndex: 2, borderBottomWidth: StyleSheet.hairlineWidth },
   headRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: space.lg, height: 52 },
   worldWrap: { flex: 1, minWidth: 0, flexDirection: 'row' },

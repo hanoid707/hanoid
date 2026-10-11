@@ -116,7 +116,9 @@ export function lines(ctx: AIContext, list: unknown, o: LineOpts = {}): Generate
     let line: GeneratedLine;
     if (authorId) {
       const addressed = o.toPlayerIfAddressed && (text.includes(ctx.persona.name) || text.toLowerCase().includes(`@${me}`) || hasBanmalAddress(text));
-      const fixed = o.toPlayer || addressed ? fixRegister(text, c?.register) : text;
+      // 연인·썸은 사적인 순간에 반말·애교가 섞일 수 있어 말투 안전망을 쓰지 않는다
+      const loose = c?.relation === 'lover' || c?.relation === 'spicy';
+      const fixed = (o.toPlayer || addressed) && !loose ? fixRegister(text, c?.register) : text;
       line = media && keys.has(media) ? { authorId, text: fixed, media } : { authorId, text: fixed };
     } else {
       if (!o.ghost) continue;
@@ -147,7 +149,7 @@ export function shapeBurst(ctx: AIContext, list: GeneratedLine[], base: number):
     if (l.replyTo && casc.length < 3 && top.some((t) => t.authorId === l.replyTo) && infl(l.replyTo)) casc.push(l);
     else if (top.length < base) top.push({ ...l, replyTo: undefined });
   }
-  const out = [...top, ...casc].slice(0, 8);
+  const out = [...top, ...casc].slice(0, base + 3);
   return out.map((l) => (l.replyTo ? l : (({ replyTo: _r, ...rest }) => rest)(l)));
 }
 
@@ -212,7 +214,7 @@ export function normReact(ctx: AIContext, r: Raw, o: { n?: number; seed?: string
   const likes = r.likes !== undefined ? Math.max(0, num(r.likes)) : estLikes;
   return {
     mood: moodOf(r.mood),
-    replies: shapeBurst(ctx, lines(ctx, r.replies, { ghost: true, seed: o.seed, max: 8, maxLen: LIMITS.reply + 50, noNews: true, toPlayer: true }), o.n ?? 6),
+    replies: shapeBurst(ctx, lines(ctx, r.replies, { ghost: true, seed: o.seed, max: (o.n ?? 6) + 3, maxLen: LIMITS.reply + 50, noNews: true, toPlayer: true }), o.n ?? 6),
     likes,
     reposts: r.reposts !== undefined ? Math.max(0, num(r.reposts)) : Math.round(likes * 0.08),
     viral,
@@ -224,7 +226,7 @@ export function normReact(ctx: AIContext, r: Raw, o: { n?: number; seed?: string
     ideas: ideasOf(r.ideas),
     // 내 글을 보고 인물이 먼저 움직인 것: 자기 계정의 공개 글 · 따로 보내는 쪽지(핵심 인물만)
     echoPosts: lines(ctx, pick1(r, 'posts', 'echo'), { max: Math.max(0, tn.echoPosts), maxLen: 160, noNews: true, toPlayerIfAddressed: true }).slice(0, tn.echoPosts),
-    openers: lines(ctx, pick1(r, 'dm', 'dmOpeners'), { max: 3, maxLen: 120, noNews: true, toPlayer: true })
+    openers: lines(ctx, pick1(r, 'dm', 'dmOpeners'), { max: Math.max(3, tn.echoDMs), maxLen: 120, noNews: true, toPlayer: true })
       .filter((l) => ctx.cast.find((c) => c.id === l.authorId)?.tier !== 'crowd')
       .slice(0, tn.echoDMs),
     love: loveList(ctx, r.love),
@@ -235,7 +237,7 @@ export function normReact(ctx: AIContext, r: Raw, o: { n?: number; seed?: string
 
 export function normThread(ctx: AIContext, r: Raw, seed?: string): ThreadReaction {
   return {
-    replies: lines(ctx, r.replies, { ghost: true, seed, max: Math.min(8, Math.max(5, (ctx.tune ?? DEFAULT_TUNE).thread)), maxLen: LIMITS.reply + 50, noNews: true, toPlayer: true }),
+    replies: lines(ctx, r.replies, { ghost: true, seed, max: Math.max(1, (ctx.tune ?? DEFAULT_TUNE).thread), maxLen: LIMITS.reply + 50, noNews: true, toPlayer: true }),
     deltas: {
       affinity: affinityMap(ctx, pick1(r, 'aff', 'affinity')),
       romance: affinityMap(ctx, pick1(r, 'rom', 'romance')),
@@ -261,7 +263,7 @@ export function normDM(r: Raw, reg?: SpeechRegister, maxBubbles = 3, avoid?: str
     .map((t) => fixRegister(cleanText(t, 160), reg))
     .filter((t) => !!t && !hitsAvoid(avoid, t));
   const post = cleanText(str(r.post), LIMITS.post + 40);
-  const messages = raw.flatMap(splitMessage).slice(0, Math.min(3, Math.max(1, maxBubbles)));
+  const messages = raw.flatMap(splitMessage).slice(0, Math.max(1, maxBubbles));
   const summary = cleanText(str(pick1(r, 'sum', 'historySummary')), 260);
   const heart = cleanText(str(r.heart), LIMITS.heart + 12);
   const touch = cleanText(str(r.touch), 14).replace(/[.!?~]+$/, '');
@@ -315,14 +317,14 @@ export function normTick(ctx: AIContext, r: Raw): TickResult {
     .filter(Boolean)
     .slice(0, 2);
   return {
-    npcPosts: lines(ctx, pick1(r, 'posts', 'npcPosts'), { max: 6, maxLen: 160, toPlayerIfAddressed: true }),
+    npcPosts: lines(ctx, pick1(r, 'posts', 'npcPosts'), { max: Math.max(1, (ctx.tune ?? DEFAULT_TUNE).dayPosts), maxLen: 160, toPlayerIfAddressed: true }),
     news: arr<string>(r.news).map((t) => cleanText(t, 90)).filter((t) => !!t && !hitsAvoid(ctx.avoid, t)).slice(0, 2),
     trends: arr<{ tag?: string; n?: number; count?: number }>(r.trends)
       .filter((t) => str(t?.tag) && !hitsAvoid(ctx.avoid, str(t.tag)))
       .slice(0, 8)
       .map((t, i) => ({ tag: str(t.tag).startsWith('#') ? str(t.tag).replace(/\s+/g, '') : `#${str(t.tag).replace(/\s+/g, '')}`, count: Math.max(100, num(t.n ?? t.count, 1000)), hot: i === 0 })),
     event: normEventDraft(ctx, r.event),
-    dmOpeners: lines(ctx, pick1(r, 'dm', 'dmOpeners'), { max: 4, maxLen: 120, noNews: true, toPlayer: true }).filter((l) => ctx.cast.find((c) => c.id === l.authorId)?.tier !== 'crowd'),
+    dmOpeners: lines(ctx, pick1(r, 'dm', 'dmOpeners'), { max: Math.max(4, (ctx.tune ?? DEFAULT_TUNE).dayDMs + 2), maxLen: 120, noNews: true, toPlayer: true }).filter((l) => ctx.cast.find((c) => c.id === l.authorId)?.tier !== 'crowd'),
     mission: str(mission?.title) && kw.length && !hitsAvoid(ctx.avoid, `${str(mission?.title)} ${str(mission?.desc)} ${kw.join(' ')}`) ? { title: cleanText(mission!.title, 30), desc: cleanText(mission!.desc, 80), keyword: kw } : null,
     ideas: ideasOf(r.ideas),
     hearts: heartList(ctx, r.hearts).slice(0, 4),
@@ -346,7 +348,7 @@ export function normOutcome(ctx: AIContext, r: Raw, event?: Pick<GameEvent, 'inv
   const text = cleanText(r.text, 200);
   // 답을 보고 올라온 글(댓글 포함) — 댓글 없는 글은 버린다(시스템 글처럼 보이지 않게)
   const posts: GeneratedLine[] = [];
-  arr<Raw>(r.posts).slice(0, Math.min(4, (ctx.tune ?? DEFAULT_TUNE).eventPosts)).forEach((p, i) => {
+  arr<Raw>(r.posts).slice(0, (ctx.tune ?? DEFAULT_TUNE).eventPosts).forEach((p, i) => {
     const main = lines(ctx, [p], { ghost: true, seed: `ev${i}:${text.slice(0, 12)}`, max: 1, maxLen: LIMITS.post + 40 })[0];
     if (!main) return;
     const comments = lines(ctx, pick1(p, 'c', 'comments'), { ghost: true, seed: `evc${i}:${main.text.slice(0, 12)}`, max: 3, maxLen: LIMITS.reply + 40, noNews: true, exclude: main.authorId.startsWith('__') ? [] : [main.authorId] });
@@ -398,14 +400,14 @@ export function normComments(ctx: AIContext, r: Raw, o: { count: number; seed?: 
   const out = lines(ctx, pick1(r, 'comments', 'replies'), {
     ghost: true,
     seed: o.seed,
-    max: 8,
+    max: o.count + 3,
     maxLen: LIMITS.reply + 50,
     exclude: o.authorId && !mine ? [o.authorId] : [],
     noNews: true,
     // 플레이어 글에 달린 답글이면 플레이어에게 쓰는 말투 등급으로 맞춘다
     toPlayer: mine,
   });
-  return shapeBurst(ctx, out, Math.min(o.count, 6));
+  return shapeBurst(ctx, out, o.count);
 }
 
 /** 첫 쪽지 1~2줄 */

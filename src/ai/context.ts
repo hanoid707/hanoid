@@ -147,7 +147,7 @@ export function buildContext(sc: Scenario): AIContext {
       .map((q) => ({ title: q.title, keyword: q.keyword })),
     pendingEvents: (sc.events ?? []).filter((e) => e.status === 'pending' && !hit(e.title)).map((e) => e.title),
     ...(avoid.length ? { avoid } : {}),
-    heartAsk: heartTargets(sc, 3).map((c) => c.id),
+    heartAsk: heartTargets(sc, 50).map((c) => c.id),
     postedToday: [...new Set(sc.feed.map((id) => sc.posts[id]).filter((p) => !!p && p.kind !== 'reply' && p.at.day === sc.clock.day && castIds.has(p.authorId) && !sc.characters[p.authorId]?.isNews).map((p) => sc.characters[p.authorId].handle))],
     touchAsk: touchCandidates(sc)
       .filter((x) => !hit(x.act))

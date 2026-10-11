@@ -5,6 +5,7 @@
  *   설렘 40↑ + 호감도 20↑ → 매콤함(썸·밀당) / 설렘 75↑ + 호감도 60↑ → 연인
  *   멘토·가족은 기본 관계라 호감도가 -55 아래로 떨어질 때만 적으로 바뀐다.
  *
+ * 연인·썸(매콤함)이 돼도 말투는 바뀌지 않는다(원래 쓰던 말투 유지 — 나이·계급이 높은 사람은 해요체·존댓말 그대로).
  * 말투가 오락가락하지 않게:
  *   ① 경계값에 여유(HYST)를 둔다 — 경계를 8 이상 넘어야 바뀐다.
  *   ② 캐릭터 한 명의 관계는 게임 하루에 한 번만 바뀐다(나머지는 다음 날 반영).
@@ -215,12 +216,13 @@ export function computeRegister(c: Character): SpeechRegister {
   switch (c.relation) {
     case 'friend':
     case 'bestie':
-    case 'lover':
     case 'family':
       return 'banmal';
+    case 'lover':
     case 'spicy':
-      // 썸: 원래 말을 놓던 사이면 그대로 반말(가까워지는데 존댓말로 돌아가면 어색함). 처음엔 해요체, 호감 55↑면 말을 놓는다
-      return prev === 'banmal' ? 'banmal' : c.affinity >= 55 ? 'banmal' : 'haeyo';
+      // 연인·썸이라고 말을 놓지 않는다: 원래 쓰던 말투 그대로(나이가 많거나 계급·직급이 높은 사람은 해요체·존댓말 유지).
+      // 사적인 순간에 플레이어가 반말·애교를 하거나 애교를 청하면 받아 주는 건 지시문([말투 등급])이 맡는다
+      return prev ?? registerHint(c.description) ?? 'haeyo';
     case 'mentor':
       // 멘토: 이미 반말 쓰던 선배는 그대로. 아니면 호감 60↑에서 말을 놓는다
       return prev === 'banmal' ? 'banmal' : c.affinity >= 60 ? 'banmal' : 'haeyo';

@@ -19,6 +19,7 @@ import { LEGACY_DESC_HASH } from '../data/worlds/legacy';
 import type { Character, Scenario } from '../types';
 import { hashStr } from '../utils';
 import { initRelation } from './relationship';
+import { registerHint } from '../ai/local/register';
 import { KEEP } from './rules';
 
 /** (되돌리기 전용) 한때 30대 이상 나이를 20대 후반으로 바꿔 저장했던 규칙: 30~31→27, 32~34→28, 35↑→29 */
@@ -63,6 +64,9 @@ export function migrateScenarioData(raw: Scenario): Scenario {
   // v3.5.1: 직함 = 계급·직급만(4자 이하). 한 번만 정리한다
   const rankFix = sc.rankV !== 1;
   sc.rankV = 1;
+  // v3.5.2: 연인·썸이 됐다고 반말로 바뀐 인물은 원래 말투로(세계관 파일·설명에 적힌 말투). 한 번만
+  const regFix = sc.regV !== 1;
+  sc.regV = 1;
   for (const c of Object.values(sc.characters ?? {})) {
     if (c.badge === undefined) c.badge = c.isNews ? 'gold' : c.verified ? 'blue' : null;
     delete c.postPool;
@@ -102,6 +106,11 @@ export function migrateScenarioData(raw: Scenario): Scenario {
         const age = ageInText(c.description ?? '') ?? ageInText(c.bio ?? '') ?? ageForTitle(c.title, c.id);
         if (age && age >= 19) c.age = age;
       }
+    }
+    if (regFix && (c.relation === 'lover' || c.relation === 'spicy') && !c.registerOverride && c.register === 'banmal') {
+      const seed = tid && c.id.startsWith('ch_') ? findSeed(tid, c.id) : undefined;
+      const orig = seed?.register ?? registerHint(c.description ?? '');
+      if (orig && orig !== 'banmal') c.register = orig;
     }
     initRelation(c, day);
   }

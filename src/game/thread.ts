@@ -20,7 +20,7 @@ import { activeChar, alive, beginFlow, ctxOf, editIf, engine, fail, G, lineAutho
 import { diffOf, scaleSocial } from './difficulty';
 import { burstDelays, isInfluencer, npcEngagement } from './engagement';
 import { dedupeLines, replyLikes } from './post';
-import { addReply, addXp, applyDeltas, consumeBoost, logActivity, noteTouchFromText, questProgress, recomputeStatus, tickClock } from './progress';
+import { addReply, addXp, applyDeltas, consumeBoost, logActivity, noteParenFacts, noteTouchFromText, questProgress, recomputeStatus, tickClock } from './progress';
 import { hitsAvoid } from '../ai/context';
 import { takeAvoid } from './avoid';
 import { POST_MAX_LEN, TIME_COST, XP } from './rules';
@@ -66,6 +66,7 @@ export function replyToPost(parentId: ID, text: string): ActionResult {
     logActivity(d, '💬', target ? `${target.name}님 글에 답글을 달았어요` : '답글을 달았어요');
     // 괄호로 쓴 행동에 스킨십이 있으면 그 인물에 적어 둔다(답글 대상이 그 자리에 있던 사람)
     noteTouchFromText(d, body, target ? [target.id] : []);
+    noteParenFacts(d, body, target?.id);
   });
   tap();
   if (myReplyId) void reactToMyReply(beginFlow(sid), parentId, myReplyId, body, days, boosted);
@@ -107,6 +108,8 @@ async function reactToMyReply(flow: Flow, parentId: ID, myReplyId: ID, text: str
       if (!hitsAvoid(ctx.avoid, cur.text)) chain.unshift({ authorId: cur.authorId, text: cur.text, ...(cur.authorId === GHOST && cur.ghost ? { name: cur.ghost.name } : {}) });
       cur = cur.parentId ? sc.posts[cur.parentId] : undefined;
     }
+    // AI 개수 조절에서 내 답글에 달리는 답글을 0으로 두면 아무도 답하지 않는다(AI를 부르지 않음)
+    if (tune().thread <= 0) return;
     const r = await engine().replyInThread(ctx, {
       root: { authorId: root.authorId, text: root.text },
       target: { authorId: target.authorId, text: target.text, ...(target.authorId === GHOST && target.ghost ? { name: target.ghost.name } : {}) },

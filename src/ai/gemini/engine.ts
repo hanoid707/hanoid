@@ -7,7 +7,7 @@
  * 호출 종류마다 출력 상한(maxOutputTokens)을 작게 잡고, 생각(thinking)은 최소로.
  */
 import type { AISettings } from '../../types';
-import { clamp, hashStr } from '../../utils';
+import { hashStr } from '../../utils';
 import * as N from '../normalize';
 import * as P from '../prompts';
 import { DEFAULT_TUNE } from '../tune';
@@ -20,11 +20,11 @@ type Raw = Record<string, unknown>;
 /** 호출 종류별 출력 토큰 상한 */
 const MAX_OUT = {
   react: (n: number) => 380 + (n + 3) * 80,
-  thread: 1200,
-  dm: 460,
+  thread: (n: number) => 300 + n * 130,
+  dm: (n: number) => 260 + n * 90,
   ambient: (n: number) => 120 + n * 90,
-  tick: 1500,
-  event: 1400,
+  tick: (t: { dayPosts: number; dayDMs: number }) => 900 + t.dayPosts * 120 + t.dayDMs * 80,
+  event: (n: number) => 600 + n * 280,
   newEvent: 600,
   comments: (n: number) => 120 + (n + 3) * 75,
   firstDM: 200,
@@ -36,13 +36,13 @@ const MAX_OUT = {
 export function createGeminiEngine(settings: AISettings, opts: { via?: GeminiVia } = {}): AIEngine {
   const model = settings.model?.trim() || DEFAULT_GEMINI_MODEL;
   const call = (ctx: AIContext | null, prompt: string, schema: object, kind: string, maxOutputTokens: number, temperature?: number) =>
-    generateJSON<Raw>({ apiKey: settings.apiKey, model, system: ctx ? P.systemFor(ctx) : P.LITE_SYSTEM, prompt: prompt + P.avoidTail(ctx), schema, temperature, maxOutputTokens, kind, via: opts.via });
+    generateJSON<Raw>({ apiKey: settings.apiKey, model, system: ctx ? P.systemFor(ctx) : P.LITE_SYSTEM, prompt: prompt + P.avoidTail(ctx, prompt), schema, temperature, maxOutputTokens, kind, via: opts.via });
 
   return {
     id: 'gemini',
 
     async reactToPost(ctx, post, o) {
-      const n = clamp(Math.round(o?.replies ?? 6), 1, 6);
+      const n = Math.max(0, Math.round(o?.replies ?? 6));
       const tn = ctx.tune ?? DEFAULT_TUNE;
       const r = await call(ctx, P.reactPrompt(ctx, post, n), S.reactSchema(n, tn), 'react', MAX_OUT.react(n) + tn.echoPosts * 110 + tn.echoDMs * 80 + 60);
       return N.normReact(ctx, r, { n, seed: post.id });
@@ -50,18 +50,20 @@ export function createGeminiEngine(settings: AISettings, opts: { via?: GeminiVia
 
     async replyInThread(ctx, { target, reply, thread }) {
       const n = (ctx.tune ?? DEFAULT_TUNE).thread;
-      const r = await call(ctx, P.threadPrompt(ctx, { target, reply, thread: thread ?? [] }), S.threadSchema(n), 'thread', MAX_OUT.thread);
+      const r = await call(ctx, P.threadPrompt(ctx, { target, reply, thread: thread ?? [] }), S.threadSchema(n), 'thread', MAX_OUT.thread(n));
       return N.normThread(ctx, r, `t${hashStr(reply)}`);
     },
 
     async dmReply(ctx, { characterId, history, message, priorSummary }) {
       if (!ctx.cast.some((x) => x.id === characterId)) return { mood: 'neutral', messages: [], leave: false, affinityDelta: 0, romanceDelta: 0, devotionDelta: 0 };
-      const reg = ctx.cast.find((x) => x.id === characterId)?.register;
+      // 연인·썸은 사적인 순간에 반말·애교가 섞일 수 있어 말투 안전망을 쓰지 않는다
+      const rc = ctx.cast.find((x) => x.id === characterId);
+      const reg = rc?.relation === 'lover' || rc?.relation === 'spicy' ? undefined : rc?.register;
       const tn = ctx.tune ?? DEFAULT_TUNE;
       const bubbles = tn.dmBubbles;
       const cc = ctx.cast.find((x) => x.id === characterId);
       const heart = !!cc?.heartOk;
-      const r = N.normDM(await call(ctx, P.dmPrompt(ctx, { characterId, history, message, priorSummary }), S.dmSchema(bubbles, !!tn.dmPost, heart), 'dm', MAX_OUT.dm + (tn.dmPost ? 110 : 0) + (heart ? 70 : 20)), reg, bubbles, ctx.avoid);
+      const r = N.normDM(await call(ctx, P.dmPrompt(ctx, { characterId, history, message, priorSummary }), S.dmSchema(bubbles, !!tn.dmPost, heart), 'dm', MAX_OUT.dm(bubbles) + (tn.dmPost ? 110 : 0) + (heart ? 70 : 20)), reg, bubbles, ctx.avoid);
       if (!r.messages.length && !r.leave) throw new GeminiError('빈 답장이 왔어요', 200, false, 'empty');
       return r;
     },
@@ -71,11 +73,11 @@ export function createGeminiEngine(settings: AISettings, opts: { via?: GeminiVia
     },
 
     async worldTick(ctx, { day, returned }) {
-      return N.normTick(ctx, await call(ctx, P.tickPrompt(ctx, day, returned), S.tickSchema(ctx.tune ?? DEFAULT_TUNE, returned?.length ?? 0, Math.min(ctx.heartAsk?.length ?? 0, (ctx.tune ?? DEFAULT_TUNE).dayHearts)), 'tick', MAX_OUT.tick + Math.min(ctx.heartAsk?.length ?? 0, (ctx.tune ?? DEFAULT_TUNE).dayHearts) * 60 + 60));
+      return N.normTick(ctx, await call(ctx, P.tickPrompt(ctx, day, returned), S.tickSchema(ctx.tune ?? DEFAULT_TUNE, returned?.length ?? 0, Math.min(ctx.heartAsk?.length ?? 0, (ctx.tune ?? DEFAULT_TUNE).dayHearts)), 'tick', MAX_OUT.tick(ctx.tune ?? DEFAULT_TUNE) + Math.min(ctx.heartAsk?.length ?? 0, (ctx.tune ?? DEFAULT_TUNE).dayHearts) * 60 + 60));
     },
 
     async resolveEvent(ctx, { event, choiceId, customText }) {
-      const r = await call(ctx, P.outcomePrompt(ctx, event, choiceId, customText), S.outcomeSchema((ctx.tune ?? DEFAULT_TUNE).eventPosts), 'event', MAX_OUT.event, 0.8);
+      const r = await call(ctx, P.outcomePrompt(ctx, event, choiceId, customText), S.outcomeSchema((ctx.tune ?? DEFAULT_TUNE).eventPosts), 'event', MAX_OUT.event((ctx.tune ?? DEFAULT_TUNE).eventPosts), 0.8);
       return N.normOutcome(ctx, r, event);
     },
 
@@ -86,7 +88,7 @@ export function createGeminiEngine(settings: AISettings, opts: { via?: GeminiVia
     },
 
     async threadComments(ctx, { post, count, existing }) {
-      const n = clamp(Math.round(count), 1, 7);
+      const n = Math.max(1, Math.round(count));
       const r = await call(ctx, P.commentsPrompt(ctx, post, n, existing), S.commentsSchema(n), 'threadComments', MAX_OUT.comments(n), 1);
       return N.normComments(ctx, r, { count: n, seed: `c${hashStr(post.text)}`, authorId: post.authorId });
     },

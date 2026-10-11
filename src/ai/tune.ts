@@ -2,7 +2,7 @@
  * AI 조절값 — AI가 한 번에 써 주는 양(답글·댓글·쪽지·새 글 수 …)을 사용자가 직접 정한다(나 탭 > AI 연결).
  *  - 값은 설정(settings.ai.tune)에 들어 있고, 호출할 때마다 지금 값을 읽는다 → 바꾸면 다음 호출부터 바로 반영.
  *  - DB 동기화를 쓰면 Supabase(aisns.settings)에 같이 올라가 다른 기기에도 그대로 적용된다(sync/index.ts).
- *  - 0 = 그 일에 AI를 쓰지 않는다(호출 자체가 없어진다). 켬/끔 항목은 1/0.
+ *  - 0 = 그 일에 AI를 쓰지 않는다(호출 자체가 없어진다). 켬/끔 항목은 1/0. 개수 항목은 최대 제한이 없다(많을수록 토큰·시간이 는다).
  * 예상 소모(토큰·요금)는 실측(2026-10, 기본 세계관)에 맞춘 어림값이다 — 입력은 호출 종류마다 거의 고정, 출력은 개수에 비례.
  */
 import type { AITune } from '../types';
@@ -29,28 +29,12 @@ export const DEFAULT_TUNE: AITune = {
   firstDM: 1,
 };
 
-/** 항목별 [최소, 최대] */
-export const TUNE_RANGE: Record<keyof AITune, [number, number]> = {
-  replies: [1, 6],
-  echoPosts: [0, 3],
-  echoDMs: [0, 2],
-  thread: [5, 8],
-  dmBubbles: [1, 3],
-  dmPost: [0, 1],
-  eventPosts: [0, 4],
-  comments: [0, 6],
-  refreshPosts: [0, 5],
-  dayPosts: [0, 6],
-  dayDMs: [0, 3],
-  dayNews: [0, 1],
-  dayTrends: [0, 1],
-  dayMission: [0, 1],
-  dayEvent: [0, 1],
-  dayHearts: [0, 3],
-  dayTouch: [0, 1],
-  bonds: [0, 1],
-  firstDM: [0, 1],
-};
+/** 켬/끔 항목(0/1) */
+const TOGGLES: (keyof AITune)[] = ['dmPost', 'dayNews', 'dayTrends', 'dayMission', 'dayEvent', 'dayTouch', 'bonds', 'firstDM'];
+/** 항목별 [최소, 최대] — 개수 항목은 0부터 제한 없이, 켬/끔 항목은 0/1 */
+export const TUNE_RANGE = Object.fromEntries(
+  (Object.keys(DEFAULT_TUNE) as (keyof AITune)[]).map((k) => [k, TOGGLES.includes(k) ? [0, 1] : [0, Infinity]]),
+) as Record<keyof AITune, [number, number]>;
 
 /** 저장된 값(일부만 있거나 범위를 벗어날 수 있음) → 쓸 수 있는 값 */
 export function normTune(p?: Partial<AITune> | null): AITune {
@@ -109,11 +93,11 @@ export function callCost(kind: CallKind, t: AITune): CallCost {
   const c = (inTok: number, out: number): CallCost => ({ inTok, outTok: Math.round(out * OUT_PAD) });
   switch (kind) {
     case 'react':
-      return c(IN.react, 130 + t.replies * 55 + t.echoPosts * 70 + t.echoDMs * 30);
+      return t.replies + t.echoPosts + t.echoDMs > 0 ? c(IN.react, 130 + t.replies * 55 + t.echoPosts * 70 + t.echoDMs * 30) : NONE;
     case 'thread':
-      return c(IN.thread, 70 + Math.max(5, t.thread) * 55);
+      return t.thread > 0 ? c(IN.thread, 70 + t.thread * 55) : NONE;
     case 'dm':
-      return c(IN.dm, 60 + ((1 + t.dmBubbles) / 2) * 45 + t.dmPost * 25);
+      return t.dmBubbles > 0 ? c(IN.dm, 60 + ((1 + t.dmBubbles) / 2) * 45 + t.dmPost * 25) : NONE;
     case 'event':
       return c(IN.event, 250 + t.eventPosts * 150);
     case 'comments':

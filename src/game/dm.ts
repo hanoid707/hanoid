@@ -6,11 +6,11 @@ import { getActive } from '../store/game';
 import type { ID } from '../types';
 import { clamp, fill, rand, sleep, uid } from '../utils';
 import { tap } from '../utils/haptics';
-import { addNpcLines, activeChar, alive, beginFlow, ctxOf, editIf, engine, ensureConversation, fail, G, OK, trimMessages, type ActionResult, type Flow } from './core';
+import { addNpcLines, activeChar, alive, beginFlow, ctxOf, editIf, engine, ensureConversation, fail, G, OK, trimMessages, tune, type ActionResult, type Flow } from './core';
 import { diffOf, scaleSocial } from './difficulty';
 import { giftBlocked, giftEffect, GIFTS } from './items';
 import { heartEligible, noteTouch, setHeart } from './love';
-import { addMemory, addXp, applyAffinity, logActivity, noteTouchFromText, pushItemLog, questProgress, tickClock } from './progress';
+import { addMemory, addXp, applyAffinity, logActivity, noteParenFacts, noteTouchFromText, pushItemLog, questProgress, tickClock } from './progress';
 import { DM_MAX_LEN, TIME_COST, XP } from './rules';
 import { hitsAvoid, scrubAvoid, withCharAvoid } from '../ai/context';
 import { takeAvoid } from './avoid';
@@ -42,6 +42,7 @@ export function sendDM(characterId: ID, text: string): ActionResult {
     questProgress(d, 'dm', 1);
     // 괄호로 쓴 행동에 스킨십이 있으면 이 인물에 적어 둔다
     noteTouchFromText(d, body, [characterId]);
+    noteParenFacts(d, body, characterId);
   });
   tap();
   void dmConversation(beginFlow(sid), characterId, body, days);
@@ -106,7 +107,8 @@ async function dmConversation(flow: Flow, characterId: ID, message: string, days
     editIf(flow, (d) => {
       if (d.dms[characterId]) d.dms[characterId].typing = true;
     });
-    const r = await engine().dmReply(ctx, { characterId, history, message, priorSummary });
+    // AI 개수 조절에서 쪽지 답장 말풍선을 0으로 두면 답장하지 않는다(AI를 부르지 않음)
+    const r = tune().dmBubbles <= 0 ? null : await engine().dmReply(ctx, { characterId, history, message, priorSummary });
     if (!r) {
       // AI가 끝내 답하지 못함 → 답장은 비워 둔다(틀 문장으로 채우지 않음)
       editIf(flow, (d) => {

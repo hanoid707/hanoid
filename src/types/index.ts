@@ -526,6 +526,8 @@ export interface Scenario {
   bondTry?: number;
   /** 직함을 계급·직급만 남기도록 한 번 정리했는지(1) — game/migrate.ts */
   rankV?: number;
+  /** 연인·썸이 돼 반말로 바뀌었던 인물의 말투를 원래대로 되돌렸는지(1) */
+  regV?: number;
 }
 
 /** 쓸 AI(예전 세이브의 'mock'은 불러올 때 'gemini'로 바뀐다) */

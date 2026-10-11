@@ -69,7 +69,7 @@ export function createClaudeEngine(settings: AISettings): AIEngine {
     const sample = await getSample();
     if (!sample) throw new ClaudeError('이 화면에서는 클로드를 쓸 수 없어요', 'unavailable', true);
     const tier = tierFor(kind);
-    const input = wellFormed(`${ctx ? P.systemFor(ctx) : P.LITE_SYSTEM}\n\n${prompt}${P.avoidTail(ctx)}\n\n[응답 형식]\n아래 모양의 JSON 값 하나만 출력한다(설명·코드펜스 없이). 글자 값은 자리일 뿐이니 새로 쓰고, <…> 자리는 [할 일]의 범위 안 정수로 바꿔 쓴다.\n${shape}`);
+    const input = wellFormed(`${ctx ? P.systemFor(ctx) : P.LITE_SYSTEM}\n\n${prompt}${P.avoidTail(ctx, prompt)}\n\n[응답 형식]\n아래 모양의 JSON 값 하나만 출력한다(설명·코드펜스 없이). 글자 값은 자리일 뿐이니 새로 쓰고, <…> 자리는 [할 일]의 범위 안 정수로 바꿔 쓴다.\n${shape}`);
     const t0 = Date.now();
     const usage = (ok: boolean, out: number) =>
       recordUsage({ provider: 'claude', model: `claude-${tier}`, kind, inTok: estTokens(input.length), outTok: out, ms: Date.now() - t0, ok, via: 'sample', estimated: true });
@@ -91,7 +91,7 @@ export function createClaudeEngine(settings: AISettings): AIEngine {
     id: 'claude',
 
     async reactToPost(ctx, post, o) {
-      const n = clamp(Math.round(o?.replies ?? 6), 1, 6);
+      const n = Math.max(0, Math.round(o?.replies ?? 6));
       return N.normReact(ctx, await call(ctx, P.reactPrompt(ctx, post, n), P.reactShape(ctx.tune ?? DEFAULT_TUNE), 'react'), { n, seed: post.id });
     },
 
@@ -102,7 +102,9 @@ export function createClaudeEngine(settings: AISettings): AIEngine {
 
     async dmReply(ctx, { characterId, history, message, priorSummary }) {
       if (!ctx.cast.some((x) => x.id === characterId)) return { mood: 'neutral', messages: [], leave: false, affinityDelta: 0, romanceDelta: 0, devotionDelta: 0 };
-      const reg = ctx.cast.find((x) => x.id === characterId)?.register;
+      // 연인·썸은 사적인 순간에 반말·애교가 섞일 수 있어 말투 안전망을 쓰지 않는다
+      const rc = ctx.cast.find((x) => x.id === characterId);
+      const reg = rc?.relation === 'lover' || rc?.relation === 'spicy' ? undefined : rc?.register;
       const heart = !!ctx.cast.find((x) => x.id === characterId)?.heartOk;
       const r = N.normDM(await call(ctx, P.dmPrompt(ctx, { characterId, history, message, priorSummary }), P.dmShape(ctx.tune ?? DEFAULT_TUNE, heart), 'dm'), reg, (ctx.tune ?? DEFAULT_TUNE).dmBubbles, ctx.avoid);
       if (!r.messages.length && !r.leave) throw new ClaudeError('빈 답장이 왔어요', 'empty', false);
@@ -128,7 +130,7 @@ export function createClaudeEngine(settings: AISettings): AIEngine {
     },
 
     async threadComments(ctx, { post, count, existing }) {
-      const n = clamp(Math.round(count), 1, 6);
+      const n = Math.max(1, Math.round(count));
       const r = await call(ctx, P.commentsPrompt(ctx, post, n, existing), P.SHAPES.comments, 'threadComments');
       return N.normComments(ctx, r, { count: n, seed: `c${hashStr(post.text)}`, authorId: post.authorId });
     },

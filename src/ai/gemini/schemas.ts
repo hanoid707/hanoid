@@ -29,7 +29,7 @@ const LINE_RE = obj({ h: STR, t: STR, re: { type: 'STRING', nullable: true } }, 
 export function reactSchema(n: number, t?: AITune) {
   return obj({
     mood: MOOD,
-    replies: arr(LINE_RE, Math.min(8, Math.max(1, n) + 3)),
+    replies: arr(LINE_RE, Math.max(1, n + 3)),
     aff: arr(DELTA, 8),
     rom: arr(DELTA, 4),
     dev: arr(DELTA, 6),
@@ -51,7 +51,7 @@ export function reactSchema(n: number, t?: AITune) {
 /** 내 답글에 달리는 답글: 조절값(n)만큼만 */
 export function threadSchema(n: number) {
   return obj({
-    replies: arr(LINE_RE, Math.min(8, Math.max(5, n))),
+    replies: arr(LINE_RE, Math.max(1, n)),
     aff: arr(DELTA, 8),
     rom: arr(DELTA, 4),
     dev: arr(DELTA, 4),
@@ -63,7 +63,7 @@ export function threadSchema(n: number) {
 export const dmSchema = (bubbles: number, withPost = false, withHeart = false) => obj(
   {
     mood: MOOD,
-    messages: arr(STR, Math.min(3, Math.max(1, bubbles))),
+    messages: arr(STR, Math.max(1, bubbles)),
     affinityDelta: INT,
     romanceDelta: INT,
     devotionDelta: INT,
@@ -111,7 +111,7 @@ export function tickSchema(t: AITune, returned = 0, hearts = 0) {
 export function outcomeSchema(posts: number) {
   return obj({
     text: STR,
-    ...(posts > 0 ? { posts: arr(obj({ h: STR, t: STR, c: arr(LINE, 3) }), Math.min(4, posts)) } : {}),
+    ...(posts > 0 ? { posts: arr(obj({ h: STR, t: STR, c: arr(LINE, 3) }), posts) } : {}),
     grade: INT,
     followers: INT,
     aura: INT,
@@ -132,7 +132,7 @@ export const BONDS_SCHEMA = obj({
 });
 
 export function commentsSchema(count: number) {
-  return obj({ comments: arr(LINE_RE, Math.min(10, Math.max(1, count) + 3)) });
+  return obj({ comments: arr(LINE_RE, Math.max(1, count) + 3) });
 }
 
 export const FIRST_DM_SCHEMA = obj({ messages: arr(STR, 2) });
