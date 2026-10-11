@@ -13,14 +13,16 @@ import { ghostAuthor } from '../ai/local/ghost';
 import type { GeneratedLine, PostReaction } from '../ai/types';
 import { getActive } from '../store/game';
 import { ME, type Character, type Deltas, type ID, type PhotoRef, type Post, type Scenario } from '../types';
-import { clamp, cutText, pick, rand, snippet, uid } from '../utils';
+import { clamp, cutText, pick, rand, snippet, uid, sleep } from '../utils';
 import { tap } from '../utils/haptics';
-import { activeChar, alive, beginFlow, castChars, ctxOf, editIf, engine, fail, G, lineAuthor, OK, revealLater, type ActionResult, type Flow, tune } from './core';
+import { activeChar, alive, beginFlow, castChars, ctxOf, editIf, engine, fail, G, lineAuthor, OK, revealLater, type ActionResult, type Flow, tune, addNpcLines, deliverOpeners } from './core';
 import { diffOf, scaleSocial } from './difficulty';
 import { burstDelays, growValue, isInfluencer, LIKES_MAX, postEngagement } from './engagement';
 import { addNewsPost, addPost, addReply, addXp, applyDeltas, consumeBoost, logActivity, markViral, pushNoti, questKeyword, questProgress, recomputeStatus, tickClock } from './progress';
 import { POST_MAX_LEN, TIME_COST, XP } from './rules';
 import { saveIdeas } from './ideas';
+import { takeAvoid } from './avoid';
+import { minutesUntil } from './clock';
 import { runDayTick } from './tick';
 import { snapshot } from './undo';
 
@@ -53,11 +55,14 @@ export function regrow(p: Post, target: { likes: number; reposts: number; views:
   p.growFrom = { likes: cur.likes, reposts: cur.reposts, views: cur.views, ts: now, ms };
 }
 
-export function publishPost(text: string, media?: PhotoRef): ActionResult {
+/** at: 글을 올리는 시각(글쓰기 화면에서 직접 고른 경우). 없으면 2~4시간 뒤 */
+export function publishPost(text: string, media?: PhotoRef, opts: { at?: { hour: number; minute: number } } = {}): ActionResult {
   const sc = getActive();
-  const body = cutText(text.trim(), POST_MAX_LEN);
   if (!sc) return fail('none');
-  if (!body && !media) return fail('empty');
+  // (-단어)·(+단어): 이 세계관에서 화제를 빼거나 다시 넣는다. 그것만 썼으면 글은 올리지 않는다
+  const cmd = takeAvoid(sc.id, text);
+  const body = cutText(cmd.text.trim(), POST_MAX_LEN);
+  if (!body && !media) return cmd.changed ? OK : fail('empty');
   snapshot(sc, '글 올리기');
 
   const sid = sc.id;
@@ -66,7 +71,8 @@ export function publishPost(text: string, media?: PhotoRef): ActionResult {
   let days = 0;
   let boosted = false;
   G().edit(sid, (d) => {
-    days = tickClock(d, TIME_COST.post); // 글을 쓰는 데 걸린 시간만큼 먼저 흐르고, 그 시각에 글이 올라간다
+    // 시간이 먼저 흐르고 그 시각에 글이 올라간다: 고른 시각까지(지난 시각이면 다음 날) 또는 2~4시간
+    days = tickClock(d, opts.at ? minutesUntil(d.clock, opts.at) : rand(TIME_COST.postMin, TIME_COST.postMax));
     boosted = consumeBoost(d, '이번 글이 크게 퍼지고 있어요');
     const p = addPost(d, { id: postId, authorId: ME, text: body, kind: 'post', media, boosted }, true);
     // 숫자는 바로 자라기 시작(로컬 추정치) → AI 반응이 오면 최종값으로 이어서 자란다
@@ -120,6 +126,16 @@ async function reactToMyPost(flow: Flow, postId: ID, text: string, hasMedia: boo
 
     // ④ 마무리: 묶음 알림 + 뉴스
     editIf(flow, (d) => finishPostNotis(d, postId, r, grouped, groupActor));
+
+    // ⑤ 내 글을 보고 먼저 움직이는 인물: 자기 계정에 올리는 글 → 조금 뒤 따로 보내는 쪽지
+    if (r.echoPosts?.length) {
+      await sleep(rand(2500, 5000));
+      editIf(flow, (d) => addNpcLines(d, r.echoPosts!));
+    }
+    if (r.openers?.length) {
+      await sleep(rand(2000, 4500));
+      editIf(flow, (d) => deliverOpeners(d, r.openers!));
+    }
   } finally {
     G().setBusy(key, false);
   }

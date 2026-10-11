@@ -6,6 +6,7 @@
  */
 import { GHOST, type Archetype, type Deltas, type GameEvent, type ID, type SpeechRegister } from '../types';
 import { hashStr } from '../utils';
+import { hitsAvoid } from './context';
 import { ghostAuthor } from './local/ghost';
 import { localBio, localEmoji, nameCore, toHandle } from './local/names';
 import { hasBanmalAddress, textRegister, toRegister } from './local/register';
@@ -103,6 +104,7 @@ export function lines(ctx: AIContext, list: unknown, o: LineOpts = {}): Generate
     if (h.toLowerCase() === me) continue; // 플레이어 대사는 쓰지 않는다
     const text = cleanText(textOfLine(l), o.maxLen ?? 140);
     if (!text || seen.has(text)) continue;
+    if (hitsAvoid(ctx.avoid, text)) continue; // 빼 둔 화제를 쓴 줄은 버린다
     let authorId = idOf(ctx, h);
     const c = authorId ? ctx.cast.find((x) => x.id === authorId) : undefined;
     if (authorId && (o.exclude?.includes(authorId) || (o.noNews && c?.isNews))) continue;
@@ -169,6 +171,7 @@ function ideasOf(v: unknown): string[] {
 // ───────────────────────── 내 글 반응
 
 export function normReact(ctx: AIContext, r: Raw, o: { n?: number; seed?: string } = {}): PostReaction {
+  const tn = ctx.tune ?? DEFAULT_TUNE;
   const quality = clampN(num(r.quality, 50), 0, 100);
   const deltas: Deltas = {
     followers: num(pick1(r, 'followers', 'followerDelta')),
@@ -196,6 +199,11 @@ export function normReact(ctx: AIContext, r: Raw, o: { n?: number; seed?: string
     newFollowers: handles(ctx, pick1(r, 'follow', 'newFollowers')),
     unfollowers: handles(ctx, pick1(r, 'unfollow', 'unfollowers')),
     ideas: ideasOf(r.ideas),
+    // 내 글을 보고 인물이 먼저 움직인 것: 자기 계정의 공개 글 · 따로 보내는 쪽지(핵심 인물만)
+    echoPosts: lines(ctx, pick1(r, 'posts', 'echo'), { max: Math.max(0, tn.echoPosts), maxLen: 160, noNews: true, toPlayerIfAddressed: true }).slice(0, tn.echoPosts),
+    openers: lines(ctx, pick1(r, 'dm', 'dmOpeners'), { max: 3, maxLen: 120, noNews: true, toPlayer: true })
+      .filter((l) => ctx.cast.find((c) => c.id === l.authorId)?.tier !== 'crowd')
+      .slice(0, tn.echoDMs),
   };
 }
 
@@ -224,10 +232,11 @@ function splitMessage(t: string): string[] {
   return [t.slice(0, at + 1).trim(), cleanText(t.slice(at + 1), 100)].filter(Boolean);
 }
 
-export function normDM(r: Raw, reg?: SpeechRegister, maxBubbles = 3): DMReaction {
+export function normDM(r: Raw, reg?: SpeechRegister, maxBubbles = 3, avoid?: string[]): DMReaction {
   const raw = arr<string>(pick1(r, 'messages', 'lines'))
     .map((t) => fixRegister(cleanText(t, 160), reg))
-    .filter(Boolean);
+    .filter((t) => !!t && !hitsAvoid(avoid, t));
+  const post = cleanText(str(r.post), LIMITS.post + 40);
   const messages = raw.flatMap(splitMessage).slice(0, Math.min(3, Math.max(1, maxBubbles)));
   const summary = cleanText(str(pick1(r, 'sum', 'historySummary')), 260);
   return {
@@ -238,6 +247,7 @@ export function normDM(r: Raw, reg?: SpeechRegister, maxBubbles = 3): DMReaction
     romanceDelta: num(pick1(r, 'romanceDelta', 'rom')),
     devotionDelta: num(pick1(r, 'devotionDelta', 'dev')),
     ...(summary ? { historySummary: summary } : {}),
+    ...(post.length >= 4 && !hitsAvoid(avoid, post) ? { post } : {}),
   };
 }
 
@@ -256,6 +266,7 @@ type RawEvent = { emoji?: string; title?: string; body?: string; inv?: string[];
 export function normEventDraft(ctx: AIContext, v: unknown): EventDraft | null {
   const ev = v as RawEvent | null;
   if (!ev || typeof ev !== 'object' || !str(ev.title) || !str(ev.body)) return null;
+  if (hitsAvoid(ctx.avoid, `${str(ev.title)} ${str(ev.body)}`)) return null; // 빼 둔 화제로 만든 이벤트는 받지 않는다
   return {
     emoji: str(ev.emoji).match(EMOJI_RE)?.[0] ?? '⚡',
     title: cleanText(ev.title, 40),
@@ -277,14 +288,14 @@ export function normTick(ctx: AIContext, r: Raw): TickResult {
     .slice(0, 2);
   return {
     npcPosts: lines(ctx, pick1(r, 'posts', 'npcPosts'), { max: 6, maxLen: 160, toPlayerIfAddressed: true }),
-    news: arr<string>(r.news).map((t) => cleanText(t, 90)).filter(Boolean).slice(0, 2),
+    news: arr<string>(r.news).map((t) => cleanText(t, 90)).filter((t) => !!t && !hitsAvoid(ctx.avoid, t)).slice(0, 2),
     trends: arr<{ tag?: string; n?: number; count?: number }>(r.trends)
-      .filter((t) => str(t?.tag))
+      .filter((t) => str(t?.tag) && !hitsAvoid(ctx.avoid, str(t.tag)))
       .slice(0, 8)
       .map((t, i) => ({ tag: str(t.tag).startsWith('#') ? str(t.tag).replace(/\s+/g, '') : `#${str(t.tag).replace(/\s+/g, '')}`, count: Math.max(100, num(t.n ?? t.count, 1000)), hot: i === 0 })),
     event: normEventDraft(ctx, r.event),
     dmOpeners: lines(ctx, pick1(r, 'dm', 'dmOpeners'), { max: 4, maxLen: 120, noNews: true, toPlayer: true }).filter((l) => ctx.cast.find((c) => c.id === l.authorId)?.tier !== 'crowd'),
-    mission: str(mission?.title) && kw.length ? { title: cleanText(mission!.title, 30), desc: cleanText(mission!.desc, 80), keyword: kw } : null,
+    mission: str(mission?.title) && kw.length && !hitsAvoid(ctx.avoid, `${str(mission?.title)} ${str(mission?.desc)} ${kw.join(' ')}`) ? { title: cleanText(mission!.title, 30), desc: cleanText(mission!.desc, 80), keyword: kw } : null,
     ideas: ideasOf(r.ideas),
     bios: arr<{ h?: string; handle?: string; bio?: string }>(r.bios)
       .map((b) => ({ id: idOf(ctx, b?.h ?? b?.handle), bio: cleanText(b?.bio, LIMITS.bio + 10) }))
@@ -352,10 +363,10 @@ export function normComments(ctx: AIContext, r: Raw, o: { count: number; seed?: 
 }
 
 /** 첫 쪽지 1~2줄 */
-export function normFirstDM(r: Raw, reg?: SpeechRegister): string[] {
+export function normFirstDM(r: Raw, reg?: SpeechRegister, avoid?: string[]): string[] {
   return arr<string>(pick1(r, 'messages', 'lines'))
     .map((t) => fixRegister(cleanText(t, 160), reg))
-    .filter(Boolean)
+    .filter((t) => !!t && !hitsAvoid(avoid, t))
     .flatMap(splitMessage)
     .slice(0, 2);
 }

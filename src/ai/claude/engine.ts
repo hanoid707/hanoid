@@ -92,7 +92,7 @@ export function createClaudeEngine(settings: AISettings): AIEngine {
 
     async reactToPost(ctx, post, o) {
       const n = clamp(Math.round(o?.replies ?? 6), 1, 6);
-      return N.normReact(ctx, await call(ctx, P.reactPrompt(ctx, post, n), P.SHAPES.react, 'react'), { n, seed: post.id });
+      return N.normReact(ctx, await call(ctx, P.reactPrompt(ctx, post, n), P.reactShape(ctx.tune ?? DEFAULT_TUNE), 'react'), { n, seed: post.id });
     },
 
     async replyInThread(ctx, { target, reply, thread }) {
@@ -103,7 +103,7 @@ export function createClaudeEngine(settings: AISettings): AIEngine {
     async dmReply(ctx, { characterId, history, message, priorSummary }) {
       if (!ctx.cast.some((x) => x.id === characterId)) return { mood: 'neutral', messages: [], leave: false, affinityDelta: 0, romanceDelta: 0, devotionDelta: 0 };
       const reg = ctx.cast.find((x) => x.id === characterId)?.register;
-      const r = N.normDM(await call(ctx, P.dmPrompt(ctx, { characterId, history, message, priorSummary }), P.SHAPES.dm, 'dm'), reg, (ctx.tune ?? DEFAULT_TUNE).dmBubbles);
+      const r = N.normDM(await call(ctx, P.dmPrompt(ctx, { characterId, history, message, priorSummary }), P.dmShape(ctx.tune ?? DEFAULT_TUNE), 'dm'), reg, (ctx.tune ?? DEFAULT_TUNE).dmBubbles, ctx.avoid);
       if (!r.messages.length && !r.leave) throw new ClaudeError('빈 답장이 왔어요', 'empty', false);
       return r;
     },
@@ -135,7 +135,7 @@ export function createClaudeEngine(settings: AISettings): AIEngine {
     async firstDM(ctx, { characterId }) {
       const c = ctx.cast.find((x) => x.id === characterId);
       if (!c) return [];
-      return N.normFirstDM(await call(ctx, P.firstDMPrompt(ctx, characterId), P.SHAPES.firstDM, 'firstDM'), c.register);
+      return N.normFirstDM(await call(ctx, P.firstDMPrompt(ctx, characterId), P.SHAPES.firstDM, 'firstDM'), c.register, ctx.avoid);
     },
 
     async draftCharacter(ctx, args) {

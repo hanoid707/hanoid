@@ -253,7 +253,7 @@ export function EventScreen() {
                     />
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                       <Text style={{ color: c.faint, fontSize: font.tiny, flex: 1 }}>
-                        {custom.length}/{CUSTOM_MAX} · 답의 내용에 따라 결과가 달라져요
+                        {custom.length}/{CUSTOM_MAX} · 답하면 하루가 지나요
                       </Text>
                       <Button title="답하기" size="sm" variant="ink" disabled={!custom.trim() || refreshing} onPress={answer} />
                     </View>

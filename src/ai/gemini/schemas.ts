@@ -23,8 +23,8 @@ const DELTA = obj({ h: STR, d: INT });
 /** (v3.1) 답글 한 줄 + re: 인플루언서 답글에 다는 대댓글이면 그 계정 아이디 */
 const LINE_RE = obj({ h: STR, t: STR, re: { type: 'STRING', nullable: true } }, ['h', 't']);
 
-/** 내 글 반응: 답글 수(n)만큼만 */
-export function reactSchema(n: number) {
+/** 내 글 반응: 답글 수(n)만큼만. 뒤따르는 공개 글(posts)·쪽지(dm)는 조절값에서 켠 경우만 */
+export function reactSchema(n: number, t?: AITune) {
   return obj({
     mood: MOOD,
     replies: arr(LINE_RE, Math.min(8, Math.max(1, n) + 3)),
@@ -40,6 +40,8 @@ export function reactSchema(n: number) {
     news: arr(STR, 1),
     follow: arr(STR, 3),
     unfollow: arr(STR, 3),
+    ...(t && t.echoPosts > 0 ? { posts: arr(LINE, t.echoPosts) } : {}),
+    ...(t && t.echoDMs > 0 ? { dm: arr(LINE, t.echoDMs) } : {}),
   });
 }
 
@@ -55,7 +57,7 @@ export function threadSchema(n: number) {
 }
 
 /** 쪽지 답장: 말풍선 최대 수(조절값) */
-export const dmSchema = (bubbles: number) => obj(
+export const dmSchema = (bubbles: number, withPost = false) => obj(
   {
     mood: MOOD,
     messages: arr(STR, Math.min(3, Math.max(1, bubbles))),
@@ -65,6 +67,7 @@ export const dmSchema = (bubbles: number) => obj(
     leave: BOOL,
     /** 대화가 12줄 넘게 길어졌을 때만 요청 — 갱신된 이전 대화 요약 */
     sum: STR,
+    ...(withPost ? { post: STR } : {}),
   },
   ['mood', 'messages', 'affinityDelta', 'romanceDelta', 'devotionDelta', 'leave'],
 );

@@ -9,8 +9,9 @@ import type { AIEngine, GeneratedLine } from '../ai/types';
 import { sceneKey } from '../data/worlds';
 import { useGame } from '../store/game';
 import { GHOST, type AITune, type Character, type Conversation, type GhostAuthor, type ID, type PhotoRef, type Scenario } from '../types';
+import { uid } from '../utils';
 import { npcEngagement } from './engagement';
-import { addPost, addReply } from './progress';
+import { addPost, addReply, pushNoti } from './progress';
 import { KEEP } from './rules';
 import { flowSeq, isUndone } from './undo';
 
@@ -155,6 +156,26 @@ export function ensureConversation(d: Scenario, characterId: ID): Conversation {
 
 export function trimMessages(cv: Conversation) {
   if (cv.messages.length > KEEP.dmMessages) cv.messages.splice(0, cv.messages.length - KEEP.dmMessages);
+}
+
+/**
+ * 인물이 먼저 보내는 쪽지 넣기(하루 정산의 먼저 오는 쪽지 · 내 글을 보고 따로 보내는 쪽지).
+ * limit: 받을 인물 수 상한. always: 상한과 상관없이 받는 인물(대화방에 돌아온 사람).
+ */
+export function deliverOpeners(d: Scenario, lines: GeneratedLine[], limit = lines.length, always: ID[] = []): void {
+  let n = 0;
+  for (const o of lines) {
+    if (!activeChar(d, o.authorId)) continue;
+    if (d.dms[o.authorId]?.typing) continue;
+    if (!always.includes(o.authorId) && ++n > limit) continue;
+    const cv = ensureConversation(d, o.authorId);
+    if (cv.leftUntilDay !== null) continue;
+    cv.messages.push({ id: uid('m'), from: 'them', text: o.text, ts: Date.now(), at: { ...d.clock } });
+    trimMessages(cv);
+    cv.unread += 1;
+    cv.updatedTs = Date.now();
+    pushNoti(d, { type: 'dm', actorId: o.authorId, text: '님이 쪽지를 보냈습니다' });
+  }
 }
 
 // ───────────────────────── NPC 글

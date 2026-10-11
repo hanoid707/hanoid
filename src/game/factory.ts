@@ -7,7 +7,7 @@
 import { peerRegisterHint } from '../ai/local/register';
 import type { CastDraft } from '../ai/types';
 import { ARCHETYPE_DEFAULTS, AVATAR_COLORS, AVATAR_EMOJIS } from '../data/avatars';
-import { pickFace, usedFaceKeys } from '../data/facePool';
+import { pickFace, themeOfWorld, usedFaceKeys } from '../data/facePool';
 import { getWorldTemplate, sceneKey, WORLDS, type CharacterSeed, type WorldTemplate } from '../data/worlds';
 import type { CustomWorldInput } from '../store/draft';
 import { useRoster } from '../store/roster';
@@ -87,10 +87,9 @@ function customFaces(cast: CastDraft[]): (string | undefined)[] {
   const used = new Set<string>();
   return cast.map((c) => {
     if (c.isNews) return undefined;
-    const ageGroup = (Math.min(60, Math.max(20, Math.floor((c.age ?? 25) / 10) * 10)) as AgeGroup);
     // AI가 성별을 빠뜨렸으면 아이디로 정한다(같은 인물이면 늘 같은 쪽)
     const gender: Gender = c.gender ?? (hashStr(c.handle) % 2 ? 'm' : 'f');
-    const key = pickFace(gender, ageGroup, used, `${c.handle}:${c.name}`);
+    const key = pickFace(gender, used, `${c.handle}:${c.name}`);
     if (key) used.add(key);
     return key;
   });
@@ -191,7 +190,7 @@ export function buildCustomFirst(cf: CustomFirstFollower, ctx: { templateId: str
   if (handle.length < 4) handle = `${handle || 'user'}_${hashStr(ctx.seed) % 1000}`.slice(0, 15);
   for (let i = 2; ctx.taken.has(handle.toLowerCase()) && i < 999; i++) handle = `${handle.slice(0, 15 - String(i).length - 1)}_${i}`;
   const org = ORG_TYPES.includes(type);
-  const face = org ? undefined : pickFace(cf.gender, ageGroup, ctx.usedFaces, ctx.seed);
+  const face = org ? undefined : pickFace(cf.gender, ctx.usedFaces, ctx.seed, themeOfWorld(ctx.templateId));
   const t = getWorldTemplate(ctx.templateId);
   const banner = !org && t?.banners.length ? { photo: sceneKey(t.id, t.banners[hashStr(ctx.seed) % t.banners.length].key) } : undefined;
   const traits = cutText((cf.traits ?? '').trim(), 600);

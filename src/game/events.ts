@@ -1,6 +1,7 @@
 /**
  * 이벤트 — 선택지 또는 직접 쓴 답(AI 1회) → 결과를 한 번에 적용(화면이 수치 변화를 실시간으로 보여 줌)
  *
+ *   시간: 이벤트에 답하면 그날이 끝난다 — 결과 글이 올라온 뒤 시계가 다음 날 아침 9시로 가고 하루 정산이 돈다
  *   수치: 난이도·답의 질·바이럴 모먼트로 보정(difficulty.ts). 관계 수치는 "적지 않게"(최소 ±6, 최대 ±30)
  *   후보: "다른 이벤트" = 그 세계관 파일에 직접 쓴 이벤트(토큰 0) 우선, 바닥나면 AI 1회. ◀ 1/2 ▶ 로 이전 후보 다시 고르기
  *   (v3.1) 세계관과 상관없는 공용 이벤트 틀은 없앴다 — 직접 만든 세계관은 처음부터 AI가 그 세계에 맞게 만든다
@@ -16,7 +17,7 @@ import { addThreadedPosts, alive, beginFlow, ctxOf, engine, fail, G, OK, type Ac
 import { localVariant } from './localEvents';
 import { DIFFICULTY_LABEL, EVENT_AFFINITY_CAP, EVENT_ROMANCE_CAP, diffOf, scaleEventDeltas } from './difficulty';
 import { addMemory, addXp, applyDeltas, consumeBoost, logActivity, pushNoti, questProgress, recomputeStatus, tickClock } from './progress';
-import { TIME_COST, XP } from './rules';
+import { START_TIME, XP } from './rules';
 import { runDayTick, usedEventKeys } from './tick';
 import { snapshot } from './undo';
 
@@ -81,7 +82,6 @@ async function resolveEventFlow(flow: Flow, eventId: ID, ans: { choiceId?: strin
       const e = d.events.find((x) => x.id === eventId);
       if (!e || e.status !== 'pending') return;
       e.status = 'resolved';
-      days = tickClock(d, TIME_COST.event);
       const difficulty = diffOf(d);
       const grade = clamp(Math.round(outcome.grade ?? 0), -2, 2);
       const scaled = scaleEventDeltas(outcome.deltas ?? {}, { difficulty, grade, boost: boosted, involved: e.involved.filter((id) => d.characters[id] && !d.characters[id].inactive) });
@@ -113,6 +113,9 @@ async function resolveEventFlow(flow: Flow, eventId: ID, ans: { choiceId?: strin
       logActivity(d, e.emoji, ans.customText ? `${e.title}: 직접 답함 "${snippet(ans.customText, 20)}"` : `${e.title}: "${label}"`);
       questProgress(d, 'event', 1);
       recomputeStatus(d);
+      // 이벤트에 답하면 그날은 끝: 결과 글은 오늘 시각으로 남기고, 시계는 다음 날 아침으로
+      days = tickClock(d, 1440 - (d.clock.hour * 60 + d.clock.minute) + START_TIME.hour * 60 + START_TIME.minute);
+      logActivity(d, '🌙', `${e.title} 뒤로 하루가 지났어요`);
     });
   } finally {
     G().setBusy(key, false);

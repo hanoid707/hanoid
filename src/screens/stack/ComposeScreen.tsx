@@ -1,11 +1,13 @@
 /**
  * 게시물 작성(X 스타일) — "무슨 일이 일어나고 있나요?" · 사진 첨부(크롭) · 글자 수 원
  * 입력창 아래에는 딱 두 가지만: 사이드 퀘스트(누르면 키워드 넣기) · 제안(누르면 그 글로 채우기)
- * @·# 자동완성은 기기 안에서만 계산(토큰 0). 제안은 받아 둔 것 + 로컬 문장, "다른 제안"을 누를 때만 짧은 AI 호출.
+ * @·# 자동완성은 기기 안에서만 계산(토큰 0).
+ * 올리는 시각: 자동(2~4시간 뒤) 또는 직접("6:48" + AM/PM — 지난 시각이면 다음 날 그 시각).
+ * 빼 둔 화제: 글에 (-단어)를 쓰면 그 화제를 이 세계관의 이야기에서 뺀다(여기서 ✕로 다시 넣기).
  */
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Avatar } from '../../components/Avatar';
 import { IconCheck, IconClose, IconGlobe, IconImage, IconSparkles, IconTarget } from '../../components/icons';
@@ -13,13 +15,15 @@ import { frequentPeople, MentionInput, type MentionInputHandle } from '../../com
 import { Photo } from '../../components/Photo';
 import { usePhotoPicker } from '../../components/PhotoCropper';
 import { MentionLegend, NameChip } from '../../components/RelationChip';
-import { Button, ProgressBar } from '../../components/ui';
+import { Button, Chip, ProgressBar } from '../../components/ui';
 import { armViralMoment, claimQuest, publishPost } from '../../game/actions';
+import { removeAvoid } from '../../game/avoid';
+import { advanceClock, formatClock12, minutesUntil, parseClock12 } from '../../game/clock';
 import { ITEM_INFO } from '../../game/items';
 import { POST_MAX_LEN } from '../../game/rules';
 import type { RootNav, RootStackParamList } from '../../navigation/types';
 import { useActive, useGame } from '../../store/game';
-import { font, radius, space, useTheme } from '../../theme';
+import { font, noOutline, radius, space, useTheme } from '../../theme';
 import type { PhotoRef, Quest } from '../../types';
 
 /** X의 글자 수 원(남은 글자 20자 이하면 숫자) */
@@ -88,6 +92,10 @@ export function ComposeScreen() {
   const inputRef = useRef<MentionInputHandle>(null);
   const [text, setText] = useState(route.params?.text ?? '');
   const [media, setMedia] = useState<PhotoRef | undefined>();
+  // 올리는 시각: 자동(2~4시간 뒤) / 직접("6:48" + AM·PM)
+  const [pickTime, setPickTime] = useState(false);
+  const [timeText, setTimeText] = useState('');
+  const [pm, setPm] = useState(true);
 
   // 다른 반응에 얹혀 새 제안이 도착하면(받아 둔 제안 갱신) 다시 읽는다 — 처음 한 번은 위에서 읽었으니 건너뜀
 
@@ -97,8 +105,25 @@ export function ComposeScreen() {
   const quests = sideQuests(sc.quests);
   const armed = sc.boost?.kind === 'viral';
 
+  const at = pickTime ? parseClock12(timeText, pm) : null;
+  const waitMin = at ? minutesUntil(sc.clock, at) : 0;
+  const nextDay = !!at && sc.clock.hour * 60 + sc.clock.minute + waitMin >= 1440;
+  const startPick = () => {
+    // 처음 '직접'을 누르면 지금에서 2시간 뒤를 채워 둔다
+    if (!timeText) {
+      const t = advanceClock(sc.clock, 120).time;
+      setTimeText(formatClock12(t).replace(/ (AM|PM)$/, ''));
+      setPm(t.hour >= 12);
+    }
+    setPickTime(true);
+  };
+
   const submit = () => {
-    const r = publishPost(text, media);
+    if (pickTime && !at) {
+      showToast('올리는 시각을 6:48처럼 적어 주세요', 'error');
+      return;
+    }
+    const r = publishPost(text, media, at ? { at } : {});
     if (r.ok) nav.goBack();
   };
 
@@ -157,6 +182,48 @@ export function ComposeScreen() {
               모든 사람이 답글을 달 수 있습니다
             </Text>
             {armed ? <Text style={{ color: c.aura, fontSize: font.small, fontWeight: '800' }}>🚀 바이럴 모먼트 켜짐</Text> : null}
+          </View>
+
+          {/* 올리는 시각 */}
+          <View style={{ gap: 8 }}>
+            <View style={styles.timeRow}>
+              <Text style={{ color: c.text, fontSize: font.small, fontWeight: '800' }}>🕒 올리는 시각</Text>
+              <Chip small label="자동" selected={!pickTime} onPress={() => setPickTime(false)} accessibilityLabel="올리는 시각 자동" />
+              <Chip small label="직접" selected={pickTime} onPress={startPick} accessibilityLabel="올리는 시각 직접 고르기" />
+              <Text testID="compose-time" style={{ color: c.subtext, fontSize: font.small, flex: 1 }} numberOfLines={1}>
+                {!pickTime ? '2~4시간 뒤에 올라가요' : at ? `${nextDay ? '내일 ' : ''}${formatClock12(at)}에 올라가요` : '예: 6:48'}
+              </Text>
+            </View>
+            {pickTime ? (
+              <View style={styles.timeRow}>
+                <TextInput
+                  testID="compose-time-input"
+                  value={timeText}
+                  onChangeText={setTimeText}
+                  placeholder="6:48"
+                  placeholderTextColor={c.faint}
+                  keyboardType="numbers-and-punctuation"
+                  maxLength={12}
+                  accessibilityLabel="올리는 시각"
+                  style={[styles.timeInput, noOutline, { color: c.text, borderColor: at ? c.borderStrong : c.danger }]}
+                />
+                <Chip small label="AM" selected={!pm} onPress={() => setPm(false)} accessibilityLabel="오전" />
+                <Chip small label="PM" selected={pm} onPress={() => setPm(true)} accessibilityLabel="오후" />
+              </View>
+            ) : null}
+          </View>
+
+          {/* 빼 둔 화제: (-단어)로 넣고 ✕로 다시 넣기 */}
+          <View style={[styles.avoidRow, { borderBottomColor: c.border }]}>
+            <Text style={{ color: c.subtext, fontSize: font.small }}>
+              원치 않는 화제는 글에 <Text style={{ color: c.text, fontWeight: '700' }}>(-단어)</Text>로 빼요
+            </Text>
+            {(sc.avoid ?? []).map((w) => (
+              <Pressable key={w} testID={`avoid-${w}`} onPress={() => removeAvoid(w)} accessibilityRole="button" accessibilityLabel={`${w} 다시 넣기`} style={[styles.avoidChip, { borderColor: c.border, backgroundColor: c.surfaceAlt }]}>
+                <Text style={{ color: c.text, fontSize: font.small, fontWeight: '700' }}>{w}</Text>
+                <IconClose size={12} color={c.subtext} />
+              </Pressable>
+            ))}
           </View>
 
           {frequent.length > 0 && (
@@ -285,6 +352,10 @@ const styles = StyleSheet.create({
   removeMedia: { position: 'absolute', top: 14, left: 6, width: 30, height: 30, borderRadius: 15, backgroundColor: 'rgba(15,20,25,0.75)', alignItems: 'center', justifyContent: 'center' },
   reply: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingBottom: 12, borderBottomWidth: StyleSheet.hairlineWidth },
   mentionRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  timeRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  timeInput: { borderWidth: 1, borderRadius: radius.md, paddingHorizontal: 12, height: 36, minWidth: 92, fontSize: font.body, fontVariant: ['tabular-nums'] },
+  avoidRow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 6, paddingBottom: 12, borderBottomWidth: StyleSheet.hairlineWidth },
+  avoidChip: { flexDirection: 'row', alignItems: 'center', gap: 4, borderWidth: 1, borderRadius: radius.pill, paddingHorizontal: 10, height: 26 },
   sectionHead: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 4 },
   quest: { flexDirection: 'row', alignItems: 'center', gap: 10, borderWidth: 1, borderRadius: radius.md, paddingHorizontal: space.md, paddingVertical: 10, marginTop: 6 },
   progressRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 2 },

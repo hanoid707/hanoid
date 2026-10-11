@@ -6,19 +6,23 @@ import { getActive } from '../store/game';
 import type { ID } from '../types';
 import { clamp, fill, rand, sleep, uid } from '../utils';
 import { tap } from '../utils/haptics';
-import { activeChar, alive, beginFlow, ctxOf, editIf, engine, ensureConversation, fail, G, OK, trimMessages, type ActionResult, type Flow } from './core';
+import { addNpcLines, activeChar, alive, beginFlow, ctxOf, editIf, engine, ensureConversation, fail, G, OK, trimMessages, type ActionResult, type Flow } from './core';
 import { diffOf, scaleSocial } from './difficulty';
 import { giftBlocked, giftEffect, GIFTS } from './items';
 import { addMemory, addXp, applyAffinity, logActivity, pushItemLog, questProgress, tickClock } from './progress';
 import { DM_MAX_LEN, TIME_COST, XP } from './rules';
+import { hitsAvoid, scrubAvoid } from '../ai/context';
+import { takeAvoid } from './avoid';
 import { runDayTick } from './tick';
 import { snapshot } from './undo';
 
 export function sendDM(characterId: ID, text: string): ActionResult {
   const sc = getActive();
-  const body = text.trim().slice(0, DM_MAX_LEN);
   if (!sc) return fail('none');
-  if (!body) return fail('empty');
+  // (-단어)·(+단어): 화제 빼기/다시 넣기(그것만 썼으면 쪽지는 보내지 않는다)
+  const cmd = takeAvoid(sc.id, text);
+  const body = cmd.text.trim().slice(0, DM_MAX_LEN);
+  if (!body) return cmd.changed ? OK : fail('empty');
   if (!activeChar(sc, characterId)) return fail('none');
   const conv = sc.dms[characterId];
   if (conv?.leftUntilDay != null && conv.leftUntilDay > sc.clock.day) return fail('left');
@@ -86,11 +90,13 @@ async function dmConversation(flow: Flow, characterId: ID, message: string, days
     const sc = G().scenarios[sid];
     const ctx = ctxOf(sid);
     if (!sc || !ctx) return;
+    // 빼 둔 화제가 든 줄·요약 문장은 넘기지 않는다
     const history = (sc.dms[characterId]?.messages ?? [])
       .filter((m) => m.from !== 'system')
       .slice(-41, -1)
+      .filter((m) => !hitsAvoid(ctx.avoid, m.text))
       .map((m) => ({ from: m.from as 'me' | 'them', text: m.text }));
-    const priorSummary = sc.dms[characterId]?.summary;
+    const priorSummary = scrubAvoid(ctx.avoid, sc.dms[characterId]?.summary) || undefined;
     // ② 입력 중… → 한 줄씩 답장
     editIf(flow, (d) => {
       if (d.dms[characterId]) d.dms[characterId].typing = true;
@@ -129,6 +135,11 @@ async function dmConversation(flow: Flow, characterId: ID, message: string, days
         applyAffinity(d, characterId, aff, rom, dev);
       }
       if (r.historySummary) cv.summary = r.historySummary;
+      // 대화 끝에 그 인물이 자기 계정에 올리는 글(하루에 한 번까지, 대화방을 나가는 경우는 제외)
+      if (r.post && !r.leave && !gift && cv.echoDay !== d.clock.day) {
+        cv.echoDay = d.clock.day;
+        addNpcLines(d, [{ authorId: characterId, text: r.post }]);
+      }
       if (r.leave) {
         cv.messages.push({ id: uid('m'), from: 'system', text: `${c.name}님이 대화방을 나갔습니다.`, ts: Date.now(), at: { ...d.clock } });
         cv.leftUntilDay = d.clock.day + 1;

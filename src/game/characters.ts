@@ -9,7 +9,7 @@
 import { peerRegisterHint } from '../ai/local/register';
 import type { CharacterDraft, CharacterDraftArgs } from '../ai/types';
 import { AVATAR_COLORS, AVATAR_EMOJIS } from '../data/avatars';
-import { pickFace, usedFaceKeys } from '../data/facePool';
+import { pickFace, themeOfWorld, usedFaceKeys } from '../data/facePool';
 import { getActive } from '../store/game';
 import type { AgeGroup, Archetype, BadgeKind, Character, CharacterType, Gender, ID, PhotoRef, Scenario, SpeechRegister } from '../types';
 import { cutText, fill, pick, rand, sanitizeHandle, uid } from '../utils';
@@ -275,7 +275,7 @@ export async function createQuickCharacter(input: QuickCharacterInput): Promise<
       if (d.cast.length >= CHARACTER_CAP) return;
       const org = ORG_TYPES.includes(type);
       const used = usedFaceKeys(Object.values(d.characters));
-      const face = input.photo || org ? undefined : pickFace(input.gender, ageGroup, used, id);
+      const face = input.photo || org ? undefined : pickFace(input.gender, used, id, themeOfWorld(d.world.templateId));
       const avatar: Character['avatar'] = {
         emoji: draft?.emoji?.trim() || (org ? '📰' : pick(AVATAR_EMOJIS)),
         color: pick(AVATAR_COLORS),

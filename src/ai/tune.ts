@@ -9,13 +9,16 @@ import type { AITune } from '../types';
 
 export const DEFAULT_TUNE: AITune = {
   replies: 6,
+  echoPosts: 1,
+  echoDMs: 1,
   thread: 6,
   dmBubbles: 3,
+  dmPost: 1,
   eventPosts: 3,
   comments: 6,
   refreshPosts: 3,
   dayPosts: 4,
-  dayDMs: 1,
+  dayDMs: 2,
   dayNews: 1,
   dayTrends: 1,
   dayMission: 1,
@@ -26,8 +29,11 @@ export const DEFAULT_TUNE: AITune = {
 /** 항목별 [최소, 최대] */
 export const TUNE_RANGE: Record<keyof AITune, [number, number]> = {
   replies: [1, 6],
+  echoPosts: [0, 3],
+  echoDMs: [0, 2],
   thread: [1, 8],
   dmBubbles: [1, 3],
+  dmPost: [0, 1],
   eventPosts: [0, 4],
   comments: [0, 6],
   refreshPosts: [0, 5],
@@ -96,11 +102,11 @@ export function callCost(kind: CallKind, t: AITune): CallCost {
   const c = (inTok: number, out: number): CallCost => ({ inTok, outTok: Math.round(out * OUT_PAD) });
   switch (kind) {
     case 'react':
-      return c(IN.react, 130 + t.replies * 55);
+      return c(IN.react, 130 + t.replies * 55 + t.echoPosts * 70 + t.echoDMs * 30);
     case 'thread':
       return c(IN.thread, 70 + t.thread * 55);
     case 'dm':
-      return c(IN.dm, 60 + ((1 + t.dmBubbles) / 2) * 45);
+      return c(IN.dm, 60 + ((1 + t.dmBubbles) / 2) * 45 + t.dmPost * 25);
     case 'event':
       return c(IN.event, 250 + t.eventPosts * 150);
     case 'comments':

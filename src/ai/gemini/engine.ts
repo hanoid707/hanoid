@@ -42,7 +42,8 @@ export function createGeminiEngine(settings: AISettings, opts: { via?: GeminiVia
 
     async reactToPost(ctx, post, o) {
       const n = clamp(Math.round(o?.replies ?? 6), 1, 6);
-      const r = await call(ctx, P.reactPrompt(ctx, post, n), S.reactSchema(n), 'react', MAX_OUT.react(n));
+      const tn = ctx.tune ?? DEFAULT_TUNE;
+      const r = await call(ctx, P.reactPrompt(ctx, post, n), S.reactSchema(n, tn), 'react', MAX_OUT.react(n) + tn.echoPosts * 110 + tn.echoDMs * 80);
       return N.normReact(ctx, r, { n, seed: post.id });
     },
 
@@ -55,8 +56,9 @@ export function createGeminiEngine(settings: AISettings, opts: { via?: GeminiVia
     async dmReply(ctx, { characterId, history, message, priorSummary }) {
       if (!ctx.cast.some((x) => x.id === characterId)) return { mood: 'neutral', messages: [], leave: false, affinityDelta: 0, romanceDelta: 0, devotionDelta: 0 };
       const reg = ctx.cast.find((x) => x.id === characterId)?.register;
-      const bubbles = (ctx.tune ?? DEFAULT_TUNE).dmBubbles;
-      const r = N.normDM(await call(ctx, P.dmPrompt(ctx, { characterId, history, message, priorSummary }), S.dmSchema(bubbles), 'dm', MAX_OUT.dm), reg, bubbles);
+      const tn = ctx.tune ?? DEFAULT_TUNE;
+      const bubbles = tn.dmBubbles;
+      const r = N.normDM(await call(ctx, P.dmPrompt(ctx, { characterId, history, message, priorSummary }), S.dmSchema(bubbles, !!tn.dmPost), 'dm', MAX_OUT.dm + (tn.dmPost ? 110 : 0)), reg, bubbles, ctx.avoid);
       if (!r.messages.length && !r.leave) throw new GeminiError('빈 답장이 왔어요', 200, false, 'empty');
       return r;
     },
@@ -89,7 +91,7 @@ export function createGeminiEngine(settings: AISettings, opts: { via?: GeminiVia
     async firstDM(ctx, { characterId }) {
       const c = ctx.cast.find((x) => x.id === characterId);
       if (!c) return [];
-      return N.normFirstDM(await call(ctx, P.firstDMPrompt(ctx, characterId), S.FIRST_DM_SCHEMA, 'firstDM', MAX_OUT.firstDM), c.register);
+      return N.normFirstDM(await call(ctx, P.firstDMPrompt(ctx, characterId), S.FIRST_DM_SCHEMA, 'firstDM', MAX_OUT.firstDM), c.register, ctx.avoid);
     },
 
     async draftCharacter(ctx, args) {

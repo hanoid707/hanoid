@@ -1,0 +1,821 @@
+[
+ {
+  "id": "g052",
+  "world": "influencer",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "long",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a bright friendly smile. They are lifestyle influencers: minimal chic outfits (a white shirt, a camel coat, a ribbed knit top, a blazer dress), delicate jewellery; softly blurred hotel lounge, gallery, brunch cafe or Seongsu street behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have long hair in different styles (long layered hair with curtain bangs, sleek straight hair, soft waves with highlights, a low side ponytail). Exactly one of them wears thin rectangular glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, soft window light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g074",
+  "world": "influencer",
+  "gender": "f",
+  "origin": "fr",
+  "hair": "short",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young woman, head and shoulders, face centered and large in the frame, looking at the camera, a gentle confident look. They are lifestyle influencers: minimal chic outfits (a white shirt, a camel coat, a ribbed knit top, a blazer dress), delicate jewellery; softly blurred hotel lounge, gallery, brunch cafe or Seongsu street behind them. They are from four different countries: Chinese, Filipino-Spanish of mixed heritage, British with auburn hair, and Brazilian of Japanese descent. All four are strikingly beautiful, with clearly different faces and eye colours; skin tones from porcelain to light olive; all four have short hair (bobs and short cuts) in different styles and natural hair colours. Exactly one of them wears clear-frame glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, clear morning light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g002",
+  "world": "military",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "short",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a bright friendly smile. They are soldiers at a Korean army base in winter: digital camouflage field jackets, no hats; softly blurred pine trees, snow and a guard post behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have short hair in different styles (a neat chin-length bob, a short bob tucked behind the ears, a short layered cut, a blunt bob). Exactly one of them wears clear-frame glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, soft daylight, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g081",
+  "world": "office",
+  "gender": "f",
+  "origin": "fr",
+  "hair": "long",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young woman, head and shoulders, face centered and large in the frame, looking at the camera, a relaxed calm expression. They work at a Korean IT startup: smart casual outfits (a knit cardigan, an oxford shirt, a hoodie with an employee lanyard, a blazer over a tee); softly blurred modern open-plan office behind them. They are from four different countries: Korean-American of mixed heritage, Ukrainian, Spanish, and Iranian. All four are strikingly beautiful, with clearly different faces and eye colours; skin tones from porcelain to light olive; all four have long hair past the shoulders in different styles and natural hair colours. Exactly one of them wears thin round metal glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, overcast natural light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g089",
+  "world": "cyberpunk",
+  "gender": "m",
+  "origin": "kr",
+  "hair": "short",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean man, head and shoulders, face centered and large in the frame, looking at the camera, a gentle confident look. They live in a rainy neon cyberpunk megacity at night, Blade Runner mood: techwear jackets with high collars, a hooded raincoat, a small glowing earpiece, one with bleached hair tips; neon signs in cyan and magenta softly blurred behind them, coloured rim light on their faces. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have different short hairstyles (a two-block cut, a soft parted fringe, a short textured crop, comma hair). Exactly one of them wears clear-frame glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, neon night light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g071",
+  "world": "daily",
+  "gender": "f",
+  "origin": "fr",
+  "hair": "long",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young woman, head and shoulders, face centered and large in the frame, looking at the camera, a relaxed calm expression. Everyday SNS profile pictures of university students and young workers in Seoul: casual outfits (a hoodie, a soft knit, a denim jacket, a plain tee); softly blurred campus, cafe, park or Han river behind them. They are from four different countries: Korean-American of mixed heritage, Ukrainian, Spanish, and Iranian. All four are strikingly beautiful, with clearly different faces and eye colours; skin tones from porcelain to light olive; all four have long hair past the shoulders in different styles and natural hair colours. Exactly one of them wears clear-frame glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, soft daylight, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g003",
+  "world": "military",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "long",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a slight playful smile. They are off-duty soldiers on a Korean army base: olive-green army t-shirts or camouflage uniforms with sleeves rolled up; softly blurred barracks hallway, PX store or training field behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have long hair tied back neatly in different ways (a low bun, a low ponytail, a braided bun, a sleek ponytail). Exactly one of them wears thin round metal glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, soft window light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g027",
+  "world": "cyberpunk",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "short",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a bright friendly smile. They live in a rainy neon cyberpunk megacity at night, Blade Runner mood: techwear jackets, a transparent raincoat, chokers, small glowing earpieces, some dyed hair streaks (ash, pink or blue tips); pink, cyan and amber neon signs softly blurred behind them, coloured rim light on their faces. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have short hair in different styles (a chin-length bob, a short bob with see-through bangs, a shoulder-skimming lob in dark brown, a tousled short cut). Exactly one of them wears thin round metal glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, neon night light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g069",
+  "world": "daily",
+  "gender": "f",
+  "origin": "fr",
+  "hair": "short",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young woman, head and shoulders, face centered and large in the frame, looking at the camera, a gentle confident look. Everyday SNS profile pictures: cozy outfits (a cardigan, a shirt over a tee, a puffer vest, a turtleneck); softly blurred bookstore, subway platform, convenience store front or autumn street behind them. They are from four different countries: Japanese, Vietnamese, French, and American with light-brown hair. All four are strikingly beautiful, with clearly different faces and eye colours; skin tones from porcelain to light olive; all four have short hair (bobs and short cuts) in different styles and natural hair colours. Exactly one of them wears thin round metal glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, clear morning light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g046",
+  "world": "travel",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "short",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a relaxed calm expression. They are travel vloggers: casual trendy outfits, backpack straps, a camera strap or a small wireless mic clipped on, a natural sun-kissed look; softly blurred airport terminal, beach town, old European street or night market behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have short hair in different styles (a chin-length bob, a short bob with see-through bangs, a shoulder-skimming lob in dark brown, a tousled short cut). Exactly one of them wears thin rectangular glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, soft window light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g082",
+  "world": "daily",
+  "gender": "m",
+  "origin": "kr",
+  "hair": "short",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean man, head and shoulders, face centered and large in the frame, looking at the camera, a bright friendly smile. Everyday SNS profile pictures of university students and young workers in Seoul: casual outfits (a hoodie, a crewneck knit, a denim jacket, a plain tee); softly blurred campus, cafe, park or street behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have different short hairstyles (a two-block cut, a soft parted fringe, a short textured crop, comma hair). Exactly one of them wears thin rectangular glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, clear morning light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g084",
+  "world": "daily",
+  "gender": "m",
+  "origin": "kr",
+  "hair": "short",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean man, head and shoulders, face centered and large in the frame, looking at the camera, a gentle confident look. Everyday SNS profile pictures of young men who create content and travel: a camera strap, a cap worn backwards, a windbreaker, a linen shirt; softly blurred city street, airport or creator room with a ring light behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have different short hairstyles (a two-block cut, a soft parted fringe, a short textured crop, comma hair). Exactly one of them wears thin round metal glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, soft daylight, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g049",
+  "world": "influencer",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "short",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a gentle confident look. They are lifestyle influencers: minimal chic outfits (a white shirt, a camel coat, a ribbed knit top, a blazer dress), delicate jewellery; softly blurred hotel lounge, gallery, brunch cafe or Seongsu street behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have short hair in different styles (a sleek jaw-length bob, a wavy bob in chestnut, a short layered cut, a blunt bob with full bangs). Exactly one of them wears thin rectangular glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, clear morning light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g022",
+  "world": "cyberpunk",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "short",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a bright friendly smile. They are hackers, street doctors and bar staff in a neon cyberpunk city: cropped tech jackets, high collars, subtle chrome ear cuffs, smudged eyeliner; wet alley with holographic signs softly blurred behind them, cool neon light mixed with warm lantern light. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have short hair in different styles (a sleek jaw-length bob, a wavy bob in chestnut, a short layered cut, a blunt bob with full bangs). Exactly one of them wears thin rectangular glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, neon night light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g004",
+  "world": "military",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "short",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a gentle confident look. They are soldiers at a Korean army base: Korean army digital camouflage combat uniforms, two of them in a black beret or a camouflage patrol cap; softly blurred barracks and parade ground behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have short hair in different styles (a neat chin-length bob, a short bob tucked behind the ears, a short layered cut, a blunt bob). Exactly one of them wears thin rectangular glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, warm late-afternoon light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g032",
+  "world": "office",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "long",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a bright friendly smile. They are developers, designers and marketers at a tech company: casual workwear (a company zip-up, a denim shirt, a turtleneck, a blouse); softly blurred rooftop garden of an office building or a lobby behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have long hair in different styles (wavy ash-brown hair, straight black hair with see-through bangs, a loose braid, long hair tucked behind the ears). Exactly one of them wears clear-frame glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, warm late-afternoon light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g037",
+  "world": "office",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "long",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a bright friendly smile. They are young office workers in Pangyo: neat work outfits (a fitted knit, a striped shirt, a collarless jacket, a cardigan over a blouse), an employee ID card on a lanyard; softly blurred meeting room glass, monitors or an office cafe behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have long hair in different styles (long layered hair with curtain bangs, sleek straight hair, soft waves with highlights, a low side ponytail). Exactly one of them wears thin rectangular glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, warm late-afternoon light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g038",
+  "world": "office",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "short",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a slight playful smile. They are developers, designers and marketers at a tech company: casual workwear (a company zip-up, a denim shirt, a turtleneck, a blouse); softly blurred rooftop garden of an office building or a lobby behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have short hair in different styles (a chin-length bob, a short bob with see-through bangs, a shoulder-skimming lob in dark brown, a tousled short cut). Exactly one of them wears clear-frame glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, clear morning light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g045",
+  "world": "travel",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "long",
+  "glasses": false,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a soft natural smile. They are content creators filming at home and outdoors: an oversized hoodie, a cropped cardigan, a varsity jacket, a tee; softly blurred creator room with a ring light and shelves, or a city street behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have long hair in different styles (wavy ash-brown hair, straight black hair with see-through bangs, a loose braid, long hair tucked behind the ears). None of them wear glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, soft daylight, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g059",
+  "world": "daily",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "short",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a gentle confident look. Everyday SNS profile pictures of university students and young workers in Seoul: casual outfits (a hoodie, a soft knit, a denim jacket, a plain tee); softly blurred campus, cafe, park or Han river behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have short hair in different styles (a sleek jaw-length bob, a wavy bob in chestnut, a short layered cut, a blunt bob with full bangs). Exactly one of them wears clear-frame glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, warm late-afternoon light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g079",
+  "world": "cyberpunk",
+  "gender": "f",
+  "origin": "fr",
+  "hair": "long",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young woman, head and shoulders, face centered and large in the frame, looking at the camera, a gentle confident look. They live in a rainy neon cyberpunk megacity at night, Blade Runner mood: techwear jackets, a transparent raincoat, chokers, small glowing earpieces, some dyed hair streaks (ash, pink or blue tips); pink, cyan and amber neon signs softly blurred behind them, coloured rim light on their faces. They are from four different countries: Taiwanese, Spanish, German, and Turkish. All four are strikingly beautiful, with clearly different faces and eye colours; skin tones from porcelain to light olive; all four have long hair past the shoulders in different styles and natural hair colours. Exactly one of them wears thin rectangular glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, neon night light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g005",
+  "world": "military",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "long",
+  "glasses": false,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a soft natural smile. They are soldiers at a Korean army base in winter: digital camouflage field jackets, no hats; softly blurred pine trees, snow and a guard post behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have long hair tied back neatly in different ways (a low bun, a low ponytail, a braided bun, a sleek ponytail). None of them wear glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, clear morning light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g076",
+  "world": "travel",
+  "gender": "f",
+  "origin": "fr",
+  "hair": "long",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young woman, head and shoulders, face centered and large in the frame, looking at the camera, a relaxed calm expression. They are travel vloggers: casual trendy outfits, backpack straps, a camera strap or a small wireless mic clipped on, a natural sun-kissed look; softly blurred airport terminal, beach town, old European street or night market behind them. They are from four different countries: Japanese, Polish, Greek, and Canadian with dark-blonde hair. All four are strikingly beautiful, with clearly different faces and eye colours; skin tones from porcelain to light olive; all four have long hair past the shoulders in different styles and natural hair colours. Exactly one of them wears thin rectangular glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, overcast natural light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g043",
+  "world": "travel",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "short",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a slight playful smile. They are travel vloggers: casual trendy outfits, backpack straps, a camera strap or a small wireless mic clipped on, a natural sun-kissed look; softly blurred airport terminal, beach town, old European street or night market behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have short hair in different styles (a sleek jaw-length bob, a wavy bob in chestnut, a short layered cut, a blunt bob with full bangs). Exactly one of them wears thin rectangular glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, clear morning light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g028",
+  "world": "cyberpunk",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "long",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a slight playful smile. They are hackers, street doctors and bar staff in a neon cyberpunk city: cropped tech jackets, high collars, subtle chrome ear cuffs, smudged eyeliner; wet alley with holographic signs softly blurred behind them, cool neon light mixed with warm lantern light. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have long hair in different styles (long layered hair with curtain bangs, sleek straight hair, soft waves with highlights, a low side ponytail). Exactly one of them wears thin rectangular glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, neon night light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g085",
+  "world": "daily",
+  "gender": "m",
+  "origin": "kr",
+  "hair": "short",
+  "glasses": false,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean man, head and shoulders, face centered and large in the frame, looking at the camera, a soft natural smile. Everyday SNS profile pictures: neat dandy outfits (a white shirt, a navy knit, a trench coat, a black tee); softly blurred cafe window, gallery, rooftop or office lobby behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have different short hairstyles (a clean side part, a messy textured fringe, a short buzz-style crop, a neat dandy cut). None of them wear glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, soft window light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g062",
+  "world": "daily",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "short",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a bright friendly smile. Everyday SNS profile pictures of university students and young workers in Seoul: casual outfits (a hoodie, a soft knit, a denim jacket, a plain tee); softly blurred campus, cafe, park or Han river behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have short hair in different styles (a chin-length bob, a short bob with see-through bangs, a shoulder-skimming lob in dark brown, a tousled short cut). Exactly one of them wears clear-frame glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, soft daylight, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g055",
+  "world": "influencer",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "long",
+  "glasses": false,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a soft natural smile. They are lifestyle influencers: minimal chic outfits (a white shirt, a camel coat, a ribbed knit top, a blazer dress), delicate jewellery; softly blurred hotel lounge, gallery, brunch cafe or Seongsu street behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have long hair in different styles (long layered hair with curtain bangs, sleek straight hair, soft waves with highlights, a low side ponytail). None of them wear glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, overcast natural light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g044",
+  "world": "travel",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "long",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a gentle confident look. They are travel and daily-life YouTubers: a bucket hat, a linen shirt, a windbreaker, a knit vest; softly blurred mountain trail, harbour, train platform or hostel terrace behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have long hair in different styles (long layered hair with curtain bangs, sleek straight hair, soft waves with highlights, a low side ponytail). Exactly one of them wears clear-frame glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, overcast natural light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g009",
+  "world": "military",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "short",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a gentle confident look. They are off-duty soldiers on a Korean army base: olive-green army t-shirts or camouflage uniforms with sleeves rolled up; softly blurred barracks hallway, PX store or training field behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have short hair in different styles (a neat chin-length bob, a short bob tucked behind the ears, a short layered cut, a blunt bob). Exactly one of them wears thin round metal glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, warm late-afternoon light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g067",
+  "world": "daily",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "short",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a bright friendly smile. Everyday SNS profile pictures taken by a friend: summer outfits (a linen blouse, a sleeveless knit, a striped tee, a light shirt); softly blurred seaside, picnic lawn, festival or rooftop behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have short hair in different styles (a sleek jaw-length bob, a wavy bob in chestnut, a short layered cut, a blunt bob with full bangs). Exactly one of them wears thin rectangular glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, soft daylight, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g030",
+  "world": "office",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "long",
+  "glasses": false,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a soft natural smile. They work at a Korean IT startup: smart casual outfits (a knit cardigan, an oxford shirt, a hoodie with an employee lanyard, a blazer over a tee); softly blurred modern open-plan office behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have long hair past the shoulders in different styles (straight black, loose dark-brown waves, a high ponytail, half-up chestnut hair). None of them wear glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, soft daylight, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g034",
+  "world": "office",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "long",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a gentle confident look. They are young office workers in Pangyo: neat work outfits (a fitted knit, a striped shirt, a collarless jacket, a cardigan over a blouse), an employee ID card on a lanyard; softly blurred meeting room glass, monitors or an office cafe behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have long hair in different styles (long layered hair with curtain bangs, sleek straight hair, soft waves with highlights, a low side ponytail). Exactly one of them wears thin rectangular glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, overcast natural light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g063",
+  "world": "daily",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "long",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a slight playful smile. Everyday SNS profile pictures: cozy outfits (a cardigan, a shirt over a tee, a puffer vest, a turtleneck); softly blurred bookstore, subway platform, convenience store front or autumn street behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have long hair in different styles (long layered hair with curtain bangs, sleek straight hair, soft waves with highlights, a low side ponytail). Exactly one of them wears thin round metal glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, soft window light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g010",
+  "world": "military",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "long",
+  "glasses": false,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a soft natural smile. They are soldiers at a Korean army base: Korean army digital camouflage combat uniforms, two of them in a black beret or a camouflage patrol cap; softly blurred barracks and parade ground behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have long hair tied back neatly in different ways (a low bun, a low ponytail, a braided bun, a sleek ponytail). None of them wear glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, clear morning light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g075",
+  "world": "influencer",
+  "gender": "f",
+  "origin": "fr",
+  "hair": "long",
+  "glasses": false,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young woman, head and shoulders, face centered and large in the frame, looking at the camera, a soft natural smile. They are fitness and daily-look influencers: athleisure and street style (a cropped zip-up, a tennis polo, a bomber jacket, a knit set); softly blurred pilates studio, riverside park or mirror selfie corner behind them. They are from four different countries: Japanese, Vietnamese, French, and American with light-brown hair. All four are strikingly beautiful, with clearly different faces and eye colours; skin tones from porcelain to light olive; all four have long hair past the shoulders in different styles and natural hair colours. None of them wear glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, overcast natural light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g090",
+  "world": "office",
+  "gender": "m",
+  "origin": "kr",
+  "hair": "short",
+  "glasses": false,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean man, head and shoulders, face centered and large in the frame, looking at the camera, a soft natural smile. They work at a Korean IT startup: smart casual outfits (a hoodie with an employee lanyard, an oxford shirt, a knit over a shirt, a casual blazer); softly blurred modern open-plan office behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have different short hairstyles (a two-block cut, a soft parted fringe, a short textured crop, comma hair). None of them wear glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, soft daylight, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g035",
+  "world": "office",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "long",
+  "glasses": false,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a soft natural smile. They are developers, designers and marketers at a tech company: casual workwear (a company zip-up, a denim shirt, a turtleneck, a blouse); softly blurred rooftop garden of an office building or a lobby behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have long hair in different styles (wavy ash-brown hair, straight black hair with see-through bangs, a loose braid, long hair tucked behind the ears). None of them wear glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, soft daylight, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g078",
+  "world": "travel",
+  "gender": "f",
+  "origin": "fr",
+  "hair": "long",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young woman, head and shoulders, face centered and large in the frame, looking at the camera, a slight playful smile. They are content creators filming at home and outdoors: an oversized hoodie, a cropped cardigan, a varsity jacket, a tee; softly blurred creator room with a ring light and shelves, or a city street behind them. They are from four different countries: Japanese, Kazakh, Swedish, and Mexican with light olive skin. All four are strikingly beautiful, with clearly different faces and eye colours; skin tones from porcelain to light olive; all four have long hair past the shoulders in different styles and natural hair colours. Exactly one of them wears thin round metal glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, soft window light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g023",
+  "world": "cyberpunk",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "long",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a slight playful smile. They are couriers and club singers in a futuristic neon Seoul at night: glossy bomber jackets, mesh tops under coats, tiny LED accessories; rain-streaked window and neon reflections softly blurred behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have long hair in different styles (wavy ash-brown hair, straight black hair with see-through bangs, a loose braid, long hair tucked behind the ears). Exactly one of them wears clear-frame glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, neon night light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g021",
+  "world": "cyberpunk",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "long",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a relaxed calm expression. They live in a rainy neon cyberpunk megacity at night, Blade Runner mood: techwear jackets, a transparent raincoat, chokers, small glowing earpieces, some dyed hair streaks (ash, pink or blue tips); pink, cyan and amber neon signs softly blurred behind them, coloured rim light on their faces. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have long hair past the shoulders in different styles (straight black, loose dark-brown waves, a high ponytail, half-up chestnut hair). Exactly one of them wears thin round metal glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, neon night light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g072",
+  "world": "daily",
+  "gender": "f",
+  "origin": "fr",
+  "hair": "short",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young woman, head and shoulders, face centered and large in the frame, looking at the camera, a bright friendly smile. Everyday SNS profile pictures: cozy outfits (a cardigan, a shirt over a tee, a puffer vest, a turtleneck); softly blurred bookstore, subway platform, convenience store front or autumn street behind them. They are from four different countries: Japanese, Polish, Greek, and Canadian with dark-blonde hair. All four are strikingly beautiful, with clearly different faces and eye colours; skin tones from porcelain to light olive; all four have short hair (bobs and short cuts) in different styles and natural hair colours. Exactly one of them wears thin round metal glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, soft window light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g066",
+  "world": "daily",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "long",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a relaxed calm expression. Everyday SNS profile pictures: cozy outfits (a cardigan, a shirt over a tee, a puffer vest, a turtleneck); softly blurred bookstore, subway platform, convenience store front or autumn street behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have long hair in different styles (long layered hair with curtain bangs, sleek straight hair, soft waves with highlights, a low side ponytail). Exactly one of them wears thin round metal glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, overcast natural light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g020",
+  "world": "football",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "long",
+  "glasses": false,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a soft natural smile. They work around a Korean pro football club: a sports reporter with a press lanyard, a physio in a club polo, a club media staffer in a training jacket, a team nutritionist in a zip-up; softly blurred training ground and stadium tunnel behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have long hair in different styles (long layered hair with curtain bangs, sleek straight hair, soft waves with highlights, a low side ponytail). None of them wear glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, overcast natural light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g053",
+  "world": "influencer",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "long",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a slight playful smile. They are fitness and daily-look influencers: athleisure and street style (a cropped zip-up, a tennis polo, a bomber jacket, a knit set); softly blurred pilates studio, riverside park or mirror selfie corner behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have long hair in different styles (wavy ash-brown hair, straight black hair with see-through bangs, a loose braid, long hair tucked behind the ears). Exactly one of them wears clear-frame glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, warm late-afternoon light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g031",
+  "world": "office",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "short",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a relaxed calm expression. They are young office workers in Pangyo: neat work outfits (a fitted knit, a striped shirt, a collarless jacket, a cardigan over a blouse), an employee ID card on a lanyard; softly blurred meeting room glass, monitors or an office cafe behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have short hair in different styles (a sleek jaw-length bob, a wavy bob in chestnut, a short layered cut, a blunt bob with full bangs). Exactly one of them wears thin rectangular glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, soft window light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g024",
+  "world": "cyberpunk",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "short",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a gentle confident look. They live in a rainy neon cyberpunk megacity at night, Blade Runner mood: techwear jackets, a transparent raincoat, chokers, small glowing earpieces, some dyed hair streaks (ash, pink or blue tips); pink, cyan and amber neon signs softly blurred behind them, coloured rim light on their faces. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have short hair in different styles (a sleek jaw-length bob, a wavy bob in chestnut, a short layered cut, a blunt bob with full bangs). Exactly one of them wears thin round metal glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, neon night light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g064",
+  "world": "daily",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "short",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a gentle confident look. Everyday SNS profile pictures taken by a friend: summer outfits (a linen blouse, a sleeveless knit, a striped tee, a light shirt); softly blurred seaside, picnic lawn, festival or rooftop behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have short hair in different styles (a chin-length bob, a short bob with see-through bangs, a shoulder-skimming lob in dark brown, a tousled short cut). Exactly one of them wears thin rectangular glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, warm late-afternoon light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g060",
+  "world": "daily",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "long",
+  "glasses": false,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a soft natural smile. Everyday SNS profile pictures: cozy outfits (a cardigan, a shirt over a tee, a puffer vest, a turtleneck); softly blurred bookstore, subway platform, convenience store front or autumn street behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have long hair in different styles (long layered hair with curtain bangs, sleek straight hair, soft waves with highlights, a low side ponytail). None of them wear glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, clear morning light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g040",
+  "world": "travel",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "long",
+  "glasses": false,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a soft natural smile. They are travel vloggers: casual trendy outfits, backpack straps, a camera strap or a small wireless mic clipped on, a natural sun-kissed look; softly blurred airport terminal, beach town, old European street or night market behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have long hair past the shoulders in different styles (straight black, loose dark-brown waves, a high ponytail, half-up chestnut hair). None of them wear glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, soft daylight, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g036",
+  "world": "office",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "short",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a relaxed calm expression. They work at a Korean IT startup: smart casual outfits (a knit cardigan, an oxford shirt, a hoodie with an employee lanyard, a blazer over a tee); softly blurred modern open-plan office behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have short hair in different styles (a chin-length bob, a short bob with see-through bangs, a shoulder-skimming lob in dark brown, a tousled short cut). Exactly one of them wears thin round metal glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, soft window light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g086",
+  "world": "football",
+  "gender": "m",
+  "origin": "kr",
+  "hair": "short",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean man, head and shoulders, face centered and large in the frame, looking at the camera, a relaxed calm expression. They are professional footballers at a Korean club: plain match jerseys in different colours or training tops, athletic lean build; softly blurred stadium pitch and stands behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have different short hairstyles (a two-block cut, a soft parted fringe, a short textured crop, comma hair). Exactly one of them wears clear-frame glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, overcast natural light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g012",
+  "world": "military",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "short",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a bright friendly smile. They are off-duty soldiers on a Korean army base: olive-green army t-shirts or camouflage uniforms with sleeves rolled up; softly blurred barracks hallway, PX store or training field behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have short hair in different styles (a neat chin-length bob, a short bob tucked behind the ears, a short layered cut, a blunt bob). Exactly one of them wears thin round metal glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, soft daylight, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g033",
+  "world": "office",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "short",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a slight playful smile. They work at a Korean IT startup: smart casual outfits (a knit cardigan, an oxford shirt, a hoodie with an employee lanyard, a blazer over a tee); softly blurred modern open-plan office behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have short hair in different styles (a sleek jaw-length bob, a wavy bob in chestnut, a short layered cut, a blunt bob with full bangs). Exactly one of them wears thin round metal glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, clear morning light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g029",
+  "world": "cyberpunk",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "short",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a gentle confident look. They are couriers and club singers in a futuristic neon Seoul at night: glossy bomber jackets, mesh tops under coats, tiny LED accessories; rain-streaked window and neon reflections softly blurred behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have short hair in different styles (a chin-length bob, a short bob with see-through bangs, a shoulder-skimming lob in dark brown, a tousled short cut). Exactly one of them wears clear-frame glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, neon night light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g080",
+  "world": "cyberpunk",
+  "gender": "f",
+  "origin": "fr",
+  "hair": "short",
+  "glasses": false,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young woman, head and shoulders, face centered and large in the frame, looking at the camera, a soft natural smile. They are hackers, street doctors and bar staff in a neon cyberpunk city: cropped tech jackets, high collars, subtle chrome ear cuffs, smudged eyeliner; wet alley with holographic signs softly blurred behind them, cool neon light mixed with warm lantern light. They are from four different countries: Korean-American of mixed heritage, Ukrainian, Spanish, and Iranian. All four are strikingly beautiful, with clearly different faces and eye colours; skin tones from porcelain to light olive; all four have short hair (bobs and short cuts) in different styles and natural hair colours. None of them wear glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, neon night light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g026",
+  "world": "cyberpunk",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "long",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a relaxed calm expression. They are couriers and club singers in a futuristic neon Seoul at night: glossy bomber jackets, mesh tops under coats, tiny LED accessories; rain-streaked window and neon reflections softly blurred behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have long hair in different styles (wavy ash-brown hair, straight black hair with see-through bangs, a loose braid, long hair tucked behind the ears). Exactly one of them wears clear-frame glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, neon night light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g017",
+  "world": "football",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "long",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a bright friendly smile. They work around a Korean pro football club: a sports reporter with a press lanyard, a physio in a club polo, a club media staffer in a training jacket, a team nutritionist in a zip-up; softly blurred training ground and stadium tunnel behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have long hair in different styles (long layered hair with curtain bangs, sleek straight hair, soft waves with highlights, a low side ponytail). Exactly one of them wears clear-frame glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, soft window light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g051",
+  "world": "influencer",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "short",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a relaxed calm expression. They are fashion and beauty influencers in Seoul: stylish outfits (a tweed jacket, an off-shoulder knit, a leather jacket, a slip dress with a cardigan), light natural makeup; softly blurred cafe, rooftop, flower shop or photo studio behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have short hair in different styles (a sleek jaw-length bob, a wavy bob in chestnut, a short layered cut, a blunt bob with full bangs). Exactly one of them wears thin round metal glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, soft daylight, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g025",
+  "world": "cyberpunk",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "long",
+  "glasses": false,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a soft natural smile. They are hackers, street doctors and bar staff in a neon cyberpunk city: cropped tech jackets, high collars, subtle chrome ear cuffs, smudged eyeliner; wet alley with holographic signs softly blurred behind them, cool neon light mixed with warm lantern light. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have long hair in different styles (long layered hair with curtain bangs, sleek straight hair, soft waves with highlights, a low side ponytail). None of them wear glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, neon night light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g070",
+  "world": "daily",
+  "gender": "f",
+  "origin": "fr",
+  "hair": "long",
+  "glasses": false,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young woman, head and shoulders, face centered and large in the frame, looking at the camera, a soft natural smile. Everyday SNS profile pictures taken by a friend: summer outfits (a linen blouse, a sleeveless knit, a striped tee, a light shirt); softly blurred seaside, picnic lawn, festival or rooftop behind them. They are from four different countries: Taiwanese, Spanish, German, and Turkish. All four are strikingly beautiful, with clearly different faces and eye colours; skin tones from porcelain to light olive; all four have long hair past the shoulders in different styles and natural hair colours. None of them wear glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, overcast natural light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g077",
+  "world": "travel",
+  "gender": "f",
+  "origin": "fr",
+  "hair": "short",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young woman, head and shoulders, face centered and large in the frame, looking at the camera, a bright friendly smile. They are travel and daily-life YouTubers: a bucket hat, a linen shirt, a windbreaker, a knit vest; softly blurred mountain trail, harbour, train platform or hostel terrace behind them. They are from four different countries: Chinese, Thai, Italian, and Russian with blonde hair. All four are strikingly beautiful, with clearly different faces and eye colours; skin tones from porcelain to light olive; all four have short hair (bobs and short cuts) in different styles and natural hair colours. Exactly one of them wears clear-frame glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, soft daylight, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g087",
+  "world": "football",
+  "gender": "m",
+  "origin": "kr",
+  "hair": "short",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean man, head and shoulders, face centered and large in the frame, looking at the camera, a bright friendly smile. They are young footballers and football-club staff: training jackets, plain jerseys, one with a towel around the neck after practice; softly blurred training pitch and floodlights behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have different short hairstyles (a clean side part, a messy textured fringe, a short buzz-style crop, a neat dandy cut). Exactly one of them wears thin round metal glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, soft daylight, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g058",
+  "world": "daily",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "long",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a slight playful smile. Everyday SNS profile pictures taken by a friend: summer outfits (a linen blouse, a sleeveless knit, a striped tee, a light shirt); softly blurred seaside, picnic lawn, festival or rooftop behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have long hair in different styles (wavy ash-brown hair, straight black hair with see-through bangs, a loose braid, long hair tucked behind the ears). Exactly one of them wears thin rectangular glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, soft window light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g061",
+  "world": "daily",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "long",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a relaxed calm expression. Everyday SNS profile pictures taken by a friend: summer outfits (a linen blouse, a sleeveless knit, a striped tee, a light shirt); softly blurred seaside, picnic lawn, festival or rooftop behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have long hair in different styles (wavy ash-brown hair, straight black hair with see-through bangs, a loose braid, long hair tucked behind the ears). Exactly one of them wears thin rectangular glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, overcast natural light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g047",
+  "world": "travel",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "long",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a bright friendly smile. They are travel and daily-life YouTubers: a bucket hat, a linen shirt, a windbreaker, a knit vest; softly blurred mountain trail, harbour, train platform or hostel terrace behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have long hair in different styles (long layered hair with curtain bangs, sleek straight hair, soft waves with highlights, a low side ponytail). Exactly one of them wears clear-frame glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, warm late-afternoon light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g083",
+  "world": "daily",
+  "gender": "m",
+  "origin": "kr",
+  "hair": "short",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean man, head and shoulders, face centered and large in the frame, looking at the camera, a slight playful smile. Everyday SNS profile pictures: clean casual outfits (an overshirt, a polo knit, a coach jacket, a sweatshirt); softly blurred basketball court, bookstore, riverside or night street behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have different short hairstyles (a clean side part, a messy textured fringe, a short buzz-style crop, a neat dandy cut). Exactly one of them wears clear-frame glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, overcast natural light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g001",
+  "world": "military",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "long",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a relaxed calm expression. They are soldiers at a Korean army base: Korean army digital camouflage combat uniforms, two of them in a black beret or a camouflage patrol cap; softly blurred barracks and parade ground behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have long hair tied back neatly in different ways (a low bun, a low ponytail, a braided bun, a sleek ponytail). Exactly one of them wears thin rectangular glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, overcast natural light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g039",
+  "world": "office",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "long",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a gentle confident look. They work at a Korean IT startup: smart casual outfits (a knit cardigan, an oxford shirt, a hoodie with an employee lanyard, a blazer over a tee); softly blurred modern open-plan office behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have long hair past the shoulders in different styles (straight black, loose dark-brown waves, a high ponytail, half-up chestnut hair). Exactly one of them wears thin round metal glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, overcast natural light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g015",
+  "world": "football",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "long",
+  "glasses": false,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a soft natural smile. They are women footballers and football lovers: plain match kits or training tops, hair styled for sport; softly blurred grass pitch and goalposts behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have long hair in different styles (wavy ash-brown hair, straight black hair with see-through bangs, a loose braid, long hair tucked behind the ears). None of them wear glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, overcast natural light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g013",
+  "world": "football",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "long",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a slight playful smile. They are fans at a Korean pro football stadium: plain team-colour jerseys (red, navy, sky blue, green) and supporter scarves; softly blurred stands, pitch and floodlights behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have long hair past the shoulders in different styles (straight black, loose dark-brown waves, a high ponytail, half-up chestnut hair). Exactly one of them wears thin rectangular glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, warm late-afternoon light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g019",
+  "world": "football",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "short",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a gentle confident look. They are fans at a Korean pro football stadium: plain team-colour jerseys (red, navy, sky blue, green) and supporter scarves; softly blurred stands, pitch and floodlights behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have short hair in different styles (a chin-length bob, a short bob with see-through bangs, a shoulder-skimming lob in dark brown, a tousled short cut). Exactly one of them wears thin rectangular glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, clear morning light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g050",
+  "world": "influencer",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "long",
+  "glasses": false,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a soft natural smile. They are fitness and daily-look influencers: athleisure and street style (a cropped zip-up, a tennis polo, a bomber jacket, a knit set); softly blurred pilates studio, riverside park or mirror selfie corner behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have long hair in different styles (wavy ash-brown hair, straight black hair with see-through bangs, a loose braid, long hair tucked behind the ears). None of them wear glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, overcast natural light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g041",
+  "world": "travel",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "short",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a relaxed calm expression. They are travel and daily-life YouTubers: a bucket hat, a linen shirt, a windbreaker, a knit vest; softly blurred mountain trail, harbour, train platform or hostel terrace behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have short hair in different styles (a sleek jaw-length bob, a wavy bob in chestnut, a short layered cut, a blunt bob with full bangs). Exactly one of them wears clear-frame glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, soft window light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g056",
+  "world": "daily",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "long",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a relaxed calm expression. Everyday SNS profile pictures of university students and young workers in Seoul: casual outfits (a hoodie, a soft knit, a denim jacket, a plain tee); softly blurred campus, cafe, park or Han river behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have long hair past the shoulders in different styles (straight black, loose dark-brown waves, a high ponytail, half-up chestnut hair). Exactly one of them wears clear-frame glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, overcast natural light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g065",
+  "world": "daily",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "long",
+  "glasses": false,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a soft natural smile. Everyday SNS profile pictures of university students and young workers in Seoul: casual outfits (a hoodie, a soft knit, a denim jacket, a plain tee); softly blurred campus, cafe, park or Han river behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have long hair past the shoulders in different styles (straight black, loose dark-brown waves, a high ponytail, half-up chestnut hair). None of them wear glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, clear morning light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g014",
+  "world": "football",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "short",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a gentle confident look. They work around a Korean pro football club: a sports reporter with a press lanyard, a physio in a club polo, a club media staffer in a training jacket, a team nutritionist in a zip-up; softly blurred training ground and stadium tunnel behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have short hair in different styles (a sleek jaw-length bob, a wavy bob in chestnut, a short layered cut, a blunt bob with full bangs). Exactly one of them wears clear-frame glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, clear morning light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g018",
+  "world": "football",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "long",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a slight playful smile. They are women footballers and football lovers: plain match kits or training tops, hair styled for sport; softly blurred grass pitch and goalposts behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have long hair in different styles (wavy ash-brown hair, straight black hair with see-through bangs, a loose braid, long hair tucked behind the ears). Exactly one of them wears thin round metal glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, warm late-afternoon light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g007",
+  "world": "military",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "short",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a bright friendly smile. They are soldiers at a Korean army base: Korean army digital camouflage combat uniforms, two of them in a black beret or a camouflage patrol cap; softly blurred barracks and parade ground behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have short hair in different styles (a neat chin-length bob, a short bob tucked behind the ears, a short layered cut, a blunt bob). Exactly one of them wears thin rectangular glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, soft daylight, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g042",
+  "world": "travel",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "long",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a bright friendly smile. They are content creators filming at home and outdoors: an oversized hoodie, a cropped cardigan, a varsity jacket, a tee; softly blurred creator room with a ring light and shelves, or a city street behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have long hair in different styles (wavy ash-brown hair, straight black hair with see-through bangs, a loose braid, long hair tucked behind the ears). Exactly one of them wears thin round metal glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, warm late-afternoon light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g054",
+  "world": "influencer",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "short",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a gentle confident look. They are fashion and beauty influencers in Seoul: stylish outfits (a tweed jacket, an off-shoulder knit, a leather jacket, a slip dress with a cardigan), light natural makeup; softly blurred cafe, rooftop, flower shop or photo studio behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have short hair in different styles (a chin-length bob, a short bob with see-through bangs, a shoulder-skimming lob in dark brown, a tousled short cut). Exactly one of them wears thin round metal glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, clear morning light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g068",
+  "world": "daily",
+  "gender": "f",
+  "origin": "fr",
+  "hair": "long",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young woman, head and shoulders, face centered and large in the frame, looking at the camera, a slight playful smile. Everyday SNS profile pictures of university students and young workers in Seoul: casual outfits (a hoodie, a soft knit, a denim jacket, a plain tee); softly blurred campus, cafe, park or Han river behind them. They are from four different countries: Chinese, Filipino-Spanish of mixed heritage, British with auburn hair, and Brazilian of Japanese descent. All four are strikingly beautiful, with clearly different faces and eye colours; skin tones from porcelain to light olive; all four have long hair past the shoulders in different styles and natural hair colours. Exactly one of them wears clear-frame glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, warm late-afternoon light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g073",
+  "world": "influencer",
+  "gender": "f",
+  "origin": "fr",
+  "hair": "long",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young woman, head and shoulders, face centered and large in the frame, looking at the camera, a slight playful smile. They are fashion and beauty influencers in Seoul: stylish outfits (a tweed jacket, an off-shoulder knit, a leather jacket, a slip dress with a cardigan), light natural makeup; softly blurred cafe, rooftop, flower shop or photo studio behind them. They are from four different countries: Japanese, Kazakh, Swedish, and Mexican with light olive skin. All four are strikingly beautiful, with clearly different faces and eye colours; skin tones from porcelain to light olive; all four have long hair past the shoulders in different styles and natural hair colours. Exactly one of them wears thin rectangular glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, warm late-afternoon light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g011",
+  "world": "military",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "long",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a relaxed calm expression. They are soldiers at a Korean army base in winter: digital camouflage field jackets, no hats; softly blurred pine trees, snow and a guard post behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have long hair tied back neatly in different ways (a low bun, a low ponytail, a braided bun, a sleek ponytail). Exactly one of them wears clear-frame glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, overcast natural light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g048",
+  "world": "influencer",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "long",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a slight playful smile. They are fashion and beauty influencers in Seoul: stylish outfits (a tweed jacket, an off-shoulder knit, a leather jacket, a slip dress with a cardigan), light natural makeup; softly blurred cafe, rooftop, flower shop or photo studio behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have long hair past the shoulders in different styles (straight black, loose dark-brown waves, a high ponytail, half-up chestnut hair). Exactly one of them wears thin round metal glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, warm late-afternoon light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g016",
+  "world": "football",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "short",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a relaxed calm expression. They are fans at a Korean pro football stadium: plain team-colour jerseys (red, navy, sky blue, green) and supporter scarves; softly blurred stands, pitch and floodlights behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have short hair in different styles (a sleek jaw-length bob, a wavy bob in chestnut, a short layered cut, a blunt bob with full bangs). Exactly one of them wears thin rectangular glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, soft daylight, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g008",
+  "world": "military",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "long",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a slight playful smile. They are soldiers at a Korean army base in winter: digital camouflage field jackets, no hats; softly blurred pine trees, snow and a guard post behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have long hair tied back neatly in different ways (a low bun, a low ponytail, a braided bun, a sleek ponytail). Exactly one of them wears clear-frame glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, soft window light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g006",
+  "world": "military",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "long",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a relaxed calm expression. They are off-duty soldiers on a Korean army base: olive-green army t-shirts or camouflage uniforms with sleeves rolled up; softly blurred barracks hallway, PX store or training field behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have long hair tied back neatly in different ways (a low bun, a low ponytail, a braided bun, a sleek ponytail). Exactly one of them wears thin round metal glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, overcast natural light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g088",
+  "world": "military",
+  "gender": "m",
+  "origin": "kr",
+  "hair": "short",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean man, head and shoulders, face centered and large in the frame, looking at the camera, a slight playful smile. They are soldiers at a Korean army base: Korean army digital camouflage combat uniforms, one in a patrol cap; softly blurred barracks and training ground behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have very short military haircuts with slightly different shapes. Exactly one of them wears thin rectangular glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, warm late-afternoon light, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g057",
+  "world": "daily",
+  "gender": "f",
+  "origin": "kr",
+  "hair": "short",
+  "glasses": true,
+  "prompt": "A 2x2 grid of four separate square profile photos with thin white lines between the panels. Each panel shows a DIFFERENT young Korean woman, head and shoulders, face centered and large in the frame, looking at the camera, a bright friendly smile. Everyday SNS profile pictures: cozy outfits (a cardigan, a shirt over a tee, a puffer vest, a turtleneck); softly blurred bookstore, subway platform, convenience store front or autumn street behind them. The four look clearly different from one another: different face shapes, eyes, noses, eyebrows and lips, skin tones from fair to warm beige; all four have short hair in different styles (a sleek jaw-length bob, a wavy bob in chestnut, a short layered cut, a blunt bob with full bangs). Exactly one of them wears thin round metal glasses; the other three wear no glasses. All four are slim, 21 to 26 years old, and very good-looking in a natural, real-person way. Photorealistic candid profile pictures shot on a phone or a mirrorless camera, soft daylight, real skin texture, no beauty filter, not an illustration, not CGI. No text, no logos, no watermark."
+ },
+ {
+  "id": "g092",
+  "world": "football",
+  "gender": "m",
+  "origin": "fr",
+  "hair": "short",
+  "glasses": false,
+  "prompt": "(foreign male footballers for two fixed characters)"
+ }
+]

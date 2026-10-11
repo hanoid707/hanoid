@@ -71,6 +71,7 @@ export const SYSTEM_PROMPT = [
   '- 기본은 맞장구·공감·호기심. 반박·딴지는 플레이어가 명백히 무례하거나 틀렸을 때만.',
   '- 반응 크기는 소식 크기에 비례: 일상 글엔 일상 반응, 큰 소식(골·성과·경사)엔 진심으로 놀라고 흥분. 팬은 열광, 라이벌·안티는 비꼬며 인정.',
   '- 정복도가 높을수록 대등한 친구·팬으로서 좋아서 먼저 나선다(편들기·홍보·응원·시간 내기).',
+  '- 인물은 구경꾼이 아니다. 플레이어의 말·행동을 자기 일로 받아 먼저 움직인다: 같이 하자고 나서기·약속 잡기·따라 해 보고 알리기·그 일로 자기 계정에 글 올리기·쪽지로 따로 묻기. "좋겠다"로 끝내지 않고 자기가 할 다음 행동을 붙인다.',
   '',
   '[형식]',
   '- h는 목록의 아이디(@ 없이), 이름 없는 일반인은 "-". t는 그 계정이 폰으로 직접 친 글자만(지문·괄호·머리말 없음). 대댓글(re)은 25자 이내.',
@@ -131,7 +132,11 @@ export function systemFor(ctx: AIContext | null): string {
   const me = [`[플레이어] ${p.name}(@${p.handle})${p.role ? ` / ${p.role}` : ''}`];
   if (p.bio) me.push(`소개: ${clip(p.bio, 120)}`);
   if (p.description) me.push(`설정: ${clip(p.description, 400)}`);
-  return [SYSTEM_PROMPT, world.join('\n'), romance, me.join('\n')].join('\n\n');
+  // 빼 둔 화제(플레이어가 (-단어)로 정한 것): 원치 않는 전개를 끊는다
+  const avoid = ctx.avoid?.length
+    ? `[빼 둔 화제] ${ctx.avoid.map((w) => clip(w, 20)).join(' · ')}\n- 플레이어가 이야기에서 빼 달라고 한 것이다. 이 낱말과 그 소재는 글·답글·쪽지·기사·요약 어디에도 쓰지 않는다. 그 화제는 지나간 일로 두고 전혀 다른 일로 이어 간다.`
+    : '';
+  return [SYSTEM_PROMPT, world.join('\n'), romance, me.join('\n'), avoid].filter(Boolean).join('\n\n');
 }
 
 const join = (...parts: (string | false | undefined | null)[]) => parts.filter(Boolean).join('\n\n');
@@ -174,6 +179,7 @@ export function reactPrompt(ctx0: AIContext, post: { text: string; hasMedia?: bo
   const f = ctx.stats.followers;
   const R = romRangeOf(ctx);
   const pick = pickCast(ctx, { text: post.text, full: 4, brief: 5, crowd: 6, seed: post.text, crowdFirst: ['fan', 'superfan', 'antifan'] });
+  const t = tuneOf(ctx);
   const core = n <= 5 ? '1~2' : n <= 8 ? '2~3' : '2~4';
   // 답글 수를 줄였을 때(1~2개)는 핵심 인물 위주로
   const who =
@@ -202,6 +208,12 @@ export function reactPrompt(ctx0: AIContext, post: { text: string; hasMedia?: bo
       `- followers -${Math.max(5, Math.round(f * 0.3))}~+${Math.max(20, Math.round(f * 0.5))}, aura·humor -5~+8, rep -20~+12(공격적인 글은 크게 깎는다)`,
       '- news: 화제·논란일 때만 기사 제목 1개, 아니면 []',
       '- follow/unfollow: 이 글로 플레이어를 새로 팔로우·언팔할 인물의 h. 보통 []',
+      t.echoPosts > 0
+        ? `- posts: 이 글을 본 인물이 자기 계정에 따로 올리는 글 ${t.echoPosts}개 {h,t}. 플레이어 글의 그 일을 자기 쪽에서 이어 간다(같이 겪은 장면·자기도 해 본 것·그 일로 잡은 약속·주변에 퍼진 얘기), @${ctx.persona.handle}를 부르거나 그 일을 구체적으로 짚어서. 핵심 인물 우선, 각 ${LIMITS.post}자 이내`
+        : '',
+      t.echoDMs > 0
+        ? `- dm: 이 글을 보고 플레이어에게 따로 쪽지를 보내는 인물 ${t.echoDMs <= 1 ? '1명' : `1~${t.echoDMs}명`} {h,t}. 가까운 사이·그 일의 당사자가 답글로는 못 할 말(걱정·약속·부탁·속마음)을 먼저 건넨다. 쪽지 보낼 만큼 가까운 인물이 없을 때만 []`
+        : '',
     ]
       .filter(Boolean)
       .join('\n'),
@@ -291,7 +303,9 @@ export function dmPrompt(
       off ? '' : `- 확인: 수위 ${ROMANCE_NAME[ctx.romanceLevel] ?? '보통'} · 설렘 ${c.romance}(${stageOf(c.romance)}) · 플러팅·칭찬은 받는 쪽에서 시작 · ${hot ? '이 상대와는 에로틱 쪽지 규칙 적용 가능' : '신체 묘사 없이'}`,
       '- affinityDelta: 사무적 0 · 다정 +4 · 반갑거나 설레는 쪽지 +8 · 무례 -6',
       off ? '- romanceDelta 0' : `- romanceDelta ${romantic ? R.dmRomantic : R.dmPlain}(플러팅·애정 표현이 있을 때만, 아니면 0)`,
+      '- 답장은 받아 주기만 하지 않는다: 자기 쪽 소식·제안·약속·되묻기 중 하나를 얹어 대화를 먼저 끌고 간다',
       '- devotionDelta 0~+8(플레이어에게 더 빠져들 때만, 보통 0)',
+      tuneOf(ctx).dmPost ? `- post: 이 대화 뒤에 ${c.name}이(가) 자기 계정에 올리는 공개 글 1개(${LIMITS.post}자 이내). 약속·기분·그 일을 남들이 봐도 되는 선에서 티 내는 글. 대화 세 번에 한 번꼴로만 쓰고, 그 밖엔 ""` : '',
       '- leave: 플레이어가 심하게 무례하고 호감이 낮을 때만 true(대화방 나감)',
       needSummary
         ? '- sum: [이전 대화 요약]과 이번 대화를 합쳐 새로 요약(260자 이내). 플레이어가 말한 사실(이름·날짜·약속·호불호·키워드·취향·페티쉬)은 전부 남기고, 마지막 줄에 지금 둘 사이 분위기 1문장. 사실만, 장면 묘사 없이'
@@ -334,7 +348,7 @@ export function tickPrompt(ctx: AIContext, day: number, returned: ID[] = []): st
   const dmLine = back.length
     ? `- dm: ${back.map((c) => `@${c.handle}`).join(', ')}이(가) 서운해서 쪽지방을 나갔다가 오늘 돌아옴 → 돌아오며 보내는 첫 쪽지 1개씩(어색함이 남은 채로, 관계·등급대로). 그 밖에 먼저 쪽지 보내는 인물은 없음`
     : t.dayDMs > 0
-      ? `- dm: 플레이어에게 먼저 쪽지 보내는 인물 0~${t.dayDMs}명 {h,t}. 최근 일과 이어지는 용건이 있을 때만, 없으면 []`
+      ? `- dm: 플레이어에게 먼저 쪽지 보내는 인물 ${t.dayDMs <= 1 ? '1명' : `1~${t.dayDMs}명`} {h,t}. 플레이어가 최근 한 말·글·이벤트와 이어지는 용건으로(후일담·약속·부탁·안부). 가까운 인물이 한 명도 없을 때만 []`
       : '';
   const pending = ctx.pendingEvents?.length ? ` 진행 중인 이벤트와 겹치지 않게(${ctx.pendingEvents.map((x) => clip(x, 20)).join(', ')}).` : '';
   // 조절값에서 끈 항목은 아예 묻지 않는다(출력 토큰 절약)
@@ -351,7 +365,7 @@ export function tickPrompt(ctx: AIContext, day: number, returned: ID[] = []): st
     nowLine(ctx),
     [
       `[할 일] ${day}일차 시작. 세계를 한 걸음 움직이는 JSON. ${rule}`,
-      t.dayPosts > 0 ? `- posts: 오늘 글 ${t.dayPosts}개(핵심 인물 + 일반 유저, 최근 사건과 이어지는 사소한 장면으로, 각 ${LIMITS.post}자 이내)` : '',
+      t.dayPosts > 0 ? `- posts: 오늘 글 ${t.dayPosts}개(핵심 인물 + 일반 유저, 각 ${LIMITS.post}자 이내). 절반 이상은 플레이어가 최근 한 말·한 일의 후일담(그 뒤 벌어진 일·따라 해 본 것·@${ctx.persona.handle} 언급), 나머지는 각자의 사소한 장면` : '',
       t.dayPosts > 0 ? scenesLine(ctx) : '',
       t.dayNews ? '- news: 뉴스 기사 제목 1개' : '',
       t.dayTrends ? '- trends: 오늘의 트렌드 6개 {tag:"#…", n:1000~100000}' : '',
@@ -501,12 +515,12 @@ ${clip(world.setting, 1200)}
 분위기: ${clip(world.tone, 300)}
 시대·장소가 설정에 없으면 지금의 한국이다. 이름·아이디·별명은 그 세계의 시대·장소에 맞춘다.
 
-[할 일] 이 세계의 SNS 등장인물 8명 JSON(cast). 전원 성인, 실존 인물 아님, 유명인·연예인 계정 없음
+[할 일] 이 세계의 SNS 등장인물 8명 JSON(cast). 전원 20대 성인, 실존 인물 아님, 유명인·연예인 계정 없음
 - archetype을 골고루: bestie, rival, mentor, fan, crush, chaos, troll, news 각 1명
 - 누구나 떠올릴 전형적인 주변 인물로(오랜 절친, 견제하는 동기, 챙겨 주는 선배처럼). 특이한 과거·복잡한 사연·세세한 버릇 없이 현실에 흔한 사람
 - name: 실제 한국 트위터 유저가 쓸 법한 표시 이름(실명형·닉네임+이모지 등), handle: 영문 소문자·숫자·밑줄 4~15자
 - emoji 1개, bio 20자 이내, description 한 문장 40자 이내(이 세계에서의 정체와 플레이어와의 사이만. 말투는 관계에 따라 게임이 정한다)
-- g: 성별 m 또는 f, age: 나이 20~59(뉴스 계정은 생략)
+- g: 성별 m 또는 f, age: 나이 20~29(사람은 전원 20대, 뉴스 계정은 생략)
 - followers: 300 ~ 2000000, isNews(뉴스 계정만 true), verified`;
 }
 
@@ -515,16 +529,13 @@ ${clip(world.setting, 1200)}
  * 클로드 엔진의 [응답 형식] 꼬리말이 "<…> 자리는 [할 일]의 범위 안 정수로 바꿔 쓴다"고 알려 준다. 혹시 글자가 그대로 오면 normalize.num()이 0으로 읽는다.
  */
 export const SHAPES = {
-  react:
-    '{"mood":"positive|negative|funny|apology|question|brag|neutral 중 하나","replies":[{"h":"아이디","t":"답글"},{"h":"-","t":"일반인 답글"},{"h":"-","t":"인플루언서 답글에 다는 대댓글","re":"인플루언서아이디"}],"aff":[{"h":"아이디","d":<-6~18>}],"rom":[],"dev":[],"quality":<0~100>,"viral":false,"followers":<범위는 할 일>,"aura":<-5~8>,"humor":<-5~8>,"rep":<-20~12>,"news":[],"follow":[],"unfollow":[]}',
   thread: '{"replies":[{"h":"말을 건 상대 아이디(1번째 줄 필수)","t":"답글"},{"h":"아이디","t":"끼어든 답글"},{"h":"-","t":"일반인 답글"}],"aff":[{"h":"아이디","d":<-6~18>}],"rom":[],"dev":[],"rep":<-8~4>}',
-  dm: '{"mood":"positive|negative|funny|apology|question|brag|neutral 중 하나","messages":["답장1","답장2"],"affinityDelta":<-6~12>,"romanceDelta":<범위는 할 일>,"devotionDelta":<0~8>,"leave":false,"sum":""}',
   ambient: '{"posts":[{"h":"아이디","t":"글","m":null}]}',
   event: '{"emoji":"⚡","title":"제목","body":"상황 1~2문장","inv":["아이디"]}',
   comments: '{"comments":[{"h":"아이디","t":"댓글"},{"h":"-","t":"일반인 댓글"},{"h":"-","t":"인플루언서 댓글에 다는 대댓글","re":"인플루언서아이디"}]}',
   firstDM: '{"messages":["쪽지1","쪽지2"]}',
   draft: '{"name":"이름","handle":"handle_01","bio":"자기소개","emoji":"🙂","post":"첫 글"}',
-  cast: '{"cast":[{"name":"이름","handle":"handle","emoji":"🙂","archetype":"bestie","bio":"소개","description":"정체와 플레이어와의 사이 한 문장","g":"m|f","age":<20~59>,"followers":<300~2000000>,"isNews":false,"verified":false}]}',
+  cast: '{"cast":[{"name":"이름","handle":"handle","emoji":"🙂","archetype":"bestie","bio":"소개","description":"정체와 플레이어와의 사이 한 문장","g":"m|f","age":<20~29>,"followers":<300~2000000>,"isNews":false,"verified":false}]}',
 } as const;
 
 /** 하루 정산 응답 모양 — 조절값에서 끈 항목은 뺀다(안 쓸 글자를 받지 않게) */
@@ -544,4 +555,15 @@ export function tickShape(t: AITune = DEFAULT_TUNE, returned = 0): string {
 export function outcomeShape(t: AITune = DEFAULT_TUNE): string {
   const posts = t.eventPosts > 0 ? '"posts":[{"h":"아이디","t":"글","c":[{"h":"-","t":"댓글"},{"h":"아이디","t":"댓글"}]}],' : '';
   return `{"text":"결과",${posts}"grade":<-2~2>,"followers":<-300~500>,"aura":<-5~10>,"humor":<-5~10>,"rep":<-15~12>,"xp":<0~20>,"aff":[{"h":"아이디","d":<-25~25>}],"rom":[],"dev":[]}`;
+}
+
+/** 내 글 반응 응답 모양 — 뒤따르는 공개 글(posts)·쪽지(dm)는 조절값에서 켠 경우만 */
+export function reactShape(t: AITune = DEFAULT_TUNE): string {
+  const extra = `${t.echoPosts > 0 ? ',"posts":[{"h":"아이디","t":"이 일을 자기 쪽에서 이어 가는 글"}]' : ''}${t.echoDMs > 0 ? ',"dm":[{"h":"아이디","t":"따로 보내는 쪽지"}]' : ''}`;
+  return `{"mood":"positive|negative|funny|apology|question|brag|neutral 중 하나","replies":[{"h":"아이디","t":"답글"},{"h":"-","t":"일반인 답글"},{"h":"-","t":"인플루언서 답글에 다는 대댓글","re":"인플루언서아이디"}],"aff":[{"h":"아이디","d":<-6~18>}],"rom":[],"dev":[],"quality":<0~100>,"viral":false,"followers":<범위는 할 일>,"aura":<-5~8>,"humor":<-5~8>,"rep":<-20~12>,"news":[],"follow":[],"unfollow":[]${extra}}`;
+}
+
+/** 쪽지 답장 응답 모양 — 공개 글(post)은 조절값에서 켠 경우만 */
+export function dmShape(t: AITune = DEFAULT_TUNE): string {
+  return `{"mood":"positive|negative|funny|apology|question|brag|neutral 중 하나","messages":["답장1","답장2"],"affinityDelta":<-6~12>,"romanceDelta":<범위는 할 일>,"devotionDelta":<0~8>,"leave":false,"sum":""${t.dmPost ? ',"post":""' : ''}}`;
 }

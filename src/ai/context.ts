@@ -18,13 +18,16 @@ import type { AIContext, CastInfo } from './types';
 export function buildContext(sc: Scenario): AIContext {
   // 공통 캐릭터를 끈 경우 등: inactive 이거나 cast 에 없는 인물은 AI에게 보이지 않는다
   const chars = sc.cast.map((id) => sc.characters[id]).filter((c): c is Character => !!c && !c.inactive);
+  // 빼 둔 화제: 그 낱말이 든 글·쪽지·기억은 AI에게 넘기지 않는다(원치 않는 전개를 끊는다)
+  const avoid = (sc.avoid ?? []).filter(Boolean);
+  const hit = (t: string | undefined) => hitsAvoid(avoid, t);
   const authorName = (p: Post) => {
     if (p.authorId === ME) return `${sc.persona.name}(플레이어)`;
     if (p.authorId === SYSTEM) return '시스템';
     if (p.authorId === GHOST) return p.ghost?.name ?? '일반인';
     return sc.characters[p.authorId]?.name ?? '알 수 없음';
   };
-  const feedPosts = sc.feed.map((id) => sc.posts[id]).filter((p): p is Post => !!p);
+  const feedPosts = sc.feed.map((id) => sc.posts[id]).filter((p): p is Post => !!p && !hit(p.text));
   const recent = feedPosts
     .slice(0, 10)
     .reverse()
@@ -34,7 +37,7 @@ export function buildContext(sc: Scenario): AIContext {
   const castIds = new Set(chars.map((c) => c.id));
   const saidBy = new Map<ID, { k: number; line: string }[]>();
   for (const p of Object.values(sc.posts)) {
-    if (!castIds.has(p.authorId) || !p.text) continue;
+    if (!castIds.has(p.authorId) || !p.text || hit(p.text)) continue;
     const k = p.at.day * 1440 + p.at.hour * 60 + p.at.minute;
     const parent = p.parentId ? sc.posts[p.parentId] : undefined;
     const where = parent ? (parent.authorId === ME ? '플레이어 글에 답글' : '답글') : '글';
@@ -75,7 +78,7 @@ export function buildContext(sc: Scenario): AIContext {
     },
     clock: sc.clock,
     cast: chars.map((c): CastInfo => {
-      const msgs = (sc.dms[c.id]?.messages ?? []).filter((m) => m.from !== 'system');
+      const msgs = (sc.dms[c.id]?.messages ?? []).filter((m) => m.from !== 'system' && !hit(m.text));
       return {
         id: c.id,
         name: c.name,
@@ -107,22 +110,41 @@ export function buildContext(sc: Scenario): AIContext {
       };
     }),
     recent,
-    memory: sc.memory.slice(-12),
+    memory: sc.memory.filter((m) => !hit(m)).slice(-12),
     scenes: (t?.scenes ?? []).map((s) => ({ key: s.key, desc: s.prompt.split(',').slice(0, 2).join(',').slice(0, 60) })),
     difficulty: sc.difficulty ?? 'normal',
     romanceLevel: sc.romanceLevel ?? 'racy',
-    trends: (sc.trends ?? []).slice(0, 6).map((x) => x.tag),
+    trends: (sc.trends ?? [])
+      .filter((x) => !hit(x.tag))
+      .slice(0, 6)
+      .map((x) => x.tag),
     quests: (sc.quests ?? [])
-      .filter((q) => !q.done)
+      .filter((q) => !q.done && !hit(q.title) && !(q.keyword ?? []).some((k) => hit(k)))
       .slice(0, 4)
       .map((q) => ({ title: q.title, keyword: q.keyword })),
-    pendingEvents: (sc.events ?? []).filter((e) => e.status === 'pending').map((e) => e.title),
+    pendingEvents: (sc.events ?? []).filter((e) => e.status === 'pending' && !hit(e.title)).map((e) => e.title),
+    ...(avoid.length ? { avoid } : {}),
     myRecent: feedPosts
       .filter((p) => p.authorId === ME && p.kind === 'post' && p.text)
       .slice(0, 3)
       .reverse()
       .map((p) => p.text),
   };
+}
+
+/** 빼 둔 화제가 들어 있는 글인지(띄어쓰기·대소문자 무시) */
+export function hitsAvoid(avoid: string[] | undefined, text: string | undefined): boolean {
+  if (!avoid?.length || !text) return false;
+  const t = text.replace(/\s+/g, '').toLowerCase();
+  return avoid.some((w) => t.includes(w.replace(/\s+/g, '').toLowerCase()));
+}
+
+/** 요약 글에서 빼 둔 화제가 든 문장만 덜어 낸다(쪽지 요약 등) */
+export function scrubAvoid(avoid: string[] | undefined, text: string | undefined): string {
+  if (!text || !avoid?.length || !hitsAvoid(avoid, text)) return text ?? '';
+  return sentences(text)
+    .filter((s) => !hitsAvoid(avoid, s))
+    .join(' ');
 }
 
 // ───────────────────────── 글자 줄이기

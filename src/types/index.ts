@@ -246,6 +246,8 @@ export interface Conversation {
   updatedTs: number;
   /** AI가 요약한 이전 대화(화면에 보여 주는 최근 12줄보다 앞선 부분) — 대화가 길어져도 맥락이 끊기지 않게 */
   summary?: string;
+  /** 이 대화 끝에 상대가 공개 글을 올린 마지막 날(하루에 한 번까지만 올리게) */
+  echoDay?: number;
 }
 
 export type NotiType =
@@ -469,6 +471,8 @@ export interface Scenario {
   /** 바이럴 모먼트: 켜 두면 다음 행동 1번의 결과가 크게 강화된다 */
   boost?: { kind: 'viral'; armedTs: number } | null;
   /** 글쓰기 화면 "제안"(다른 AI 응답에 얹어 받아 둔 것 — 따로 호출하지 않음) */
+  /** 빼 둔 화제 — 플레이어가 (-단어)로 이야기에서 빼 달라고 한 낱말들(game/avoid.ts). AI 맥락·요약에서 빠지고 AI도 쓰지 않는다 */
+  avoid?: string[];
   ideas?: { list: string[]; ts: number };
   /** 아이템 사용 기록(최근 30개, 최신이 앞). target = 선물 받은 캐릭터 등 */
   itemLog?: { id: ID; item: ItemKind; text: string; ts: number; at: GameTime; target?: ID }[];
@@ -486,10 +490,16 @@ export type AIProvider = 'gemini' | 'claude';
 export interface AITune {
   /** 내 글 1개에 달리는 답글 수 */
   replies: number;
+  /** 내 글을 보고 인물이 자기 계정에 따로 올리는 글 수(0 = 없음) */
+  echoPosts: number;
+  /** 내 글을 보고 따로 쪽지를 보내는 인물 수(최대, 0 = 없음) */
+  echoDMs: number;
   /** 내 답글 1개에 달리는 답글 수(상대 1 + 끼어드는 사람) */
   thread: number;
   /** 쪽지 답장 말풍선 최대 수 */
   dmBubbles: number;
+  /** 쪽지를 주고받은 뒤 그 인물이 가끔 공개 글을 올린다(1/0) */
+  dmPost: number;
   /** 이벤트에 답한 뒤 올라오는 글 수 */
   eventPosts: number;
   /** 남의 글을 처음 열 때 달려 있는 댓글 수(0 = 만들지 않음) */

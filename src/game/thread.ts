@@ -21,6 +21,8 @@ import { diffOf, scaleSocial } from './difficulty';
 import { burstDelays, isInfluencer, npcEngagement } from './engagement';
 import { dedupeLines, replyLikes } from './post';
 import { addReply, addXp, applyDeltas, consumeBoost, logActivity, questProgress, recomputeStatus, tickClock } from './progress';
+import { hitsAvoid } from '../ai/context';
+import { takeAvoid } from './avoid';
 import { POST_MAX_LEN, TIME_COST, XP } from './rules';
 import { runDayTick } from './tick';
 import { snapshot } from './undo';
@@ -29,9 +31,11 @@ import { snapshot } from './undo';
 
 export function replyToPost(parentId: ID, text: string): ActionResult {
   const sc = getActive();
-  const body = cutText(text.trim(), POST_MAX_LEN);
   if (!sc) return fail('none');
-  if (!body) return fail('empty');
+  // (-단어)·(+단어): 화제 빼기/다시 넣기(그것만 썼으면 답글은 달지 않는다)
+  const cmd = takeAvoid(sc.id, text);
+  const body = cutText(cmd.text.trim(), POST_MAX_LEN);
+  if (!body) return cmd.changed ? OK : fail('empty');
   const parent = sc.posts[parentId];
   if (!parent) return fail('none');
   snapshot(sc, '답글');
@@ -97,7 +101,8 @@ async function reactToMyReply(flow: Flow, parentId: ID, myReplyId: ID, text: str
     const chain: { authorId: ID; text: string; name?: string }[] = [];
     let cur: Post | undefined = parent;
     while (cur && chain.length < 8) {
-      chain.unshift({ authorId: cur.authorId, text: cur.text, ...(cur.authorId === GHOST && cur.ghost ? { name: cur.ghost.name } : {}) });
+      // 빼 둔 화제가 든 줄은 흐름에서 뺀다
+      if (!hitsAvoid(ctx.avoid, cur.text)) chain.unshift({ authorId: cur.authorId, text: cur.text, ...(cur.authorId === GHOST && cur.ghost ? { name: cur.ghost.name } : {}) });
       cur = cur.parentId ? sc.posts[cur.parentId] : undefined;
     }
     const r = await engine().replyInThread(ctx, {

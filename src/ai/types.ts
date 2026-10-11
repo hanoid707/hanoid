@@ -42,6 +42,8 @@ export interface AIContext {
   pendingEvents?: string[];
   /** (v3) 플레이어가 최근에 올린 글(오래된 → 최신) — 제안 글이 말투를 따라가게 */
   myRecent?: string[];
+  /** 빼 둔 화제(플레이어가 이야기에서 빼 달라고 한 낱말) — 맥락에서는 이미 빠져 있고, AI도 쓰지 않는다 */
+  avoid?: string[];
   /** AI 조절값(답글·쪽지·새 글 수 …). 게임이 호출 직전에 붙인다(core.ctxOf). 없으면 기본값 */
   tune?: AITune;
 }
@@ -118,6 +120,10 @@ export interface PostReaction {
   unfollowers: ID[];
   /** 다음에 올릴 만한 글 제안(완성된 글 1~2줄, 0~2개) — 글쓰기 화면이 따로 호출하지 않고 재사용 */
   ideas: string[];
+  /** 내 글을 보고 인물이 자기 계정에 따로 올리는 글(같은 일을 자기 쪽에서 이어 감) */
+  echoPosts?: GeneratedLine[];
+  /** 내 글을 보고 따로 보내는 쪽지 */
+  openers?: GeneratedLine[];
 }
 
 /** 답글 스레드에서 캐릭터가 되받아치는 반응 */
@@ -139,6 +145,8 @@ export interface DMReaction {
   devotionDelta: number;
   /** 대화가 길어졌을 때(12줄 넘음) AI가 새로 갱신한 이전 대화 요약 — 다음 호출의 priorSummary로 저장 */
   historySummary?: string;
+  /** 이 대화 뒤에 그 인물이 자기 계정에 올리는 공개 글(가끔) */
+  post?: string;
 }
 
 export interface EventDraft {

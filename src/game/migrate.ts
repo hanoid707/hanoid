@@ -7,7 +7,7 @@
  * - v3.4: 등장인물(핵심 인물)은 반드시 사람 얼굴 사진 — 사진 없이 이모지만 쓰던 사람에게 성별·나이대에 맞는 프리셋 얼굴을 준다
  * 받은 객체(JSON에서 막 읽은 것)를 직접 고친다.
  */
-import { pickFace, resolveFace, usedFaceKeys } from '../data/facePool';
+import { pickFace, resolveFace, themeOfWorld, usedFaceKeys } from '../data/facePool';
 import { AVATARS } from '../data/photos';
 import { findSeed } from '../data/worlds';
 import { LEGACY_DESC_HASH } from '../data/worlds/legacy';
@@ -28,7 +28,7 @@ function ensureFaces(sc: Scenario): void {
   const used = usedFaceKeys(all);
   if (sc.persona?.avatar?.photo) used.add(resolveFace(sc.persona.avatar.photo));
   for (const c of missing) {
-    const key = pickFace(c.gender ?? (hashStr(c.id) % 2 ? 'm' : 'f'), c.ageGroup ?? 20, used, c.id);
+    const key = pickFace(c.gender ?? (hashStr(c.id) % 2 ? 'm' : 'f'), used, c.id, themeOfWorld(sc.world?.templateId));
     if (!key) continue;
     c.avatar.photo = key;
     used.add(key);

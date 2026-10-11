@@ -1,0 +1,7 @@
+g031 bl
+g033 bl
+g059 bl
+g069 bl
+g074 bl
+g077 bl
+g079 bl

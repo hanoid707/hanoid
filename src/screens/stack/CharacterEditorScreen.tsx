@@ -21,7 +21,7 @@ import { StatSlider } from '../../components/StatSlider';
 import { Screen, TopBar } from '../../components/Screen';
 import { Button, Chip, Field, FormLabel, MeterBar } from '../../components/ui';
 import { AVATAR_COLORS, AVATAR_EMOJIS } from '../../data/avatars';
-import { faceAgeGroup, faceGender, usedFaceKeys } from '../../data/facePool';
+import { faceGender, usedFaceKeys } from '../../data/facePool';
 import { createQuickCharacter, deleteCharacter, regenerateBio, saveCharacter } from '../../game/actions';
 import {
   AGE_GROUPS,
@@ -83,9 +83,10 @@ export function CharacterEditorScreen() {
 
   const [type, setType] = useState<CharacterType>(initType);
   const [followers, setFollowers] = useState(String(editing?.followers ?? 1000));
-  // 성별은 사진을 따른다(사진 프리셋을 고르면 그 얼굴의 성별). 나이대는 기본 20대(고치는 중이면 저장된 값 → 사진 나이대 → 20대)
+  // 성별은 사진을 따른다(사진 프리셋을 고르면 그 얼굴의 성별). 나이대는 기본 20대 — 원래 나이대가 없던 인물은 직접 눌렀을 때만 저장한다(설명 속 나이와 어긋나지 않게)
   const [gender, setGender] = useState<Gender | undefined>(editing ? (editing.gender ?? faceGender(editing.avatar.photo)) : undefined);
-  const [ageGroup, setAgeGroup] = useState<AgeGroup>(editing ? (editing.ageGroup ?? faceAgeGroup(editing.avatar.photo) ?? 20) : 20);
+  const [ageGroup, setAgeGroup] = useState<AgeGroup>(editing?.ageGroup ?? 20);
+  const [ageTouched, setAgeTouched] = useState(false);
   const [traits, setTraits] = useState(editing?.description ?? '');
   const [personality, setPersonality] = useState<string | undefined>(editing?.personality);
   const [speechStyle, setSpeechStyle] = useState<string | undefined>(editing?.speechStyle);
@@ -187,7 +188,7 @@ export function CharacterEditorScreen() {
         banner,
         type: typeChanged ? type : undefined,
         gender,
-        ageGroup,
+        ageGroup: editing.ageGroup || ageTouched ? ageGroup : undefined,
         personality,
         speechStyle,
         registerOverride: register === 'auto' ? null : register,
@@ -289,7 +290,16 @@ export function CharacterEditorScreen() {
         <FormLabel>나이대</FormLabel>
         <View style={styles.wrap}>
           {AGE_GROUPS.map((a) => (
-            <Chip key={a} small label={`${a}대`} selected={ageGroup === a} onPress={() => setAgeGroup(a)} />
+            <Chip
+              key={a}
+              small
+              label={`${a}대`}
+              selected={ageGroup === a}
+              onPress={() => {
+                setAgeGroup(a);
+                setAgeTouched(true);
+              }}
+            />
           ))}
         </View>
       </View>

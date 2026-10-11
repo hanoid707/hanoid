@@ -1,0 +1,6 @@
+g024_tl g024_tr g024_bl g024_br
+g050_tr g062_br g064_br
+g074_tl g074_tr g074_bl g074_br
+g077_tl g077_tr g077_bl g077_br
+g073_br g078_br g080_bl g080_br
+g092_tl g092_tr g092_bl g092_br

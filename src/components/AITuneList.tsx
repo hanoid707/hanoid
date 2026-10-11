@@ -36,8 +36,11 @@ const GROUPS: GroupSpec[] = [
     title: '내가 한 일에 달리는 반응',
     rows: [
       { key: 'replies', label: '내 글에 달리는 답글', unit: '개', cost: 'react', per: '글 1개' },
+      { key: 'echoPosts', label: '내 글을 보고 인물이 올리는 글', unit: '개', note: '같은 일을 자기 계정에서 이어 가요' },
+      { key: 'echoDMs', label: '내 글을 보고 오는 쪽지', unit: '명', note: '가까운 인물이 따로 쪽지를 보내요' },
       { key: 'thread', label: '내 답글에 달리는 답글', unit: '개', cost: 'thread', per: '답글 1개' },
       { key: 'dmBubbles', label: '쪽지 답장 말풍선(최대)', unit: '개', cost: 'dm', per: '쪽지 1번' },
+      { key: 'dmPost', label: '쪽지 뒤에 인물이 올리는 글', note: '대화가 끝나면 가끔 공개 글로 티를 내요' },
       { key: 'eventPosts', label: '이벤트 뒤에 올라오는 글', unit: '개', cost: 'event', per: '이벤트 1번' },
     ],
   },

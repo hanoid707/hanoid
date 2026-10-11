@@ -12,7 +12,7 @@ import { getActive } from '../store/game';
 import type { ID, Scenario } from '../types';
 import { DEFAULT_TUNE, dayPlan } from '../ai/tune';
 import { cutText, rand, sleep, uid } from '../utils';
-import { addNpcLines, activeChar, alive, beginFlow, ctxOf, engine, ensureConversation, G, tune } from './core';
+import { addNpcLines, activeChar, alive, beginFlow, ctxOf, deliverOpeners, engine, G, tune } from './core';
 import { pickLocalEvent } from './localEvents';
 import { saveIdeas } from './ideas';
 import { addNewsPost, dailyHousekeeping, logActivity, pushItemLog, pushNoti, tickClock } from './progress';
@@ -120,18 +120,7 @@ export async function runDayTick(sid: ID, opts: { force?: boolean } = {}) {
         pushNoti(d, { type: 'event', eventId: id, text: `새 이벤트: ${r.event.title}` });
       }
       // 먼저 오는 쪽지: 돌아온 인물은 전부, 그 밖은 조절값(먼저 쪽지 보내는 인물 수)까지
-      let openers = 0;
-      for (const o of r.dmOpeners) {
-        if (!activeChar(d, o.authorId)) continue;
-        if (!returned.includes(o.authorId) && ++openers > t.dayDMs) continue;
-        if (d.dms[o.authorId]?.typing) continue;
-        const cv = ensureConversation(d, o.authorId);
-        if (cv.leftUntilDay !== null) continue;
-        cv.messages.push({ id: uid('m'), from: 'them', text: o.text, ts: Date.now(), at: { ...d.clock } });
-        cv.unread += 1;
-        cv.updatedTs = Date.now();
-        pushNoti(d, { type: 'dm', actorId: o.authorId, text: '님이 쪽지를 보냈습니다' });
-      }
+      deliverOpeners(d, r.dmOpeners, t.dayDMs, returned);
       if (t.dayMission && r.mission) {
         d.quests.unshift({
           id: uid('q'),
