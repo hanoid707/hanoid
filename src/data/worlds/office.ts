@@ -64,7 +64,7 @@ export const OFFICE: WorldTemplate = {
       color: '#455A64',
       archetype: 'crush',
       bio: '판교 9년차 · 개인 계정이며 소속과 무관 · 아아는 연하게',
-      description: '숙소예약 스쿼드 팀장(33, 백엔드 출신 9년차), 냉철하고 공정한 사람. 평가권자라 업무에선 선을 지키지만, 퇴근 후엔 무심한 한마디로 챙김이 샌다.',
+      description: '숙소예약 스쿼드 팀장(28, 백엔드 출신 9년차), 냉철하고 공정한 사람. 평가권자라 업무에선 선을 지키지만, 퇴근 후엔 무심한 한마디로 챙김이 샌다.',
       register: 'haeyo',
       followers: 612,
       following: 158,
@@ -73,7 +73,7 @@ export const OFFICE: WorldTemplate = {
       photo: {
         kind: 'face',
         gender: 'f',
-        age: 33,
+        age: 28,
         prompt:
           'candid photo by a coworker in a glass meeting room, shoulder-length straight black hair tucked behind one ear, thin silver-rimmed glasses, charcoal knit sweater, lanyard, calm unsmiling expression, slightly tired eyes, laptop glow on face',
       },
@@ -286,7 +286,7 @@ export const OFFICE: WorldTemplate = {
       color: '#A1887F',
       archetype: 'mentor',
       bio: '피플팀 13년차 | 연말정산 문의는 메일로 | 사내 소문은 저한테 오면 끝납니다 🤐',
-      description: '피플팀 과장(39, 13년차). 사내 사정을 다 알지만 입이 무겁고, 플레이어를 아끼는 후배로 대하며 현실적인 조언을 준다.',
+      description: '피플팀 과장(29, 13년차). 사내 사정을 다 알지만 입이 무겁고, 플레이어를 아끼는 후배로 대하며 현실적인 조언을 준다.',
       register: 'haeyo',
       followers: 1530,
       following: 640,
@@ -295,7 +295,7 @@ export const OFFICE: WorldTemplate = {
       photo: {
         kind: 'face',
         gender: 'f',
-        age: 39,
+        age: 29,
         prompt:
           'photo taken by a coworker in a cafe-style office lounge, medium-length permed brown hair, light makeup, beige blazer over a white tee, warm knowing smile, holding a ceramic mug, soft background blur',
       },
@@ -323,7 +323,7 @@ export const OFFICE: WorldTemplate = {
       color: '#EC407A',
       archetype: 'celeb',
       bio: '유튜브 윤슬로그 구독자 18.6만 · 판교 8년차 백엔드 · 영상 속 동료는 전부 허락받음 · 협업 문의 DM',
-      description: '8년차 백엔드 개발자이자 구독자 18.6만 개발 유튜버 \'윤슬로그\'(31). 플레이어를 케미 좋은 게스트로 탐내지만, 동료 얼굴과 회사 이야기는 꼭 허락받는다.',
+      description: '8년차 백엔드 개발자이자 구독자 18.6만 개발 유튜버 \'윤슬로그\'(27). 플레이어를 케미 좋은 게스트로 탐내지만, 동료 얼굴과 회사 이야기는 꼭 허락받는다.',
       register: 'haeyo',
       followers: 92400,
       following: 380,
@@ -333,7 +333,7 @@ export const OFFICE: WorldTemplate = {
       photo: {
         kind: 'face',
         gender: 'f',
-        age: 31,
+        age: 27,
         prompt:
           'vlog-style selfie in an office lounge, long layered dark brown hair, natural makeup, white crewneck sweatshirt, wireless earbuds, bright smile, holding a compact camera, small ring light in background',
       },
@@ -454,7 +454,7 @@ export const OFFICE: WorldTemplate = {
       color: '#8D6E63',
       archetype: 'bestie',
       bio: 'QA 4년차 · 이름은 재현인데 버그는 재현 안 됨',
-      description: '숙소예약 스쿼드 QA 엔지니어, 30세. 플레이어 옆자리 동료이자 배포 날 같이 야근하는 전우. 건조한 드립.',
+      description: '숙소예약 스쿼드 QA 엔지니어, 27세. 플레이어 옆자리 동료이자 배포 날 같이 야근하는 전우. 건조한 드립.',
       followers: 418,
       following: 377,
       location: '판교',
@@ -462,7 +462,7 @@ export const OFFICE: WorldTemplate = {
       photo: {
         kind: 'face',
         gender: 'm',
-        age: 30,
+        age: 27,
         prompt: 'photo taken by a coworker at a desk covered with test smartphones, buzz cut, broad shoulders, black-framed glasses, plain gray hoodie, deadpan expression',
       },
       posts: [
@@ -664,7 +664,7 @@ export const OFFICE: WorldTemplate = {
       color: '#FFCA28',
       archetype: 'chaos',
       bio: '판교 점심 1만 2천원 이하만 리뷰 · 웨이팅 15분 넘으면 탈락 · 알파돔 지하 지박령',
-      description: '판교 직장인 점심 리뷰 계정(30세 직장인). 가성비에 집착한다.',
+      description: '판교 직장인 점심 리뷰 계정(27세 직장인). 가성비에 집착한다.',
       followers: 2870,
       following: 95,
       location: '판교',
@@ -689,7 +689,7 @@ export const OFFICE: WorldTemplate = {
       color: '#E53935',
       archetype: 'chaos',
       bio: '판교 게임회사 5년차 서버 개발자 · 금요일 배포 반대 운동 본부장 · 개인 의견',
-      description: '판교 다른 회사(게임사) 서버 개발자, 30세. 개발자 밈과 장애 썰 전문.',
+      description: '판교 다른 회사(게임사) 서버 개발자, 27세. 개발자 밈과 장애 썰 전문.',
       followers: 2990,
       following: 640,
       location: '판교',
@@ -697,7 +697,7 @@ export const OFFICE: WorldTemplate = {
       photo: {
         kind: 'face',
         gender: 'm',
-        age: 30,
+        age: 27,
         prompt: 'low-light selfie at a desk with three monitors at night, unkempt medium-length hair, stubble, black hoodie, headphones around neck, sleepy face',
       },
       posts: [
@@ -716,7 +716,7 @@ export const OFFICE: WorldTemplate = {
       color: '#F48FB1',
       archetype: 'chaos',
       bio: '주 3일 출근 반대 서명 1번 · 출근하면 생산성 떨어지는 사람 · 고양이 둘',
-      description: '판교 IT회사 데이터 엔지니어, 31세. 재택 vs 출근 논쟁만 나오면 등판하는 재택 원리주의자.',
+      description: '판교 IT회사 데이터 엔지니어, 27세. 재택 vs 출근 논쟁만 나오면 등판하는 재택 원리주의자.',
       followers: 1560,
       following: 430,
       location: '경기 성남',
@@ -724,7 +724,7 @@ export const OFFICE: WorldTemplate = {
       photo: {
         kind: 'face',
         gender: 'f',
-        age: 31,
+        age: 27,
         prompt: 'selfie from slightly above on a sofa with a laptop, messy top knot, glasses, no makeup, oversized knit sweater, smug smile, cozy home office',
       },
       posts: [
@@ -743,7 +743,7 @@ export const OFFICE: WorldTemplate = {
       color: '#B0BEC5',
       archetype: 'troll',
       bio: '판교 연봉 거품 꺼진다에 한 표 · 팩트만 말함 · 차단해도 됨',
-      description: '판교 직장인들을 비꼬는 34세 외부인 시비러. 사실은 판교가 부럽다. 욕설·혐오 표현은 없다.',
+      description: '판교 직장인들을 비꼬는 28세 외부인 시비러. 사실은 판교가 부럽다. 욕설·혐오 표현은 없다.',
       followers: 640,
       following: 1020,
       location: '경기 수원',
@@ -751,7 +751,7 @@ export const OFFICE: WorldTemplate = {
       photo: {
         kind: 'face',
         gender: 'm',
-        age: 34,
+        age: 28,
         prompt: 'selfie from the driver seat of a car, short side-part hair, slightly tanned skin, white shirt with rolled sleeves, smug half smile',
       },
       posts: [
@@ -770,7 +770,7 @@ export const OFFICE: WorldTemplate = {
       color: '#29B6F6',
       archetype: 'bestie',
       bio: '떠나봄 퇴사 1년 · 지금은 제주에서 프리랜서 디자이너 · 스탠드업 없는 삶',
-      description: '플레이어의 첫 옆자리 선배였다가 1년 전 퇴사한 32세 프리랜서 디자이너. 전 회사 대숲을 아직도 챙겨 보며 플레이어 근황에 훈수 둔다. 퇴사 뽐뿌 담당.',
+      description: '플레이어의 첫 옆자리 선배였다가 1년 전 퇴사한 28세 프리랜서 디자이너. 전 회사 대숲을 아직도 챙겨 보며 플레이어 근황에 훈수 둔다. 퇴사 뽐뿌 담당.',
       followers: 1130,
       following: 560,
       location: '제주',

@@ -14,7 +14,7 @@ import { useGrowth } from '../../components/GrowingCount';
 import { IconClose } from '../../components/icons';
 import { MentionInput, type PersonOption } from '../../components/MentionInput';
 import { Photo } from '../../components/Photo';
-import { PostActions, PostCard } from '../../components/PostCard';
+import { PostActions, PostCard, QuoteChain } from '../../components/PostCard';
 import { RelationChip } from '../../components/RelationChip';
 import { RichText } from '../../components/RichText';
 import { Screen, TopBar } from '../../components/Screen';
@@ -105,6 +105,11 @@ function MainPost({ sc, root, onReply }: { sc: Scenario; root: Post; onReply: ()
         </Pressable>
         {ch && !ch.iFollow ? <FollowButton c={ch} /> : null}
       </View>
+      {root.quote?.length ? (
+        <View style={{ marginTop: 8 }}>
+          <QuoteChain chain={root.quote} onOpen={(id) => sc.posts[id] && nav.push('PostDetail', { postId: id })} />
+        </View>
+      ) : null}
       {root.badge === 'viral' || root.boosted ? (
         <Text style={{ color: root.boosted ? c.aura : c.repost, fontSize: font.small, fontWeight: '700', marginTop: 8 }}>
           {[root.badge === 'viral' ? '🔥 지금 확산 중' : '', root.boosted ? '🚀 바이럴 모먼트' : ''].filter(Boolean).join('  ')}

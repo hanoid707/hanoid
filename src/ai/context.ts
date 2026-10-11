@@ -92,6 +92,8 @@ export function buildContext(sc: Scenario): AIContext {
         description: scrubAvoid(all, c.description),
         relations: scrubAvoid(all, c.relations) || undefined,
         ...(own.length ? { avoid: own } : {}),
+        ...(c.title ? { title: c.title } : {}),
+        ...(c.age ? { age: c.age } : {}),
         affinity: c.affinity,
         followsMe: c.followsMe,
         iFollow: c.iFollow,
@@ -254,7 +256,8 @@ export function fullEntry(c: CastInfo, descMax = 160, opts: { said?: boolean } =
     [c.tier !== 'crowd' && c.crowdRole && c.crowdRole !== 'public' ? CROWD_LABEL[c.crowdRole] : '', c.badge ? BADGE_SHORT[c.badge] : '', `팔로워${formatCount(c.followers)}`]
       .filter(Boolean)
       .join('·'),
-    [c.ageGroup ? `${c.ageGroup}대` : '', c.gender ? (c.gender === 'f' ? '여' : '남') : ''].filter(Boolean).join(' '),
+    [c.age ? `${c.age}살` : c.ageGroup ? `${c.ageGroup}대` : '', c.gender ? (c.gender === 'f' ? '여' : '남') : ''].filter(Boolean).join(' '),
+    c.title ? `자리: ${clip(c.title, 16)}` : '',
     [presetLabel(c.personality, PERSONALITY_PRESETS, c.description), presetLabel(c.speechStyle, SPEECH_PRESETS, c.description)].filter(Boolean).join('·'),
     c.followsMe && c.iFollow ? '맞팔' : c.followsMe ? '플레이어를 팔로우' : c.iFollow ? '플레이어가 팔로우' : '',
   ].filter(Boolean);

@@ -102,6 +102,8 @@ export function CharacterEditorScreen() {
   const [badge, setBadge] = useState<BadgeChoice>(editing ? (badgeOf(editing) ?? 'none') : 'auto');
   const [relations, setRelations] = useState(editing?.relations ?? '');
   const [avoidText, setAvoidText] = useState((editing?.avoid ?? []).join(', '));
+  const [rankTitle, setRankTitle] = useState(editing?.title ?? '');
+  const [ageText, setAgeText] = useState(editing?.age ? String(editing.age) : '');
   const [register, setRegister] = useState<SpeechRegister | 'auto'>(editing?.registerOverride ?? 'auto');
   const [relationLocked, setRelationLocked] = useState(!!editing?.relationLocked);
   const [followsMe, setFollowsMe] = useState(editing?.followsMe ?? true);
@@ -156,6 +158,8 @@ export function CharacterEditorScreen() {
         badge: badgeValue,
         relations: relations.trim() || undefined,
         avoid: splitAvoid(avoidText).slice(0, 12),
+        title: rankTitle.trim() || undefined,
+        age: Number(ageText) || undefined,
         registerOverride: register === 'auto' ? null : register,
         relationLocked,
       });
@@ -195,6 +199,8 @@ export function CharacterEditorScreen() {
         personality,
         speechStyle,
         avoid: splitAvoid(avoidText).slice(0, 12),
+        title: rankTitle,
+        age: Number(ageText) || 0,
         registerOverride: register === 'auto' ? null : register,
         relationLocked,
         stats:
@@ -408,6 +414,14 @@ export function CharacterEditorScreen() {
         </View>
       </View>
       <Field label="관계 메모(다른 인물·나와의 사이)" value={relations} onChangeText={setRelations} multiline maxLength={300} counter placeholder="예) 나와 같은 날 입사한 동기. 강해솔 팀장을 어려워함." />
+      <View style={{ flexDirection: 'row', gap: 8 }}>
+        <View style={{ flex: 1 }}>
+          <Field testID="char-title" label="계급·직함(타임라인 이름 옆)" value={rankTitle} onChangeText={setRankTitle} placeholder="예) 상병 · 맞선임 / 팀장 / 입사 동기" maxLength={16} />
+        </View>
+        <View style={{ width: 84 }}>
+          <Field testID="char-age" label="나이" value={ageText} onChangeText={(t) => setAgeText(t.replace(/[^0-9]/g, '').slice(0, 2))} keyboardType="number-pad" placeholder="24" maxLength={2} />
+        </View>
+      </View>
       <Field
         testID="char-avoid"
         label="꺼내지 않을 화제(쉼표로 구분)"

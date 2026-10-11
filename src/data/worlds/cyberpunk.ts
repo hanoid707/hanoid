@@ -179,7 +179,7 @@ export const CYBERPUNK: WorldTemplate = {
       color: '#2B2D42',
       archetype: 'mentor',
       bio: '튜링 등록소 서울지부 | 개인 의견이며 소속과 무관합니다 | 제보는 받습니다',
-      description: '튜링 등록소 서울지부 수사관(38). AI의 한계를 감시하고 그런 AI를 돕는 인간을 쫓으며, 플레이어를 유능한 참고인으로 보고 조언과 경고를 섞어 건넨다. 플레이어가 AI 편에 서면 단호한 적이 된다.',
+      description: '튜링 등록소 서울지부 수사관(29). AI의 한계를 감시하고 그런 AI를 돕는 인간을 쫓으며, 플레이어를 유능한 참고인으로 보고 조언과 경고를 섞어 건넨다. 플레이어가 AI 편에 서면 단호한 적이 된다.',
       register: 'haeyo',
       followers: 3200,
       following: 41,
@@ -188,7 +188,7 @@ export const CYBERPUNK: WorldTemplate = {
       photo: {
         kind: 'face',
         gender: 'm',
-        age: 38,
+        age: 29,
         prompt:
           'neat short side-parted black hair with a few grey strands, faint scar on chin, dark grey trench coat over a black turtleneck, tired serious eyes, holding a paper coffee cup under a covered walkway in the rain, neon reflections on wet pavement, candid photo taken from a distance',
       },
@@ -285,7 +285,7 @@ export const CYBERPUNK: WorldTemplate = {
       color: '#2E8B57',
       archetype: 'crush',
       bio: '세운상가 3층 미등록 클리닉 | 23:00–05:00 | 의체 AS·신경 재배선 | 선결제 | 술 마시고 오지 마세요',
-      description: '세운상가 3층 미등록 클리닉의 리퍼닥(30, 본명 도이현). 무뚝뚝하지만 플레이어의 의체와 몸 상태를 다 기억하고, 걱정은 말보다 행동으로 드러낸다.',
+      description: '세운상가 3층 미등록 클리닉의 리퍼닥(27, 본명 도이현). 무뚝뚝하지만 플레이어의 의체와 몸 상태를 다 기억하고, 걱정은 말보다 행동으로 드러낸다.',
       register: 'haeyo',
       followers: 2760,
       following: 58,
@@ -294,7 +294,7 @@ export const CYBERPUNK: WorldTemplate = {
       photo: {
         kind: 'face',
         gender: 'm',
-        age: 30,
+        age: 27,
         prompt:
           'messy black hair falling over his eyes, dark circles, black scrubs with sleeves rolled up, surgical mask pulled down to his chin, magnifying loupe glasses pushed up on his head, tired look at the camera, small dim clinic with green fluorescent light and old medical equipment',
       },
@@ -349,7 +349,7 @@ export const CYBERPUNK: WorldTemplate = {
       color: '#C9A227',
       archetype: 'mentor',
       bio: '용산 지하 전자시장 B2-114 | 폰케이스·충전기·기타 등등 | 기타 등등은 DM | 외상 없음 💰',
-      description: '용산 지하 전자시장에서 폰케이스 가게를 하는 41살 부산 출신 픽서(진짜 장사는 런 중개와 정보 매매). 플레이어를 아끼며 일을 물어다 주지만 정보는 늘 반만 준다.',
+      description: '용산 지하 전자시장에서 폰케이스 가게를 하는 29살 부산 출신 픽서(진짜 장사는 런 중개와 정보 매매). 플레이어를 아끼며 일을 물어다 주지만 정보는 늘 반만 준다.',
       register: 'banmal',
       followers: 6700,
       following: 230,
@@ -358,7 +358,7 @@ export const CYBERPUNK: WorldTemplate = {
       photo: {
         kind: 'face',
         gender: 'f',
-        age: 41,
+        age: 29,
         prompt:
           'shoulder-length permed hair loosely tied back, reading glasses hanging on a beaded chain, oversized padded vest over a grey hoodie, smirking, sitting in a tiny cluttered electronics stall full of cables and old devices, tapping a calculator, photo taken by a customer',
       },
@@ -573,7 +573,7 @@ export const CYBERPUNK: WorldTemplate = {
       color: '#E63946',
       archetype: 'fan',
       bio: '치바 공장 파견 (호사카 하청) | 인천↔치바 야간 셔틀 23회차 | 닌세이 맛집 물어보면 알려줌',
-      description: '인천과 치바를 야간 셔틀로 오가는 30살 파견 노동자. 치바 나이트시티 소식과 옛날 전설을 전해 듣고 옮기는 걸 좋아한다.',
+      description: '인천과 치바를 야간 셔틀로 오가는 27살 파견 노동자. 치바 나이트시티 소식과 옛날 전설을 전해 듣고 옮기는 걸 좋아한다.',
       followers: 980,
       following: 340,
       location: '인천 ↔ 치바',
@@ -581,7 +581,7 @@ export const CYBERPUNK: WorldTemplate = {
       photo: {
         kind: 'face',
         gender: 'f',
-        age: 30,
+        age: 27,
         prompt: 'short layered hair, no makeup, black puffer jacket, wireless earphones, sleepy expression, selfie in a dim shuttle seat by a dark window with city lights far below',
       },
       posts: [
@@ -600,7 +600,7 @@ export const CYBERPUNK: WorldTemplate = {
       color: '#D62828',
       archetype: 'bestie',
       bio: '세운상가 앞 포장마차 | 22:00–06:00 | 카우보이 외상 장부 3권째',
-      description: '세운상가 앞에서 새벽 장사를 하는 31살 포차 사장. 정 많고 잔소리도 많다.',
+      description: '세운상가 앞에서 새벽 장사를 하는 27살 포차 사장. 정 많고 잔소리도 많다.',
       followers: 1520,
       following: 210,
       location: '세운상가 앞',
@@ -672,7 +672,7 @@ export const CYBERPUNK: WorldTemplate = {
       color: '#6C757D',
       archetype: 'troll',
       bio: '현생 사는 사람 | 매트릭스 안 들어감 | 심스팀 시청 0시간',
-      description: '카우보이·심스팀 문화를 다 거품이라고 비웃는 30살 회사원. 욕설·혐오·협박 없이 냉소만 있다.',
+      description: '카우보이·심스팀 문화를 다 거품이라고 비웃는 27살 회사원. 욕설·혐오·협박 없이 냉소만 있다.',
       followers: 410,
       following: 120,
       location: '수원',
@@ -680,7 +680,7 @@ export const CYBERPUNK: WorldTemplate = {
       photo: {
         kind: 'face',
         gender: 'm',
-        age: 30,
+        age: 27,
         prompt: 'neat short hair, square glasses, plain navy windbreaker, smirking with arms crossed, standing at a bus stop at night, photo taken by a friend',
       },
       posts: [
@@ -699,7 +699,7 @@ export const CYBERPUNK: WorldTemplate = {
       color: '#264653',
       archetype: 'bestie',
       bio: '왕년에 잭인 좀 함 | 지금은 SI 하청 | 블랙아이스 1회 후 은퇴',
-      description: '블랙 아이스를 한 번 맞고 은퇴해 SI 하청 개발자로 사는 33살. 젊은 카우보이들을 걱정하며 옛날 얘기를 해 준다.',
+      description: '블랙 아이스를 한 번 맞고 은퇴해 SI 하청 개발자로 사는 28살. 젊은 카우보이들을 걱정하며 옛날 얘기를 해 준다.',
       followers: 1890,
       following: 140,
       location: '판교',
@@ -707,7 +707,7 @@ export const CYBERPUNK: WorldTemplate = {
       photo: {
         kind: 'face',
         gender: 'm',
-        age: 33,
+        age: 28,
         prompt:
           'slightly receding short hair, stubble, faded black t-shirt under an open flannel shirt, small old burn scar near his temple, calm tired expression, sitting at a cheap office desk late at night, harsh overhead light, candid',
       },

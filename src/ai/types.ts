@@ -60,6 +60,9 @@ export interface CastInfo {
   relations?: string;
   /** 이 인물이 꺼내지 않는 화제 */
   avoid?: string[];
+  /** 계급·직함·플레이어와의 사이 */
+  title?: string;
+  age?: number;
   affinity: number;
   followsMe: boolean;
   iFollow: boolean;
@@ -220,6 +223,8 @@ export interface CastDraft {
   /** 성별·나이(기본 사진 고르기용, 뉴스 계정은 없음) */
   gender?: Gender;
   age?: number;
+  /** 계급·직함·플레이어와의 사이(타임라인 이름 옆) */
+  title?: string;
   followers: number;
   isNews?: boolean;
   verified?: boolean;
@@ -231,7 +236,7 @@ export interface AIEngine {
    * 내가 글을 올렸을 때: 답글·좋아요·팔로워·스탯 변화(+다음 글 제안).
    * opts.replies = AI가 써 줄 답글 수(팔로워 규모로 게임이 정함). (v3.1) 답글은 전부 AI가 글 내용에 맞춰 쓴다(로컬 채우기 없음).
    */
-  reactToPost(ctx: AIContext, post: { id: ID; text: string; hasMedia?: boolean }, opts: { replies: number }): Promise<PostReaction>;
+  reactToPost(ctx: AIContext, post: { id: ID; text: string; hasMedia?: boolean; quote?: { authorId: ID; name: string; text: string }[] }, opts: { replies: number }): Promise<PostReaction>;
   /** 내가 캐릭터 글에 답글을 달았을 때: 그 캐릭터의 되받아치기 */
   replyInThread(
     ctx: AIContext,

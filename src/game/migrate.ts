@@ -10,12 +10,19 @@
 import { separateFromPlayer } from './lookalike';
 import { pickFace, resolveFace, themeOfWorld, usedFaceKeys } from '../data/facePool';
 import { AVATARS } from '../data/photos';
+import { seedMeta } from '../data/castMeta';
 import { findSeed } from '../data/worlds';
 import { LEGACY_DESC_HASH } from '../data/worlds/legacy';
 import type { Character, Scenario } from '../types';
 import { hashStr } from '../utils';
 import { initRelation } from './relationship';
 import { KEEP } from './rules';
+
+/** "38살"·"(41)"·"33세" 같은 30대 이상 나이 표기 → 20대 후반(세계관 파일과 같은 규칙: 30~31→27, 32~34→28, 35↑→29) */
+function youngify(text: string): string {
+  const m = (n: number) => String(n <= 31 ? 27 : n <= 34 ? 28 : 29);
+  return text.replace(/(?<![0-9])(3\d|4\d)(살|세)/g, (_, a: string, b: string) => m(Number(a)) + b).replace(/\((3\d|4\d)([,)])/g, (_, a: string, b: string) => `(${m(Number(a))}${b}`);
+}
 
 /** 얼굴 사진이 꼭 있어야 하는 사람: 핵심 인물(뉴스·단체·공통 캐릭터 제외). 공통 캐릭터는 실존 인물일 수 있어 가상 얼굴을 붙이지 않는다 */
 const needsFace = (c: Character) => c.tier !== 'crowd' && !c.isNews && c.badge !== 'gold' && !c.rosterId && !c.inactive;
@@ -58,6 +65,20 @@ export function migrateScenarioData(raw: Scenario): Scenario {
       if (legacy !== undefined && hashStr(c.description ?? '') === legacy) {
         const seed = findSeed(tid, c.id);
         if (seed) c.description = seed.description;
+      }
+    }
+    // 기본 세계관 인물: 계급·직함·나이·성별을 채운다(이름 옆 표시). 사용자가 적어 둔 값은 건드리지 않는다
+    if (tid && !c.custom && !c.rosterId && c.id.startsWith('ch_') && !c.isNews) {
+      const seed = findSeed(tid, c.id);
+      if (seed) {
+        const meta = seedMeta(tid, seed);
+        if (c.title === undefined && meta.title) c.title = meta.title;
+        if (c.age === undefined && meta.age) c.age = meta.age;
+        if (c.gender === undefined && seed.photo.gender && !seed.org) c.gender = seed.photo.gender;
+        // 전원 20대: 예전 설명·소개에 남은 30대 이상 나이 표기를 고친다
+        c.description = youngify(c.description ?? '');
+        c.bio = youngify(c.bio ?? '');
+        if (c.ageGroup && c.ageGroup > 20) c.ageGroup = 20;
       }
     }
     initRelation(c, day);

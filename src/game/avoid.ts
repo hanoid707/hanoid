@@ -15,8 +15,7 @@ import type { ID, Scenario } from '../types';
 import { G } from './core';
 import { logActivity } from './progress';
 
-// 괄호는 ( ) （ ） [ ] 모두, 빼기 표시는 - – — − ー ﹣ － 모두 받는다(자판·자동 고침에 따라 달라지므로)
-const CMD = /[(（[]\s*([-–—−ー﹣－+＋])\s*#?([^()（）[\]\n]{1,20}?)\s*[)）\]]/g;
+const CMD = /\(\s*([-+])\s*#?([^()\n]{1,20}?)\s*\)/g;
 /** 한 세계관에서 빼 둘 수 있는 화제 수 */
 export const AVOID_MAX = 20;
 
@@ -27,7 +26,7 @@ export function parseAvoid(text: string): { text: string; add: string[]; remove:
   const rest = text.replace(CMD, (m: string, sign: string, word: string) => {
     const w = word.trim();
     if (!/^[가-힣a-zA-Z]/.test(w)) return m;
-    (sign === '+' || sign === '＋' ? remove : add).push(w);
+    (sign === '-' ? add : remove).push(w);
     return ' ';
   });
   if (!add.length && !remove.length) return { text, add, remove };

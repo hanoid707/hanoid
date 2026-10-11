@@ -71,6 +71,10 @@ export interface CharacterInput {
   relationLocked?: boolean;
   /** 이 인물이 꺼내지 않는 화제(없으면 건드리지 않음, 빈 배열 = 지우기) */
   avoid?: string[];
+  /** 계급·직함·플레이어와의 사이(없으면 건드리지 않음, 빈 글자 = 지우기) */
+  title?: string;
+  /** 나이(없으면 건드리지 않음, 0 = 지우기) */
+  age?: number;
   /** (v3.2) 호감도·설렘·정복도 직접 조절(편집기 슬라이더) */
   stats?: { affinity?: number; romance?: number; devotion?: number };
 }
@@ -113,6 +117,8 @@ export function saveCharacter(input: CharacterInput, editId?: ID): ActionResult 
       if (input.gender) c.gender = input.gender;
       if (input.ageGroup) c.ageGroup = input.ageGroup;
       if (input.avoid !== undefined) c.avoid = input.avoid.length ? input.avoid.slice(0, 12) : undefined;
+      if (input.title !== undefined) c.title = cutText(input.title.trim(), 16) || undefined;
+      if (input.age !== undefined) c.age = input.age >= 18 && input.age <= 99 ? Math.round(input.age) : undefined;
       if (input.personality !== undefined) c.personality = input.personality || undefined;
       if (input.speechStyle !== undefined) c.speechStyle = input.speechStyle || undefined;
       if (input.relationLocked !== undefined) c.relationLocked = input.relationLocked;
@@ -179,6 +185,8 @@ export function saveCharacter(input: CharacterInput, editId?: ID): ActionResult 
       ...(input.personality ? { personality: input.personality } : {}),
       ...(input.speechStyle ? { speechStyle: input.speechStyle } : {}),
       ...(input.avoid?.length ? { avoid: input.avoid.slice(0, 12) } : {}),
+      ...(input.title?.trim() ? { title: cutText(input.title.trim(), 16) } : {}),
+      ...(input.age && input.age >= 18 && input.age <= 99 ? { age: Math.round(input.age) } : {}),
       custom: true,
       bioDay: d.clock.day,
     };
@@ -236,6 +244,9 @@ export interface QuickCharacterInput {
   relations?: string;
   registerOverride?: SpeechRegister | null;
   relationLocked?: boolean;
+  /** 계급·직함·플레이어와의 사이 */
+  title?: string;
+  age?: number;
   /** 이 인물이 꺼내지 않는 화제 */
   avoid?: string[];
 }
@@ -298,6 +309,8 @@ export async function createQuickCharacter(input: QuickCharacterInput): Promise<
         description: traitsWithPresets(traits, input.personality, input.speechStyle),
         ...(input.relations?.trim() ? { relations: input.relations.trim() } : {}),
         ...(input.avoid?.length ? { avoid: input.avoid.slice(0, 12) } : {}),
+        ...(input.title?.trim() ? { title: cutText(input.title.trim(), 16) } : {}),
+        ...(input.age && input.age >= 18 && input.age <= 99 ? { age: Math.round(input.age) } : {}),
         archetype: def.archetype,
         badge: input.badge !== undefined ? input.badge : def.badge,
         isNews: def.isNews,

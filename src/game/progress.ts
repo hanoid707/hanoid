@@ -74,6 +74,7 @@ export function addPost(d: Scenario, p: Pick<Post, 'authorId' | 'text' | 'kind'>
   if (p.at) post.at = { ...p.at };
   // 임시 계정이 플레이어와 헷갈리는 이름·프사면 다른 사람으로(game/lookalike.ts)
   if (p.ghost) post.ghost = safeGhost(d, p.ghost, post.id);
+  if (p.quote?.length) post.quote = p.quote;
   if (p.growFrom) post.growFrom = p.growFrom;
   if (p.boosted) post.boosted = true;
   d.posts[post.id] = post;

@@ -31,7 +31,7 @@ export const TUNE_RANGE: Record<keyof AITune, [number, number]> = {
   replies: [1, 6],
   echoPosts: [0, 3],
   echoDMs: [0, 2],
-  thread: [1, 8],
+  thread: [5, 8],
   dmBubbles: [1, 3],
   dmPost: [0, 1],
   eventPosts: [0, 4],
@@ -104,7 +104,7 @@ export function callCost(kind: CallKind, t: AITune): CallCost {
     case 'react':
       return c(IN.react, 130 + t.replies * 55 + t.echoPosts * 70 + t.echoDMs * 30);
     case 'thread':
-      return c(IN.thread, 70 + t.thread * 55);
+      return c(IN.thread, 70 + Math.max(5, t.thread) * 55);
     case 'dm':
       return c(IN.dm, 60 + ((1 + t.dmBubbles) / 2) * 45 + t.dmPost * 25);
     case 'event':

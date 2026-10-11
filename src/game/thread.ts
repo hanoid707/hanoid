@@ -122,6 +122,8 @@ async function reactToMyReply(flow: Flow, parentId: ID, myReplyId: ID, text: str
       lines = [{ authorId: target.authorId, text: all[0].text }, ...all.slice(1)];
     }
     let ghostUsed = false;
+    // 누가 어느 댓글을 달았는지(인물 → 그 인물의 가장 최근 댓글): re로 받아친 말은 그 댓글 아래에 붙여 대화가 아래로 이어지게
+    const lastBy = new Map<ID, ID>();
     await revealLater(flow, burstDelays(lines.length, rand(600, 1100)), (i, d) => {
       if (!d.posts[myReplyId]) return;
       const line = lines[i];
@@ -132,7 +134,10 @@ async function reactToMyReply(flow: Flow, parentId: ID, myReplyId: ID, text: str
         addReply(d, myReplyId, GHOST, t, { ghost: target.ghost, likes: rand(0, 3) });
         return;
       }
-      addReply(d, myReplyId, who.authorId, t, { ghost: who.ghost, likes: rand(0, 5) });
+      const toId = line.replyTo && line.replyTo !== who.authorId ? lastBy.get(line.replyTo) : undefined;
+      const parent = toId && d.posts[toId] ? toId : myReplyId;
+      const made = addReply(d, parent, who.authorId, t, { ghost: who.ghost, likes: rand(0, 5), noti: parent === myReplyId ? undefined : true });
+      if (made && who.authorId !== GHOST) lastBy.set(who.authorId, made.id);
     });
     editIf(flow, (d) => {
       const diff = diffOf(d);

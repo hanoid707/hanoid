@@ -10,7 +10,7 @@ import { relativeTime } from '../game/clock';
 import type { RootNav } from '../navigation/types';
 import { useGame } from '../store/game';
 import { font, radius, space, useTheme } from '../theme';
-import { GHOST, type Post, type Scenario } from '../types';
+import { GHOST, type Character, type Post, type QuoteRef, type Scenario } from '../types';
 import { formatCount } from '../utils';
 import { authorOf } from './author';
 import { Avatar } from './Avatar';
@@ -54,8 +54,44 @@ function Action({ icon, count, active, color, onPress, label, grow, pop }: { ico
   );
 }
 
-/** 이름 ✓ @아이디 · 시간 */
-export function NameLine({ name, handle, badge, time, big }: { name: string; handle: string; badge: AuthorBadge; time?: string; big?: boolean }) {
+/**
+ * 이어 쓴 글 위에 보이는 앞 글들(재게시해서 그 아래에 쓴 글) — 메일 답장처럼 위에서 아래로 이어진다.
+ * 누르면 그 글로(남아 있으면). 글쓰기 화면에서도 같은 모양으로 보여 준다.
+ */
+export function QuoteChain({ chain, onOpen }: { chain: QuoteRef[]; onOpen?: (id: string) => void }) {
+  const { c } = useTheme();
+  if (!chain.length) return null;
+  return (
+    <View testID="quote-chain" style={[styles.quoteBox, { borderColor: c.border }]}>
+      {chain.map((q, i) => (
+        <Pressable
+          key={`${q.id ?? i}:${i}`}
+          disabled={!onOpen || !q.id}
+          onPress={() => q.id && onOpen?.(q.id)}
+          accessibilityRole="button"
+          accessibilityLabel={`${q.name}님의 앞 글`}
+          style={[styles.quoteRow, i > 0 && { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: c.border }]}
+        >
+          <View style={{ alignItems: 'center' }}>
+            <Avatar avatar={q.avatar} size={22} />
+            <View style={[styles.quoteLine, { backgroundColor: c.border }]} />
+          </View>
+          <View style={{ flex: 1, minWidth: 0, gap: 1 }}>
+            <Text numberOfLines={1} style={{ color: c.text, fontSize: font.small, fontWeight: '800' }}>
+              {q.name} <Text style={{ color: c.subtext, fontWeight: '400' }}>@{q.handle}</Text>
+            </Text>
+            <Text numberOfLines={5} style={{ color: c.text, fontSize: font.small, lineHeight: 19 }}>
+              {q.text || (q.hasMedia ? '(사진)' : '')}
+            </Text>
+          </View>
+        </Pressable>
+      ))}
+    </View>
+  );
+}
+
+/** 이름 ✓ [계급·직함 · 나이] @아이디 · 시간 */
+export function NameLine({ name, handle, badge, time, big, rank }: { name: string; handle: string; badge: AuthorBadge; time?: string; big?: boolean; rank?: string }) {
   const { c } = useTheme();
   return (
     <View style={styles.head}>
@@ -63,19 +99,37 @@ export function NameLine({ name, handle, badge, time, big }: { name: string; han
         {name}
       </Text>
       <VerifiedBadge kind={badge} />
-      {!big && (
-        <Text numberOfLines={1} style={{ color: c.subtext, fontSize: font.body, flexShrink: 2, marginLeft: 3 }}>
-          @{handle}
-          {time ? ` · ${time}` : ''}
+      {rank ? (
+        <Text testID="rank" numberOfLines={1} style={[styles.rank, { color: c.subtext, borderColor: c.border, backgroundColor: c.surfaceAlt }]}>
+          {rank}
         </Text>
+      ) : null}
+      {!big && (
+        <>
+          <Text numberOfLines={1} style={{ color: c.subtext, fontSize: font.body, flexShrink: 8, minWidth: 0, marginLeft: 3 }}>
+            @{handle}
+          </Text>
+          {time ? (
+            <Text numberOfLines={1} style={{ color: c.subtext, fontSize: font.body, flexShrink: 0 }}>
+              {` · ${time}`}
+            </Text>
+          ) : null}
+        </>
       )}
     </View>
   );
 }
 type AuthorBadge = ReturnType<typeof authorOf>['badge'];
 
+/** 이름 옆 표시: 계급·직함 · 나이("맞선임 · 상병 · 22"). 둘 다 없으면 빈 글자 */
+export function rankLabel(ch: Character | undefined): string {
+  if (!ch || ch.isNews) return '';
+  return [ch.title?.trim(), ch.age ? String(ch.age) : ''].filter(Boolean).join(' · ');
+}
+
 export function PostActions({ post, onReply }: { post: Post; onReply?: () => void }) {
   const { c } = useTheme();
+  const nav = useNavigation<RootNav>();
   // 숫자가 자라는 동안만 1초에 4번 다시 그린다(이 줄만)
   const g = useGrowth(post);
   return (
@@ -83,7 +137,7 @@ export function PostActions({ post, onReply }: { post: Post; onReply?: () => voi
       {/* 숫자 칸 4개는 정해진 비율로 나눠 갖는다(글마다 아이콘 줄이 맞고, 숫자가 커져도 옆 아이콘과 겹치지 않게).
           답글 수는 짧고(보통 두 자리) 재게시·마음·조회수는 "21.9만"·"6209만"처럼 다섯 글자까지 길어져 칸을 더 준다 */}
       <Action grow={0.72} label="답글" icon={(col) => <IconComment size={18} color={col} />} count={post.replies.length} color={c.primary} onPress={onReply} />
-      <Action pop grow={1.04} label="재게시" icon={(col) => <IconRepost size={18} color={col} />} count={g.reposts} active={post.reposted} color={c.repost} onPress={() => toggleRepost(post.id)} />
+      <Action pop grow={1.04} label="재게시해서 이어 쓰기" icon={(col) => <IconRepost size={18} color={col} />} count={g.reposts} active={post.reposted} color={c.repost} onPress={() => (post.kind === 'system' ? toggleRepost(post.id) : nav.navigate('Compose', { quoteId: post.id }))} />
       <Action pop grow={1.06} label="마음에 들어요" icon={(col) => <IconHeart size={18} color={col} fill={post.liked ? c.like : 'transparent'} />} count={g.likes} active={post.liked} color={c.like} onPress={() => toggleLike(post.id)} />
       <Action grow={1.18} label="조회수" icon={(col) => <IconViews size={18} color={col} />} count={g.views} color={c.primary} />
       <View style={{ flexDirection: 'row', gap: 10, flexShrink: 0 }}>
@@ -100,6 +154,7 @@ export const PostCard = memo(function PostCard({
   onPress,
   replyingTo,
   threadLine,
+  showRank,
 }: {
   post: Post;
   sc: Scenario;
@@ -107,6 +162,8 @@ export const PostCard = memo(function PostCard({
   replyingTo?: string;
   /** 스레드에서 다음 글과 이어지는 세로선 */
   threadLine?: boolean;
+  /** 이름 옆에 계급·직함·나이를 보여 줄지(홈 타임라인만) */
+  showRank?: boolean;
 }) {
   const { c } = useTheme();
   const nav = useNavigation<RootNav>();
@@ -137,7 +194,7 @@ export const PostCard = memo(function PostCard({
         {threadLine ? <View style={[styles.threadLine, { backgroundColor: c.borderStrong }]} /> : null}
       </View>
       <View style={{ flex: 1, gap: 2 }}>
-        <NameLine name={a.name} handle={a.handle} badge={a.badge} time={relativeTime(post.at, sc.clock)} />
+        <NameLine name={a.name} handle={a.handle} badge={a.badge} time={relativeTime(post.at, sc.clock)} rank={showRank ? rankLabel(sc.characters[post.authorId]) : undefined} />
         {replyingTo ? (
           <Text style={{ color: c.subtext, fontSize: font.body }}>
             <Text style={{ color: c.primary }}>@{replyingTo}</Text>님에게 보내는 답글
@@ -150,6 +207,7 @@ export const PostCard = memo(function PostCard({
             {post.boosted && <Text style={[styles.badge, { color: c.aura }]}>🚀 바이럴 모먼트</Text>}
           </View>
         ) : null}
+        {post.quote?.length ? <QuoteChain chain={post.quote} onOpen={(id) => sc.posts[id] && nav.navigate('PostDetail', { postId: id })} /> : null}
         {isEvent ? (
           <View style={[styles.eventBox, { borderColor: c.border }]}>
             <Text style={{ color: c.text, fontWeight: '800', fontSize: font.body }}>{firstLine}</Text>
@@ -174,6 +232,10 @@ export const PostCard = memo(function PostCard({
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', gap: space.md, paddingHorizontal: space.lg, paddingTop: space.md, paddingBottom: space.sm, borderBottomWidth: StyleSheet.hairlineWidth },
   head: { flexDirection: 'row', alignItems: 'center', gap: 2, flexWrap: 'nowrap' },
+  quoteBox: { borderWidth: StyleSheet.hairlineWidth, borderRadius: radius.md, marginTop: 4, marginBottom: 6, overflow: 'hidden' },
+  quoteRow: { flexDirection: 'row', gap: 8, paddingHorizontal: 10, paddingVertical: 8 },
+  quoteLine: { width: 2, flex: 1, borderRadius: 1, marginTop: 3 },
+  rank: { fontSize: font.tiny, fontWeight: '700', borderWidth: StyleSheet.hairlineWidth, borderRadius: 6, paddingHorizontal: 5, paddingVertical: 1, marginLeft: 4, flexShrink: 0, overflow: 'hidden' },
   badge: { fontSize: font.small, fontWeight: '700' },
   badgeRow: { flexDirection: 'row', flexWrap: 'wrap', columnGap: 10 },
   eventBox: { borderWidth: 1, borderRadius: radius.lg, padding: space.md, marginTop: 4 },

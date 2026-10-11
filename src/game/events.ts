@@ -17,7 +17,7 @@ import { addThreadedPosts, alive, beginFlow, ctxOf, engine, fail, G, OK, type Ac
 import { localVariant } from './localEvents';
 import { DIFFICULTY_LABEL, EVENT_AFFINITY_CAP, EVENT_ROMANCE_CAP, diffOf, scaleEventDeltas } from './difficulty';
 import { addMemory, addXp, applyDeltas, consumeBoost, logActivity, pushNoti, questProgress, recomputeStatus, tickClock } from './progress';
-import { START_TIME, XP } from './rules';
+import { TIME_COST, XP } from './rules';
 import { runDayTick, usedEventKeys } from './tick';
 import { snapshot } from './undo';
 
@@ -113,9 +113,8 @@ async function resolveEventFlow(flow: Flow, eventId: ID, ans: { choiceId?: strin
       logActivity(d, e.emoji, ans.customText ? `${e.title}: 직접 답함 "${snippet(ans.customText, 20)}"` : `${e.title}: "${label}"`);
       questProgress(d, 'event', 1);
       recomputeStatus(d);
-      // 이벤트에 답하면 그날은 끝: 결과 글은 오늘 시각으로 남기고, 시계는 다음 날 아침으로
-      days = tickClock(d, 1440 - (d.clock.hour * 60 + d.clock.minute) + START_TIME.hour * 60 + START_TIME.minute);
-      logActivity(d, '🌙', `${e.title} 뒤로 하루가 지났어요`);
+      // 이벤트를 겪는 데 드는 시간만 흐른다(다음 날로 넘기지 않는다 — 하루 정산까지 겹치면 한 이벤트에 반응이 두 번 온다)
+      days = tickClock(d, TIME_COST.event);
     });
   } finally {
     G().setBusy(key, false);

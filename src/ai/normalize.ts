@@ -213,7 +213,7 @@ export function normReact(ctx: AIContext, r: Raw, o: { n?: number; seed?: string
 
 export function normThread(ctx: AIContext, r: Raw, seed?: string): ThreadReaction {
   return {
-    replies: lines(ctx, r.replies, { ghost: true, seed, max: Math.min(8, Math.max(1, (ctx.tune ?? DEFAULT_TUNE).thread)), maxLen: LIMITS.reply + 50, noNews: true, toPlayer: true }),
+    replies: lines(ctx, r.replies, { ghost: true, seed, max: Math.min(8, Math.max(5, (ctx.tune ?? DEFAULT_TUNE).thread)), maxLen: LIMITS.reply + 50, noNews: true, toPlayer: true }),
     deltas: {
       affinity: affinityMap(ctx, pick1(r, 'aff', 'affinity')),
       romance: affinityMap(ctx, pick1(r, 'rom', 'romance')),
@@ -404,7 +404,8 @@ export function normCast(r: Raw): CastDraft[] {
         bio: cleanText(c.bio, 30),
         description: cleanText(c.description, 70),
         ...(c.g === 'm' || c.g === 'f' ? { gender: c.g as 'm' | 'f' } : {}),
-        ...(num(c.age, 0) >= 18 ? { age: Math.min(79, num(c.age, 0)) } : {}),
+        ...(num(c.age, 0) >= 18 ? { age: Math.min(29, num(c.age, 0)) } : {}),
+        ...(cleanText(c.title, 12) ? { title: cleanText(c.title, 12) } : {}),
         followers: Math.max(0, num(c.followers, 1000)),
         isNews: c.isNews === true,
         verified: c.verified === true,

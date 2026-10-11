@@ -4,6 +4,7 @@
  *        첫 팔로워의 첫 쪽지와 직접 만든 세계관의 첫 타임라인은 시작 직후 AI가 쓴다(characters.ts onScenarioCreated).
  *        기본 세계관의 지난 글·첫 이벤트는 세계관 파일에 인물별로 직접 쓴 설정 그대로(맥락이 정해져 있음).
  */
+import { seedMeta } from '../data/castMeta';
 import { separateFromPlayer } from './lookalike';
 import { peerRegisterHint } from '../ai/local/register';
 import type { CastDraft } from '../ai/types';
@@ -132,6 +133,9 @@ export function characterFromSeed(t: WorldTemplate, s: CharacterSeed): Character
     banner,
     bio: s.bio,
     description: s.description,
+    // 계급·직함·나이(타임라인 이름 옆) · 성별
+    ...seedMeta(t.id, s),
+    ...(s.photo.gender && !s.isNews && !s.org ? { gender: s.photo.gender } : {}),
     ...(s.register && s.tier === 'core' && !s.isNews ? { register: s.register } : {}),
     relations: s.relations,
     archetype: s.archetype,
@@ -159,6 +163,8 @@ function buildCharacters(input: NewScenarioInput): Character[] {
     avatar: { emoji: c.emoji, color: AVATAR_COLORS[i % AVATAR_COLORS.length], ...(faces[i] ? { photo: faces[i] } : {}) },
     ...(c.gender ? { gender: c.gender } : {}),
     ...(c.age ? { ageGroup: (Math.min(60, Math.max(20, Math.floor(c.age / 10) * 10)) as AgeGroup) } : {}),
+    ...(c.age && !c.isNews ? { age: c.age } : {}),
+    ...(c.title && !c.isNews ? { title: c.title } : {}),
     bio: c.bio,
     description: c.description,
     archetype: c.archetype,

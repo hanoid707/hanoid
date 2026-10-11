@@ -178,7 +178,7 @@ export const INFLUENCER: WorldTemplate = {
       color: '#1F3A5F',
       archetype: 'mentor',
       bio: '인플루언서 마케팅 11년차 | 온더피드 팀장 | 개인 계정, 회사 입장과 무관합니다',
-      description: '인플루언서 마케팅 에이전시 팀장(36, 11년차 현실주의자). 플레이어를 가능성 있는 신인으로 보고 냉정하지만 따뜻하게 조언하며, 위험한 제안엔 먼저 경고한다.',
+      description: '인플루언서 마케팅 에이전시 팀장(29, 11년차 현실주의자). 플레이어를 가능성 있는 신인으로 보고 냉정하지만 따뜻하게 조언하며, 위험한 제안엔 먼저 경고한다.',
       register: 'haeyo',
       followers: 18600,
       following: 540,
@@ -187,7 +187,7 @@ export const INFLUENCER: WorldTemplate = {
       photo: {
         kind: 'face',
         gender: 'f',
-        age: 36,
+        age: 29,
         prompt:
           'low ponytail, rectangular glasses, navy blazer over a striped shirt, slightly tired but kind eyes, holding a laptop, office meeting room with a whiteboard, candid photo taken by a coworker',
       },
@@ -307,7 +307,7 @@ export const INFLUENCER: WorldTemplate = {
       color: '#7FA77A',
       archetype: 'mentor',
       bio: '달무드 MD | 홈웨어 · 니트 · 바디케어 | 인플 협업 · 시딩 · 공구 담당 | 업무 연락은 메일로',
-      description: '홈웨어 브랜드 \'달무드\'의 MD(31). 협업을 제안하며 플레이어를 정중하게 대하고, 실적 압박 속에서도 광고 표기 같은 선은 지키는 정직한 실무자다.',
+      description: '홈웨어 브랜드 \'달무드\'의 MD(27). 협업을 제안하며 플레이어를 정중하게 대하고, 실적 압박 속에서도 광고 표기 같은 선은 지키는 정직한 실무자다.',
       register: 'haeyo',
       followers: 2940,
       following: 1630,
@@ -316,7 +316,7 @@ export const INFLUENCER: WorldTemplate = {
       photo: {
         kind: 'face',
         gender: 'm',
-        age: 31,
+        age: 27,
         prompt:
           'neat short side-parted hair, clean-shaven, light blue oxford shirt with an employee lanyard, polite friendly smile, standing in a bright showroom with blurred shelves of unlabeled products, photo taken by a colleague',
       },
@@ -560,14 +560,14 @@ export const INFLUENCER: WorldTemplate = {
       color: '#9CA3AF',
       archetype: 'troll',
       bio: '인플 아님 | 그냥 보는 사람',
-      description: '인플 문화를 냉소하는 회사원(30). 시비를 걸지만 결국 본인도 따라 한다.',
+      description: '인플 문화를 냉소하는 회사원(27). 시비를 걸지만 결국 본인도 따라 한다.',
       followers: 41,
       following: 298,
       joined: '2017년 8월',
       photo: {
         kind: 'face',
         gender: 'm',
-        age: 30,
+        age: 27,
         prompt: 'buzz cut, plain black t-shirt, expressionless face, wired earphones, selfie on a city bus by the window, flat afternoon light',
       },
       posts: [
@@ -612,7 +612,7 @@ export const INFLUENCER: WorldTemplate = {
       color: '#0EA5E9',
       archetype: 'chaos',
       bio: '퇴사 후 여행 기록 | 숙소 협찬 받으면 출장임 | 내돈내산은 내돈내산이라고 씀',
-      description: '퇴사하고 여행 인플을 꿈꾸는 30세. 여행 경비를 원 단위까지 정리하는 걸 좋아함.',
+      description: '퇴사하고 여행 인플을 꿈꾸는 27세. 여행 경비를 원 단위까지 정리하는 걸 좋아함.',
       followers: 860,
       following: 377,
       location: '제주 (한 달 살기 중)',
@@ -620,7 +620,7 @@ export const INFLUENCER: WorldTemplate = {
       photo: {
         kind: 'face',
         gender: 'm',
-        age: 30,
+        age: 27,
         prompt:
           'shaggy medium-length hair, tanned skin, faded denim jacket, backpack strap on his shoulder, squinting smile in bright sunlight, selfie at an airport window with planes blurred behind',
       },
@@ -640,7 +640,7 @@ export const INFLUENCER: WorldTemplate = {
       color: '#8D6E63',
       archetype: 'bestie',
       bio: '망원동 8평 카페 | 디저트는 매일 아침 직접 | 촬영은 짧게 부탁드려요',
-      description: '망원동 작은 카페 사장(33). 인플 손님이 고마우면서도 고충이 있다.',
+      description: '망원동 작은 카페 사장(28). 인플 손님이 고마우면서도 고충이 있다.',
       followers: 1120,
       following: 233,
       location: '서울 망원동',
@@ -648,7 +648,7 @@ export const INFLUENCER: WorldTemplate = {
       photo: {
         kind: 'face',
         gender: 'm',
-        age: 33,
+        age: 28,
         prompt:
           'short neat hair, round face, denim shirt under a canvas apron, warm shy smile, standing behind a small wooden cafe counter, candid photo taken by a customer',
       },

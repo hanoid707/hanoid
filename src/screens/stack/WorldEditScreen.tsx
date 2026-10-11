@@ -148,6 +148,8 @@ function CharacterCard({ ch, open, onToggle }: { ch: Character; open: boolean; o
   const [desc, setDesc] = useState(ch.description);
   const [relations, setRelations] = useState(ch.relations ?? '');
   const [avoid, setAvoid] = useState((ch.avoid ?? []).join(', '));
+  const [rank, setRank] = useState(ch.title ?? '');
+  const [age, setAge] = useState(ch.age ? String(ch.age) : '');
   const [aff, setAff] = useState(ch.affinity);
   const [rom, setRom] = useState(ch.romance ?? 0);
   const [dev, setDev] = useState(ch.devotion ?? 0);
@@ -180,6 +182,8 @@ function CharacterCard({ ch, open, onToggle }: { ch: Character; open: boolean; o
         personality: ch.personality,
         speechStyle: ch.speechStyle,
         avoid: splitAvoid(avoid).slice(0, 12),
+        title: rank,
+        age: Number(age) || 0,
         stats: { affinity: aff, romance: rom, devotion: dev },
       },
       ch.id,
@@ -211,6 +215,14 @@ function CharacterCard({ ch, open, onToggle }: { ch: Character; open: boolean; o
         <View style={{ gap: space.md, paddingTop: space.sm }}>
           <Field label="이름" value={name} onChangeText={setName} maxLength={30} />
           <Field label="아이디" value={handle} onChangeText={setHandle} autoCapitalize="none" maxLength={15} hint={taken ? '이미 있는 아이디예요' : undefined} />
+          <View style={{ flexDirection: 'row', gap: space.sm }}>
+            <View style={{ flex: 1 }}>
+              <Field label="계급·직함(타임라인 이름 옆)" value={rank} onChangeText={setRank} placeholder="예) 상병 · 맞선임 / 팀장" maxLength={16} />
+            </View>
+            <View style={{ width: 84 }}>
+              <Field label="나이" value={age} onChangeText={(t) => setAge(t.replace(/[^0-9]/g, '').slice(0, 2))} keyboardType="number-pad" maxLength={2} />
+            </View>
+          </View>
           <View style={styles.wrap}>
             {(['f', 'm'] as Gender[]).map((g) => (
               <Chip key={g} small label={g === 'f' ? '여' : '남'} selected={gender === g} onPress={() => setGender(g)} accessibilityLabel={`${ch.name} 성별 ${g === 'f' ? '여' : '남'}`} />

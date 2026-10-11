@@ -195,7 +195,7 @@ export const MILITARY: WorldTemplate = {
       color: '#9A3412',
       archetype: 'mentor',
       bio: '행정보급관 | 대숲 보려고 가입했어요 | 하준맘 | 커피는 믹스',
-      description: '3중대 행정보급관 상사(41), 초등학생 아들을 둔 엄마. 플레이어를 막내처럼 챙기지만 정리·청소엔 칼같고, 상하급자 연애 금지 규정은 단호하게 상기시키되 공개 망신은 주지 않는다.',
+      description: '3중대 행정보급관 상사(29), 초등학생 아들을 둔 엄마. 플레이어를 막내처럼 챙기지만 정리·청소엔 칼같고, 상하급자 연애 금지 규정은 단호하게 상기시키되 공개 망신은 주지 않는다.',
       register: 'haeyo',
       followers: 63,
       following: 12,
@@ -204,7 +204,7 @@ export const MILITARY: WorldTemplate = {
       photo: {
         kind: 'face',
         gender: 'f',
-        age: 41,
+        age: 29,
         prompt: 'short permed hair, laugh lines, kind but tired eyes, digital camouflage uniform, holding a paper cup of instant coffee, cluttered office with filing cabinets, slightly low angle photo by a coworker',
       },
       posts: [
@@ -668,7 +668,7 @@ export const MILITARY: WorldTemplate = {
       color: '#78716C',
       archetype: 'troll',
       bio: '16군번 | 우리 땐 폰 없었음 | 요즘 군대 부럽다(진심)',
-      description: '2016년에 입대한 31세 회사원, 요즘 군대가 편하다고 비꼬는 라떼 시비러. 욕이나 혐오 표현은 쓰지 않는다.',
+      description: '2016년에 입대한 27세 회사원, 요즘 군대가 편하다고 비꼬는 라떼 시비러. 욕이나 혐오 표현은 쓰지 않는다.',
       followers: 208,
       following: 77,
       location: '여의도',
@@ -766,7 +766,7 @@ export const MILITARY: WorldTemplate = {
       color: '#0F766E',
       archetype: 'bestie',
       bio: '18년 전역 | 남지원 1세대 | 그땐 생활관이 창고였다',
-      description: '2016년에 입대한 남자 지원병 1세대, 30세 직장인. 담백한 썰과 후배 남지원들을 향한 조언을 올리는 선배.',
+      description: '2016년에 입대한 남자 지원병 1세대, 27세 직장인. 담백한 썰과 후배 남지원들을 향한 조언을 올리는 선배.',
       followers: 2210,
       following: 301,
       location: '부산',
@@ -774,7 +774,7 @@ export const MILITARY: WorldTemplate = {
       photo: {
         kind: 'face',
         gender: 'm',
-        age: 30,
+        age: 27,
         prompt: 'short neat haircut, light stubble, calm smile, beige trench coat, quiet cafe, candid photo',
       },
       posts: [

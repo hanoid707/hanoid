@@ -13,6 +13,7 @@ export const TIME_COST = {
   postMax: 240,
   reply: 45,
   dm: 20,
+  event: 180,
 } as const;
 
 /** 행동별 경험치 */

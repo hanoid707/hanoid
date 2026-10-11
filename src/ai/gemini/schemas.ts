@@ -48,7 +48,7 @@ export function reactSchema(n: number, t?: AITune) {
 /** 내 답글에 달리는 답글: 조절값(n)만큼만 */
 export function threadSchema(n: number) {
   return obj({
-    replies: arr(LINE, Math.min(8, Math.max(1, n))),
+    replies: arr(LINE_RE, Math.min(8, Math.max(5, n))),
     aff: arr(DELTA, 8),
     rom: arr(DELTA, 4),
     dev: arr(DELTA, 4),
@@ -136,6 +136,7 @@ export const CAST_SCHEMA = obj({
       description: STR,
       g: { type: 'STRING', format: 'enum', enum: ['m', 'f'] },
       age: INT,
+      title: STR,
       followers: INT,
       isNews: BOOL,
       verified: BOOL,

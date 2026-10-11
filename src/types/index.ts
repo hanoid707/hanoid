@@ -105,6 +105,10 @@ export interface Character {
   relations?: string;
   /** 이 인물이 꺼내지 않는 화제(캐릭터 설정에서 정함). 이 인물의 글·답글·쪽지에서 그 낱말·소재를 뺀다 */
   avoid?: string[];
+  /** 계급·직함·플레이어와의 사이(상병 · 맞선임 / 팀장 / 입사 동기 …) — 타임라인의 이름 옆에 보인다 */
+  title?: string;
+  /** 나이(타임라인의 이름 옆에 보인다). 없으면 나이대(ageGroup)로 대신한다 */
+  age?: number;
   archetype: Archetype;
   /** 인증 배지(없으면 배지 없음) */
   badge?: BadgeKind | null;
@@ -195,6 +199,18 @@ export interface World {
 
 export type PostKind = 'post' | 'reply' | 'news' | 'event' | 'system';
 
+/** 이어 쓴 글 위에 보이는 앞 글 한 개(그때의 이름·사진·내용) */
+export interface QuoteRef {
+  /** 원글 ID(지워졌을 수 있다) */
+  id?: ID;
+  authorId: ID;
+  name: string;
+  handle: string;
+  avatar: Avatar;
+  text: string;
+  hasMedia?: boolean;
+}
+
 export interface Post {
   id: ID;
   authorId: ID;
@@ -221,6 +237,8 @@ export interface Post {
   /** authorId === GHOST 일 때 작성자 정보 */
   ghost?: GhostAuthor;
   /** 숫자가 자라는 연출(표시 전용): 이 값에서 지금 값까지 ms 동안 올라간다 */
+  /** 이어 쓴 글(재게시해서 그 아래에 쓴 글): 위에 보여 줄 앞 글들(오래된 것부터, 최대 4개). 원글이 지워져도 보이게 그때 모습을 담아 둔다 */
+  quote?: QuoteRef[];
   growFrom?: { likes: number; reposts: number; views: number; ts: number; ms: number };
   /** 남의 글을 처음 열었을 때 댓글을 만든 기록(작성자 팔로워 50%↑이면 추가 생성) */
   threadGen?: { followers: number; count: number; ts: number };

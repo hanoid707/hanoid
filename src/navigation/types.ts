@@ -20,7 +20,8 @@ export type RootStackParamList = {
   MyProfile: undefined;
   ProfileEdit: undefined;
   PostDetail: { postId: string };
-  Compose: { text?: string } | undefined;
+  /** quoteId: 이 글을 재게시해서 그 아래에 이어 쓴다 */
+  Compose: { text?: string; quoteId?: string } | undefined;
   Chat: { characterId: string };
   NewMessage: undefined;
   CharacterProfile: { characterId: string };

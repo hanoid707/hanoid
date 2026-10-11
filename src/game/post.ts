@@ -12,13 +12,14 @@ import { analyze, type Analysis } from '../ai/local/analyze';
 import { ghostAuthor } from '../ai/local/ghost';
 import type { GeneratedLine, PostReaction } from '../ai/types';
 import { getActive } from '../store/game';
-import { ME, type Character, type Deltas, type ID, type PhotoRef, type Post, type Scenario } from '../types';
+import { authorOf } from '../components/author';
+import { ME, type Character, type Deltas, type ID, type PhotoRef, type Post, type QuoteRef, type Scenario } from '../types';
 import { clamp, cutText, pick, rand, snippet, uid, sleep } from '../utils';
 import { tap } from '../utils/haptics';
 import { activeChar, alive, beginFlow, castChars, ctxOf, editIf, engine, fail, G, lineAuthor, OK, revealLater, type ActionResult, type Flow, tune, addNpcLines, deliverOpeners } from './core';
 import { diffOf, scaleSocial } from './difficulty';
 import { burstDelays, growValue, isInfluencer, LIKES_MAX, postEngagement } from './engagement';
-import { addNewsPost, addPost, addReply, addXp, applyDeltas, consumeBoost, logActivity, markViral, pushNoti, questKeyword, questProgress, recomputeStatus, tickClock } from './progress';
+import { addNewsPost, addPost, addReply, addXp, applyAffinity, applyDeltas, consumeBoost, logActivity, markViral, pushNoti, questKeyword, questProgress, recomputeStatus, tickClock } from './progress';
 import { POST_MAX_LEN, TIME_COST, XP } from './rules';
 import { saveIdeas } from './ideas';
 import { takeAvoid } from './avoid';
@@ -56,7 +57,20 @@ export function regrow(p: Post, target: { likes: number; reposts: number; views:
 }
 
 /** at: 글을 올리는 시각(글쓰기 화면에서 직접 고른 경우). 없으면 2~4시간 뒤 */
-export function publishPost(text: string, media?: PhotoRef, opts: { at?: { hour: number; minute: number } } = {}): ActionResult {
+/** 이어 쓴 글 위에 보여 줄 앞 글 한 개(지금 모습 그대로 담아 둔다) */
+function quoteRef(sc: Scenario, p: Post): QuoteRef {
+  const a = authorOf(sc, p.authorId, p);
+  return { id: p.id, authorId: p.authorId, name: a.name, handle: a.handle, avatar: a.avatar, text: p.text, ...(p.media ? { hasMedia: true } : {}) };
+}
+
+/** 이 글을 재게시해서 이어 쓰면 위에 보일 글들(그 글이 이미 이어 쓴 글이면 그 앞 글들까지, 최대 4개) */
+export function quoteChain(sc: Scenario, quoteId: ID | undefined): QuoteRef[] {
+  const src = quoteId ? sc.posts[quoteId] : undefined;
+  if (!src || src.kind === 'system') return [];
+  return [...(src.quote ?? []), quoteRef(sc, src)].slice(-4);
+}
+
+export function publishPost(text: string, media?: PhotoRef, opts: { at?: { hour: number; minute: number }; quoteId?: ID } = {}): ActionResult {
   const sc = getActive();
   if (!sc) return fail('none');
   // (-단어)·(+단어): 이 세계관에서 화제를 빼거나 다시 넣는다. 그것만 썼으면 글은 올리지 않는다
@@ -67,6 +81,8 @@ export function publishPost(text: string, media?: PhotoRef, opts: { at?: { hour:
 
   const sid = sc.id;
   const postId = uid('p');
+  // 재게시해서 이어 쓰는 글이면 앞 글들을 같이 담는다
+  const quote = quoteChain(sc, opts.quoteId);
   const local = analyze(body, pick(sc.world.vocab.length ? sc.world.vocab : ['이거']));
   let days = 0;
   let boosted = false;
@@ -74,7 +90,18 @@ export function publishPost(text: string, media?: PhotoRef, opts: { at?: { hour:
     // 시간이 먼저 흐르고 그 시각에 글이 올라간다: 고른 시각까지(지난 시각이면 다음 날) 또는 2~4시간
     days = tickClock(d, opts.at ? minutesUntil(d.clock, opts.at) : rand(TIME_COST.postMin, TIME_COST.postMax));
     boosted = consumeBoost(d, '이번 글이 크게 퍼지고 있어요');
-    const p = addPost(d, { id: postId, authorId: ME, text: body, kind: 'post', media, boosted }, true);
+    const p = addPost(d, { id: postId, authorId: ME, text: body, kind: 'post', media, boosted, ...(quote.length ? { quote } : {}) }, true);
+    // 이어 쓴 원글: 재게시 수 +1, 그 인물과 조금 가까워진다
+    const src = opts.quoteId ? d.posts[opts.quoteId] : undefined;
+    if (src && quote.length && !src.reposted) {
+      src.reposted = true;
+      src.reposts += 1;
+      const sc0 = d.characters[src.authorId];
+      if (sc0) {
+        applyAffinity(d, sc0.id, 2);
+        logActivity(d, '🔁', `${sc0.name}님 글에 이어 썼어요`);
+      }
+    }
     // 숫자는 바로 자라기 시작(로컬 추정치) → AI 반응이 오면 최종값으로 이어서 자란다
     const pre = postEngagement({ followers: d.stats.followers, quality: localQuality(local), mood: local.mood, viral: false, boost: boosted, difficulty: diffOf(d) });
     p.likes = pre.likes;
@@ -88,18 +115,18 @@ export function publishPost(text: string, media?: PhotoRef, opts: { at?: { hour:
     logActivity(d, '✍️', `글을 올렸어요: "${snippet(body || '(사진)', 24)}"`);
   });
   tap('medium');
-  void reactToMyPost(beginFlow(sid), postId, body || '(사진만 올림)', !!media, days, boosted);
+  void reactToMyPost(beginFlow(sid), postId, body || '(사진만 올림)', !!media, days, boosted, quote);
   return OK;
 }
 
-async function reactToMyPost(flow: Flow, postId: ID, text: string, hasMedia: boolean, days: number, boosted: boolean) {
+async function reactToMyPost(flow: Flow, postId: ID, text: string, hasMedia: boolean, days: number, boosted: boolean, quote: QuoteRef[] = []) {
   const sid = flow.sid;
   const key = `post:${postId}`;
   G().setBusy(key, true);
   try {
     const ctx = ctxOf(sid);
     if (!ctx) return;
-    const r = (await engine().reactToPost(ctx, { id: postId, text, hasMedia }, { replies: tune().replies })) ?? silentReaction(text);
+    const r = (await engine().reactToPost(ctx, { id: postId, text, hasMedia, ...(quote.length ? { quote: quote.map((q) => ({ authorId: q.authorId, name: q.name, text: q.text })) } : {}) }, { replies: tune().replies })) ?? silentReaction(text);
     if (!alive(flow)) return;
 
     // ② 최종 숫자 + 스탯·팔로우·제안

@@ -185,11 +185,15 @@ function withoutText(ctx: AIContext, text: string): AIContext {
   return { ...ctx, recent: ctx.recent.filter((r) => r.text.trim() !== t), myRecent: ctx.myRecent?.filter((x) => x.trim() !== t) };
 }
 
-export function reactPrompt(ctx0: AIContext, post: { text: string; hasMedia?: boolean }, n: number): string {
+export function reactPrompt(ctx0: AIContext, post: { text: string; hasMedia?: boolean; quote?: { authorId: ID; name: string; text: string }[] }, n: number): string {
   const ctx = withoutText(ctx0, post.text);
   const f = ctx.stats.followers;
   const R = romRangeOf(ctx);
-  const pick = pickCast(ctx, { text: post.text, full: 4, brief: 5, crowd: 6, seed: post.text, crowdFirst: ['fan', 'superfan', 'antifan'] });
+  // 이어 쓴 글이면 앞 글 작성자들을 꼭 자세히 넣는다(자기 글에 플레이어가 이어 썼으니 반응할 사람)
+  const quote = (post.quote ?? []).slice(-4);
+  const quoted = [...new Set(quote.map((q) => q.authorId))].filter((id) => ctx.cast.some((c) => c.id === id));
+  const src = quoted.length ? ctx.cast.find((c) => c.id === quoted[quoted.length - 1]) : undefined;
+  const pick = pickCast(ctx, { must: quoted, text: `${post.text} ${quote.map((q) => q.text).join(' ')}`, full: 4, brief: 5, crowd: 6, seed: post.text, crowdFirst: ['fan', 'superfan', 'antifan'] });
   const t = tuneOf(ctx);
   const core = n <= 5 ? '1~2' : n <= 8 ? '2~3' : '2~4';
   // 답글 수를 줄였을 때(1~2개)는 핵심 인물 위주로
@@ -205,10 +209,12 @@ export function reactPrompt(ctx0: AIContext, post: { text: string; hasMedia?: bo
     memoryBlock(ctx, 6),
     hooksBlock(ctx),
     nowLine(ctx),
-    `[방금 플레이어가 올린 글]${post.hasMedia ? '(사진 첨부)' : ''}\n"${clip(post.text, 280)}"`,
+    quote.length ? `[이어 쓴 글의 앞 글: 플레이어가 아래 글을 재게시하고 그 밑에 이어 썼다(위→아래 순서)]\n${quote.map((q) => `- ${q.authorId === 'me' ? '플레이어' : q.name}: ${clip(q.text, 120)}`).join('\n')}` : '',
+    `[방금 플레이어가 올린 글]${post.hasMedia ? '(사진 첨부)' : ''}${quote.length ? '(위 글에 이어 쓴 글)' : ''}\n"${clip(post.text, 280)}"`,
     registerMap(pick),
     [
       '[할 일] 이 글에 대한 반응 JSON',
+      src ? `- 앞 글을 쓴 @${src.handle}(${src.name})는 반드시 답글을 단다: 자기 글에 플레이어가 이어 쓴 말을 받아서. 다른 답글도 앞 글과 이어지는 흐름으로 읽고 쓴다` : '',
       `- replies ${n}개: ${who}. 각 ${LIMITS.reply}자 이내`,
       n >= 4 ? '- 답글 단 사람 중 인플루언서(팔로워 10만↑·셀럽)가 있으면 그 답글 아래 대댓글 2~3개를 더 쓰고 re에 그 아이디' : '',
       `- aff: 답글 단 인물의 호감 변화. ${AFF_SCALE}`,
@@ -244,7 +250,8 @@ export function threadPrompt(
   const flow = args.thread.slice(-6).map((l) => `- ${l.name ?? nameOf(ctx, l.authorId)}: ${clip(l.text, 70)}`);
   // 답글 대상이 목록에 없는 일반 유저(임시 계정)면 h:"-"로 답하게(그 사람의 앞 말투·입장을 이어서)
   const who = t ? `@${t.handle}(${t.name})` : `${args.target.name ? `일반 유저 "${args.target.name}"` : '그 일반 유저'}(h "-")`;
-  const N = tuneOf(ctx).thread;
+  // 댓글로 이야기가 이어지려면 최소 5줄(당사자 1 + 관련 인물 2명·그중 1명은 두 번 + 일반인 1)
+  const N = Math.max(5, tuneOf(ctx).thread);
   return join(
     castBlock(pick, { descMax: 140 }),
     memoryBlock(ctx, 4),
@@ -253,10 +260,13 @@ export function threadPrompt(
     `[플레이어가 방금 단 답글] ${who}에게: "${clip(args.reply, 200)}"`,
     registerMap(pick),
     [
-      '[할 일] JSON',
-      N <= 1 ? `- replies: ${who}의 답글 1개만(${LIMITS.reply}자 이내)` : `- replies: 전체 ${N}개(각 ${LIMITS.reply}자 이내) = ${who} 1개 + 다른 사람 ${N - 1}개. 개수를 채운다`,
+      '[할 일] JSON — 이 답글 아래로 댓글이 이어지며 이야기가 한 걸음 나아간다',
+      `- replies: 전체 ${N}개(각 ${LIMITS.reply}자 이내), 위에서 아래로 읽히는 대화 순서대로. 개수를 채운다`,
       `- 1번째 줄은 반드시 ${who}: 플레이어가 자기에게 한 말에 바로 대꾸(스레드에서 자기가 한 말과 이어지게). 이 줄을 빠뜨리지 않는다`,
-      N <= 1 ? '' : '- 2번째 줄부터는 이 스레드를 보던 다른 인물·일반인(h "-")이 끼어든 것. 서로 다른 지점을 집고 길이·시작 단어·관점이 겹치지 않게',
+      `- 나오는 사람: ① ${who} ② 이 답글·${t ? t.name : '그 사람'}과(와) 가장 관련 깊은 인물 2명 이상(그 일의 당사자·가까운 사이·스레드에 있던 사람·언급된 사람) ③ 이름 없는 일반인(h "-") 1명 이상`,
+      `- ②의 인물 중 적어도 1명은 2번 이상 쓴다(${who}도 다시 써도 된다). 앞 댓글을 받아치며 서로 주고받는다: 누구 말에 한 말인지 re에 그 아이디(플레이어에게 한 말이면 re 생략)`,
+      '- 댓글끼리 알아서 굴러간다: 그 일이 어떻게 됐는지 한 걸음 전개하거나(새 사실·약속·폭로·오해), 플레이어에 대해 자기들끼리 말한다(놀림·편들기·질투·소문). 같은 말 되풀이·맞장구만 하는 줄 없음',
+      '- 서로 다른 지점을 집고 길이·시작 단어·관점이 겹치지 않게',
       `- aff: 답글을 단 인물들의 호감 변화. ${AFF_SCALE}`,
       `- rom: 연애 감정이 걸린 인물이면 설렘 변화 ${R.thread}, 아니면 [] · dev: 정복 변화 0~+21, 보통 []`,
       '- rep: -8~+12',
@@ -532,6 +542,7 @@ ${clip(world.setting, 1200)}
 - name: 실제 한국 트위터 유저가 쓸 법한 표시 이름(실명형·닉네임+이모지 등), handle: 영문 소문자·숫자·밑줄 4~15자
 - emoji 1개, bio 20자 이내, description 한 문장 40자 이내(이 세계에서의 정체와 플레이어와의 사이만. 말투는 관계에 따라 게임이 정한다)
 - g: 성별 m 또는 f, age: 나이 20~29(사람은 전원 20대, 뉴스 계정은 생략)
+- title: 그 세계에서의 자리나 플레이어와의 사이를 8자 이내로(상병 · 맞선임 / 팀장 / 입사 동기 / 3학년 선배 / 팬). 뉴스 계정은 ""
 - followers: 300 ~ 2000000, isNews(뉴스 계정만 true), verified`;
 }
 
@@ -540,13 +551,13 @@ ${clip(world.setting, 1200)}
  * 클로드 엔진의 [응답 형식] 꼬리말이 "<…> 자리는 [할 일]의 범위 안 정수로 바꿔 쓴다"고 알려 준다. 혹시 글자가 그대로 오면 normalize.num()이 0으로 읽는다.
  */
 export const SHAPES = {
-  thread: '{"replies":[{"h":"말을 건 상대 아이디(1번째 줄 필수)","t":"답글"},{"h":"아이디","t":"끼어든 답글"},{"h":"-","t":"일반인 답글"}],"aff":[{"h":"아이디","d":<-6~18>}],"rom":[],"dev":[],"rep":<-8~4>}',
+  thread: '{"replies":[{"h":"말을 건 상대 아이디(1번째 줄 필수)","t":"답글"},{"h":"관련 인물 아이디","t":"끼어든 답글","re":"받아치는 상대 아이디"},{"h":"-","t":"일반인 답글"},{"h":"앞에 나온 인물 아이디","t":"다시 받아치는 답글","re":"상대 아이디"}],"aff":[{"h":"아이디","d":<-6~18>}],"rom":[],"dev":[],"rep":<-8~4>}',
   ambient: '{"posts":[{"h":"아이디","t":"글","m":null}]}',
   event: '{"emoji":"⚡","title":"제목","body":"상황 1~2문장","inv":["아이디"]}',
   comments: '{"comments":[{"h":"아이디","t":"댓글"},{"h":"-","t":"일반인 댓글"},{"h":"-","t":"인플루언서 댓글에 다는 대댓글","re":"인플루언서아이디"}]}',
   firstDM: '{"messages":["쪽지1","쪽지2"]}',
   draft: '{"name":"이름","handle":"handle_01","bio":"자기소개","emoji":"🙂","post":"첫 글"}',
-  cast: '{"cast":[{"name":"이름","handle":"handle","emoji":"🙂","archetype":"bestie","bio":"소개","description":"정체와 플레이어와의 사이 한 문장","g":"m|f","age":<20~29>,"followers":<300~2000000>,"isNews":false,"verified":false}]}',
+  cast: '{"cast":[{"name":"이름","handle":"handle","emoji":"🙂","archetype":"bestie","bio":"소개","description":"정체와 플레이어와의 사이 한 문장","g":"m|f","age":<20~29>,"title":"자리·사이 8자 이내","followers":<300~2000000>,"isNews":false,"verified":false}]}',
 } as const;
 
 /** 하루 정산 응답 모양 — 조절값에서 끈 항목은 뺀다(안 쓸 글자를 받지 않게) */

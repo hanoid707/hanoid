@@ -5,6 +5,8 @@
  * 올리는 시각: 자동(2~4시간 뒤) 또는 직접("6:48" + AM/PM — 지난 시각이면 다음 날 그 시각).
  * 빼 둔 화제: 글에 (-단어)를 쓰면 그 화제를 이 세계관의 이야기에서 뺀다(여기서 ✕로 다시 넣기).
  */
+import { QuoteChain } from '../../components/PostCard';
+import { quoteChain } from '../../game/post';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
@@ -104,6 +106,9 @@ export function ComposeScreen() {
 
   const quests = sideQuests(sc.quests);
   const armed = sc.boost?.kind === 'viral';
+  // 재게시해서 이어 쓰기: 위에 앞 글들을 보여 주고 그 아래에 쓴다
+  const quoteId = route.params?.quoteId;
+  const chain = quoteChain(sc, quoteId);
 
   const at = pickTime ? parseClock12(timeText, pm) : null;
   const waitMin = at ? minutesUntil(sc.clock, at) : 0;
@@ -123,7 +128,7 @@ export function ComposeScreen() {
       showToast('올리는 시각을 6:48처럼 적어 주세요', 'error');
       return;
     }
-    const r = publishPost(text, media, at ? { at } : {});
+    const r = publishPost(text, media, { ...(at ? { at } : {}), ...(chain.length ? { quoteId } : {}) });
     if (r.ok) nav.goBack();
   };
 
@@ -151,6 +156,12 @@ export function ComposeScreen() {
       </View>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={{ paddingHorizontal: space.lg, paddingBottom: space.xl, gap: space.md }} keyboardShouldPersistTaps="handled">
+          {chain.length ? (
+            <View>
+              <Text style={{ color: c.subtext, fontSize: font.small, fontWeight: '700', marginBottom: 2 }}>이 글에 이어서 써요 — 아래에 새 글로 올라가요</Text>
+              <QuoteChain chain={chain} />
+            </View>
+          ) : null}
           <View style={styles.row}>
             <Avatar avatar={sc.persona.avatar} size={40} />
             <View style={{ flex: 1, minWidth: 0 }}>
@@ -159,7 +170,7 @@ export function ComposeScreen() {
                 autoFocus
                 value={text}
                 onChangeText={setText}
-                placeholder="무슨 일이 일어나고 있나요?"
+                placeholder={chain.length ? '이어서 쓰기' : '무슨 일이 일어나고 있나요?'}
                 placeholderTextColor={c.subtext}
                 multiline
                 maxLength={POST_MAX_LEN + 20}

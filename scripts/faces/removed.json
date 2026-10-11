@@ -168,27 +168,6 @@
 "origin": "kr"
 },
 {
-"key": "face__g021_bl",
-"gender": "f",
-"theme": "cyberpunk",
-"hair": "long",
-"origin": "kr"
-},
-{
-"key": "face__g021_br",
-"gender": "f",
-"theme": "cyberpunk",
-"hair": "long",
-"origin": "kr"
-},
-{
-"key": "face__g021_tl",
-"gender": "f",
-"theme": "cyberpunk",
-"hair": "long",
-"origin": "kr"
-},
-{
 "key": "face__g021_tr",
 "gender": "f",
 "theme": "cyberpunk",
@@ -196,45 +175,10 @@
 "origin": "kr"
 },
 {
-"key": "face__g022_bl",
-"gender": "f",
-"theme": "cyberpunk",
-"hair": "short",
-"origin": "kr"
-},
-{
-"key": "face__g022_br",
-"gender": "f",
-"theme": "cyberpunk",
-"hair": "short",
-"origin": "kr"
-},
-{
 "key": "face__g022_tr",
 "gender": "f",
 "theme": "cyberpunk",
 "hair": "short",
-"origin": "kr"
-},
-{
-"key": "face__g023_bl",
-"gender": "f",
-"theme": "cyberpunk",
-"hair": "long",
-"origin": "kr"
-},
-{
-"key": "face__g023_br",
-"gender": "f",
-"theme": "cyberpunk",
-"hair": "long",
-"origin": "kr"
-},
-{
-"key": "face__g023_tl",
-"gender": "f",
-"theme": "cyberpunk",
-"hair": "long",
 "origin": "kr"
 },
 {
@@ -273,45 +217,10 @@
 "origin": "kr"
 },
 {
-"key": "face__g025_bl",
-"gender": "f",
-"theme": "cyberpunk",
-"hair": "long",
-"origin": "kr"
-},
-{
-"key": "face__g025_tl",
-"gender": "f",
-"theme": "cyberpunk",
-"hair": "long",
-"origin": "kr"
-},
-{
 "key": "face__g026_tr",
 "gender": "f",
 "theme": "cyberpunk",
 "hair": "long",
-"origin": "kr"
-},
-{
-"key": "face__g027_bl",
-"gender": "f",
-"theme": "cyberpunk",
-"hair": "short",
-"origin": "kr"
-},
-{
-"key": "face__g027_br",
-"gender": "f",
-"theme": "cyberpunk",
-"hair": "short",
-"origin": "kr"
-},
-{
-"key": "face__g027_tl",
-"gender": "f",
-"theme": "cyberpunk",
-"hair": "short",
 "origin": "kr"
 },
 {
@@ -917,27 +826,6 @@
 "origin": "fr"
 },
 {
-"key": "face__g079_br",
-"gender": "f",
-"theme": "cyberpunk",
-"hair": "long",
-"origin": "fr"
-},
-{
-"key": "face__g079_tl",
-"gender": "f",
-"theme": "cyberpunk",
-"hair": "long",
-"origin": "fr"
-},
-{
-"key": "face__g079_tr",
-"gender": "f",
-"theme": "cyberpunk",
-"hair": "long",
-"origin": "fr"
-},
-{
 "key": "face__g080_bl",
 "gender": "f",
 "theme": "cyberpunk",
@@ -1032,13 +920,6 @@
 "key": "face__g088_tr",
 "gender": "m",
 "theme": "military",
-"hair": "short",
-"origin": "kr"
-},
-{
-"key": "face__g089_br",
-"gender": "m",
-"theme": "cyberpunk",
 "hair": "short",
 "origin": "kr"
 },
