@@ -353,7 +353,7 @@ export function dmPrompt(
       tuneOf(ctx).dmPost ? `- post: 이 대화 뒤에 ${c.name}이(가) 자기 계정에 올리는 공개 글 1개(${LIMITS.post}자 이내). 약속·기분·그 일을 남들이 봐도 되는 선에서 티 내는 글. 대화 세 번에 한 번꼴로만 쓰고, 그 밖엔 ""` : '',
       '- leave: 플레이어가 심하게 무례하고 호감이 낮을 때만 true(대화방 나감)',
       c.heartOk
-        ? `- heart: 이 대화 직후 ${c.name}의 속마음 한 줄(${LIMITS.heart}자 이내). 플레이어에게는 말하지 않은 진짜 마음을 혼잣말로, 방금 대화에 나온 말·물건·장면을 짚어서`
+        ? `- heart: 이 대화 직후 ${c.name}의 속마음 한 줄(${LIMITS.heart}자 이내). 플레이어에게는 말하지 않은 진짜 마음을 혼잣말로, 방금 대화에 나온 말·물건·장면을 짚어서. 연애X 표시 인물은 연애 감정 없이 동료·팬·친구로서의 마음만`
         : '',
       off ? '' : '- touch: 이 대화에서 플레이어와 실제로 한 스킨십이 있으면 그 이름 한 낱말(손잡기·포옹처럼). 말로만 하거나 없으면 ""',
       needSummary
@@ -429,7 +429,7 @@ export function tickPrompt(ctx: AIContext, day: number, returned: ID[] = []): st
       t.dayEvent ? `- event: 플레이어에게 닥친 사건 1개 또는 null(이틀에 한 번꼴). body 2문장 이내(플레이어가 어떻게 할지 고민할 상황), inv=관련 인물 h 0~2.${pending}` : '',
       dmLine,
       hearts.length
-        ? `- hearts: ${hearts.map((c) => `@${c.handle}`).join(', ')}의 지금 속마음 한 줄씩 {h,t}(각 ${LIMITS.heart}자 이내). 플레이어에게는 말 못 한 진짜 마음을 혼잣말로, 최근 플레이어와 있었던 일의 구체적인 말·물건·장면을 짚어서`
+        ? `- hearts: ${hearts.map((c) => `@${c.handle}`).join(', ')}의 지금 속마음 한 줄씩 {h,t}(각 ${LIMITS.heart}자 이내). 플레이어에게는 말 못 한 진짜 마음을 혼잣말로, 최근 플레이어와 있었던 일의 구체적인 말·물건·장면을 짚어서. 연애X 표시 인물은 연애 감정 없이 동료·팬·친구로서의 마음만`
         : '',
       loveLine(ctx),
     ]
@@ -625,7 +625,7 @@ export function bondsPrompt(ctx: AIContext, ids?: ID[]): string {
       '- loves: 그 인물이 사랑하는 다른 인물 {to: 상대 아이디, v: 20~80}. 설정·관계·지금까지의 일에서 근거가 있을 때만, 대부분 0~1명(드물게 2명). 짝사랑이 흔하다(상대는 0). 가족·실존 인물·플레이어는 적지 않는다(플레이어를 향한 마음은 설렘 수치가 따로 있다)',
       '- 플레이어를 좋아하는 인물(설렘 30↑)을 좋아하는 인물이 한두 명 있으면 이야기가 생긴다(질투). 억지로 전원을 엮지 않는다',
       hearts.length
-        ? `- hearts: ${hearts.map((c) => `@${c.handle}`).join(', ')}의 지금 속마음 한 줄씩 {h,t}(각 ${LIMITS.heart}자 이내). 플레이어에게는 말 못 한 진짜 마음을 혼잣말로, 플레이어와 있었던 일의 구체적인 말·물건·장면을 짚어서`
+        ? `- hearts: ${hearts.map((c) => `@${c.handle}`).join(', ')}의 지금 속마음 한 줄씩 {h,t}(각 ${LIMITS.heart}자 이내). 플레이어에게는 말 못 한 진짜 마음을 혼잣말로, 플레이어와 있었던 일의 구체적인 말·물건·장면을 짚어서. 연애X 표시 인물은 연애 감정 없이 동료·팬·친구로서의 마음만`
         : '- hearts: []',
     ].join('\n'),
   );
