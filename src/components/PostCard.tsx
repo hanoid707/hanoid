@@ -95,7 +95,8 @@ export function NameLine({ name, handle, badge, time, big, rank }: { name: strin
   const { c } = useTheme();
   return (
     <View style={styles.head}>
-      <Text numberOfLines={1} style={{ color: c.text, fontWeight: '800', fontSize: font.body, flexShrink: 1 }}>
+      {/* 이름은 줄이지 않는다(…로 잘리지 않게) — 공간이 모자라면 @아이디가 대신 줄어든다 */}
+      <Text numberOfLines={1} style={{ color: c.text, fontWeight: '800', fontSize: font.body, flexShrink: 0 }}>
         {name}
       </Text>
       <VerifiedBadge kind={badge} />
@@ -121,10 +122,10 @@ export function NameLine({ name, handle, badge, time, big, rank }: { name: strin
 }
 type AuthorBadge = ReturnType<typeof authorOf>['badge'];
 
-/** 이름 옆 표시: 계급·직함 · 나이("맞선임 · 상병 · 22"). 둘 다 없으면 빈 글자 */
+/** 인물 프로필의 이름 옆 표시: 계급·직급 · 나이("상병 · 22살"). 둘 다 없으면 빈 글자 */
 export function rankLabel(ch: Character | undefined): string {
   if (!ch || ch.isNews) return '';
-  return [ch.title?.trim(), ch.age ? String(ch.age) : ''].filter(Boolean).join(' · ');
+  return [ch.title?.trim(), ch.age ? `${ch.age}살` : ''].filter(Boolean).join(' · ');
 }
 
 export function PostActions({ post, onReply }: { post: Post; onReply?: () => void }) {

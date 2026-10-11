@@ -1,5 +1,5 @@
 /**
- * 캐릭터 프로필(X 스타일) — 속마음(여성 + 호감도 기준 이상) · 관계 칩 · 지금 쓰는 말투 · 호감도(-100~100)·설렘 막대 · 다른 인물을 향한 사랑 · 성별·나이·자리·성격 · 그 사람의 글
+ * 캐릭터 프로필(X 스타일) — 속마음(여성 + 호감도 기준 이상) · 관계 칩 · 지금 쓰는 말투 · 호감도(-100~100)·설렘 막대 · 다른 인물을 향한 사랑 · 이름 옆 계급·직급·나이 · 성별·성격 · 그 사람의 글
  * 버튼: 캐릭터 설정 · 선물(선물 3종 창 → 보내면 쪽지 대화로) · 쪽지 · 팔로우
  */
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
@@ -8,6 +8,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { authorOf } from '../../components/author';
 import { GiftSheet } from '../../components/GiftSheet';
 import { IconGift, IconMail, IconUserPen } from '../../components/icons';
+import { rankLabel } from '../../components/PostCard';
 import { ProfileView } from '../../components/ProfileView';
 import { RelationChip } from '../../components/RelationChip';
 import { Screen, TopBar } from '../../components/Screen';
@@ -24,9 +25,8 @@ function personLine(ch: Character): string {
   const parts: string[] = [];
   const g = genderOf(ch);
   if (g && !ch.isNews && ch.badge !== 'gold') parts.push(g === 'f' ? '여성' : '남성');
-  if (ch.age) parts.push(`${ch.age}살`);
-  else if (ch.ageGroup) parts.push(`${ch.ageGroup}대`);
-  if (ch.title) parts.push(ch.title);
+  // 직급·나이는 이름 옆에 보인다(나이가 없을 때만 나이대)
+  if (!ch.age && ch.ageGroup) parts.push(`${ch.ageGroup}대`);
   return parts.join(' · ');
 }
 
@@ -82,6 +82,7 @@ export function CharacterProfileScreen() {
           badge: a.badge,
           // 한줄소개 대신 속마음만(여성 + 호감도가 세계관 설정의 기준 이상일 때) — 아니면 비워 둔다
           bio: '',
+          rank: rankLabel(ch),
           heart: heartShown(sc, ch),
           joined: ch.joined,
           following: ch.following ?? 0,

@@ -6,6 +6,7 @@
  */
 import { GHOST, type Archetype, type Deltas, type GameEvent, type ID, type LoveDelta, type SpeechRegister } from '../types';
 import { fitAge } from '../data/ageNorms';
+import { cleanRank } from '../data/castMeta';
 import { isPlayerName } from '../game/lookalike';
 import { hashStr } from '../utils';
 import { hitsAvoid } from './context';
@@ -378,7 +379,7 @@ export function normBonds(ctx: AIContext, r: Raw): CastBonds {
   for (const x of arr<Raw>(r.info)) {
     const id = idOf(ctx, pick1(x, 'h', 'handle'));
     if (!id || info.some((i) => i.id === id)) continue;
-    const title = cleanText(x.title, 12);
+    const title = cleanRank(cleanText(x.title, 20));
     const age = num(x.age, 0);
     const loves = arr<{ to?: string; h?: string; v?: number }>(x.loves)
       .map((l) => ({ to: idOf(ctx, l?.to ?? l?.h), v: clampN(num(l?.v), 0, 85) }))
@@ -449,10 +450,10 @@ export function normCast(r: Raw): CastDraft[] {
         ...(c.g === 'm' || c.g === 'f' ? { gender: c.g as 'm' | 'f' } : {}),
         // 나이는 그 자리의 현실 범위로(스물다섯 살 부장처럼 어긋난 값만 고친다 — data/ageNorms.ts)
         ...(c.isNews === true ? {} : (() => {
-          const age = fitAge(cleanText(c.title, 12) || cleanText(c.description, 70), num(c.age, 0) >= 18 ? Math.min(75, num(c.age, 0)) : undefined, name);
+          const age = fitAge(cleanText(c.title, 20) || cleanText(c.description, 70), num(c.age, 0) >= 18 ? Math.min(75, num(c.age, 0)) : undefined, name);
           return age ? { age } : {};
         })()),
-        ...(cleanText(c.title, 12) ? { title: cleanText(c.title, 12) } : {}),
+        ...(cleanRank(cleanText(c.title, 20)) ? { title: cleanRank(cleanText(c.title, 20)) } : {}),
         followers: Math.max(0, num(c.followers, 1000)),
         isNews: c.isNews === true,
         verified: c.verified === true,

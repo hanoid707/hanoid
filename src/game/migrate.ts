@@ -6,13 +6,14 @@
  * - v3.3: 연애 수위 값 이름 변경(normal→racy, spicy→erotic)
  * - v3.4: 등장인물(핵심 인물)은 반드시 사람 얼굴 사진 — 사진 없이 이모지만 쓰던 사람에게 성별·나이대에 맞는 프리셋 얼굴을 준다
  * - v3.5: 전원 20대로 바꿨던 것(v3.4의 한때)을 되돌린다 — 나이는 그 자리의 현실 나이. 직함·나이가 빈 인물은 설명에서 읽어 채운다
+ * - v3.5.1: 직함은 계급·직급(+ 플레이어와 얽힌 직업)만 — 관계·일반 직업은 한 번 정리해 지운다(rankV)
  * 받은 객체(JSON에서 막 읽은 것)를 직접 고친다.
  */
 import { separateFromPlayer } from './lookalike';
 import { pickFace, resolveFace, themeOfWorld, usedFaceKeys } from '../data/facePool';
 import { AVATARS } from '../data/photos';
 import { ageForTitle } from '../data/ageNorms';
-import { ageInText, seedMeta, titleInText } from '../data/castMeta';
+import { ageInText, cleanRank, seedMeta, titleInText } from '../data/castMeta';
 import { findSeed } from '../data/worlds';
 import { LEGACY_DESC_HASH } from '../data/worlds/legacy';
 import type { Character, Scenario } from '../types';
@@ -26,19 +27,6 @@ function youngify(text: string): string {
   const m = (n: number) => String(youngAge(n));
   return text.replace(/(?<![0-9])(3\d|4\d)(살|세)/g, (_, a: string, b: string) => m(Number(a)) + b).replace(/\((3\d|4\d)([,)])/g, (_, a: string, b: string) => `(${m(Number(a))}${b}`);
 }
-
-/** 직함 표에서 이름을 바꾼 것(예전 값 → 새 표 값으로 갈아 준다) */
-const OLD_TITLE: Record<string, string> = {
-  office__hangyeol: 'PM',
-  office__seungjae: '개발자',
-  office__eunjung: '피플팀',
-  office__yunseul: '선배 개발자',
-  office__jaehyun: 'QA',
-  office__bom: '신입',
-  influencer__sujin: '팀장',
-  football__ryu_agent: '에이전트',
-  youtuber__sojeong: 'MCN 매니저',
-};
 
 /** 얼굴 사진이 꼭 있어야 하는 사람: 핵심 인물(뉴스·단체·공통 캐릭터 제외). 공통 캐릭터는 실존 인물일 수 있어 가상 얼굴을 붙이지 않는다 */
 const needsFace = (c: Character) => c.tier !== 'crowd' && !c.isNews && c.badge !== 'gold' && !c.rosterId && !c.inactive;
@@ -72,6 +60,9 @@ export function migrateScenarioData(raw: Scenario): Scenario {
   }
   const day = sc.clock?.day ?? 1;
   const tid = sc.world?.templateId;
+  // v3.5.1: 직함 = 계급·직급만(4자 이하). 한 번만 정리한다
+  const rankFix = sc.rankV !== 1;
+  sc.rankV = 1;
   for (const c of Object.values(sc.characters ?? {})) {
     if (c.badge === undefined) c.badge = c.isNews ? 'gold' : c.verified ? 'blue' : null;
     delete c.postPool;
@@ -92,14 +83,17 @@ export function migrateScenarioData(raw: Scenario): Scenario {
         if (c.description !== seed.description && c.description === youngify(seed.description)) c.description = seed.description;
         if (c.bio !== seed.bio && c.bio === youngify(seed.bio)) c.bio = seed.bio;
         if (meta.age && meta.age >= 30 && c.age === youngAge(meta.age)) c.age = meta.age;
-        // 직함은 표가 바뀌었으면 새 표로(예전 표의 값 그대로일 때만)
-        if (meta.title && (c.title === undefined || OLD_TITLE[`${tid}__${seed.key}`] === c.title)) c.title = meta.title;
+        // 직급: 한 번만 정리(계급·직급만 남기고, 없으면 표 값). 그 뒤로는 사용자가 적은 값을 그대로 둔다
+        if (rankFix) c.title = cleanRank(c.title) ?? meta.title;
+        else if (c.title === undefined && meta.title) c.title = meta.title;
         if (c.age === undefined && meta.age) c.age = meta.age;
         if (c.gender === undefined && seed.photo.gender && !seed.org) c.gender = seed.photo.gender;
       }
     }
     // 직접 만든 세계관·인물: 설명 첫 대목에 적힌 계급·직급과 나이를 읽어 채운다(적어 둔 값은 건드리지 않는다)
     if (!c.isNews && c.badge !== 'gold' && !c.rosterId) {
+      // 예전에 넣어 둔 관계·일반 직업(소꿉친구·유튜버 …)은 한 번 정리한다 — 계급·직급만 남긴다
+      if (rankFix && c.title !== undefined) c.title = cleanRank(c.title);
       if (c.title === undefined) {
         const t = titleInText(c.description);
         if (t) c.title = t;

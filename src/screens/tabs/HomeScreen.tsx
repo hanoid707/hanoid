@@ -77,7 +77,7 @@ export function HomeScreen() {
         renderItem={({ item }) => (
           // 방금 올라온 글은 살짝 떠오르며 나타난다(처음부터 있던 글은 그대로)
           <AppearIn animate={Date.now() - (item.ts ?? 0) < 2500} from={14}>
-            <PostCard post={item} sc={sc} showRank />
+            <PostCard post={item} sc={sc} />
           </AppearIn>
         )}
         ListHeaderComponent={

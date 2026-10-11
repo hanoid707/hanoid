@@ -524,6 +524,8 @@ export interface Scenario {
   bondV?: number;
   /** 인물 정보 채우기를 AI가 실패한 횟수(3번 실패하면 규칙으로 채운다) */
   bondTry?: number;
+  /** 직함을 계급·직급만 남기도록 한 번 정리했는지(1) — game/migrate.ts */
+  rankV?: number;
 }
 
 /** 쓸 AI(예전 세이브의 'mock'은 불러올 때 'gemini'로 바뀐다) */

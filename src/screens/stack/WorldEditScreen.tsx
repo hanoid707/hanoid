@@ -230,7 +230,7 @@ function CharacterCard({ ch, open, onToggle }: { ch: Character; open: boolean; o
           <Field label="아이디" value={handle} onChangeText={setHandle} autoCapitalize="none" maxLength={15} hint={taken ? '이미 있는 아이디예요' : undefined} />
           <View style={{ flexDirection: 'row', gap: space.sm }}>
             <View style={{ flex: 1 }}>
-              <Field label="계급·직함(타임라인 이름 옆)" value={rank} onChangeText={setRank} placeholder="예) 상병 · 맞선임 / 팀장" maxLength={16} />
+              <Field label="계급·직급(프로필 이름 옆)" value={rank} onChangeText={setRank} placeholder="예) 상병 / 부장 / 기자" maxLength={4} />
             </View>
             <View style={{ width: 84 }}>
               <Field label="나이" value={age} onChangeText={(t) => setAge(t.replace(/[^0-9]/g, '').slice(0, 2))} keyboardType="number-pad" maxLength={2} />

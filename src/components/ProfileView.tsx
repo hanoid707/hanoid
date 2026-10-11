@@ -29,6 +29,8 @@ export interface ProfileInfo {
   bannerColor: string;
   badge: BadgeKind | null;
   bio: string;
+  /** 계급·직급 · 나이(인물 프로필에서만, 이름 옆) */
+  rank?: string;
   /** 속마음(인물 프로필: 여성 + 호감도 기준 이상일 때만 넘어온다) */
   heart?: string;
   location?: string;
@@ -81,6 +83,11 @@ export function ProfileView({ sc, info, actions, extra, showLikes, hideMedia }: 
         <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8 }}>
           <Text style={{ color: c.text, fontSize: font.h2, fontWeight: '900', flexShrink: 1 }}>{info.name}</Text>
           <VerifiedBadge kind={info.badge} size={20} />
+          {info.rank ? (
+            <Text testID="rank" numberOfLines={1} style={[styles.rank, { color: c.subtext, borderColor: c.border, backgroundColor: c.surfaceAlt }]}>
+              {info.rank}
+            </Text>
+          ) : null}
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
           <Text style={{ color: c.subtext, fontSize: font.body }}>@{info.handle}</Text>
@@ -140,6 +147,7 @@ const styles = StyleSheet.create({
   actions: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 10 },
   follows: { fontSize: 11, paddingHorizontal: 4, paddingVertical: 1, borderRadius: 4, overflow: 'hidden' },
   meta: { flexDirection: 'row', flexWrap: 'wrap', gap: 14, marginTop: 10 },
+  rank: { fontSize: font.small, fontWeight: '700', borderWidth: StyleSheet.hairlineWidth, borderRadius: 6, paddingHorizontal: 6, paddingVertical: 1, marginLeft: 6, flexShrink: 0, overflow: 'hidden' },
   heart: { flexDirection: 'row', alignItems: 'flex-start', gap: 6, alignSelf: 'flex-start', marginTop: 10, borderRadius: 14, borderTopLeftRadius: 4, paddingHorizontal: 11, paddingVertical: 7, maxWidth: '100%' },
   metaItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
 });

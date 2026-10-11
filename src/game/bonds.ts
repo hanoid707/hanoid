@@ -10,6 +10,7 @@
 import { buildContext, createEngine } from '../ai';
 import type { CastBonds } from '../ai/types';
 import { ageForTitle, fitAge } from '../data/ageNorms';
+import { cleanRank } from '../data/castMeta';
 import type { ID, Scenario } from '../types';
 import { clamp } from '../utils';
 import { G, tune } from './core';
@@ -40,7 +41,7 @@ function applyBonds(d: Scenario, r: CastBonds): void {
   for (const x of r.info) {
     const c = d.characters[x.id];
     if (!lovable(c)) continue;
-    if (!c.title && x.title) c.title = x.title;
+    if (!c.title && x.title) c.title = cleanRank(x.title);
     if (!c.age) {
       const age = fitAge(c.title ?? x.title, x.age, c.id);
       if (age) c.age = age;
@@ -72,7 +73,7 @@ export async function ensureBonds(sid: ID): Promise<void> {
   try {
     // 자리·나이가 빈 인물부터, 12명씩 나눠서(받는 대로 바로 적용 — 다음 묶음은 앞 묶음의 결과를 보고 쓴다)
     const todo = lovables(sc)
-      .sort((a, b) => Number(!!(a.title && a.age)) - Number(!!(b.title && b.age)))
+      .sort((a, b) => Number(!!a.age) - Number(!!b.age))
       .map((c) => c.id);
     const ai = createEngine(G().settings.ai, () => {});
     let ok = true;
@@ -84,7 +85,7 @@ export async function ensureBonds(sid: ID): Promise<void> {
       const cur = G().scenarios[sid];
       if (!cur) return;
       const last = b === batches.length - 1;
-      const ids = (last ? todo.filter((id) => !(cur.characters[id]?.title && cur.characters[id]?.age)).slice(0, BATCH) : batches[b]).filter((id) => cur.characters[id] && !cur.characters[id].inactive);
+      const ids = (last ? todo.filter((id) => !cur.characters[id]?.age).slice(0, BATCH) : batches[b]).filter((id) => cur.characters[id] && !cur.characters[id].inactive);
       if (!ids.length) continue;
       let r: CastBonds | null = null;
       try {
